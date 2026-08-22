@@ -495,25 +495,12 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
       handleDrop: () => !editable,
       handleDOMEvents: {
         copy: (view, event) => {
-          if (!isPaid) {
-            event.preventDefault();
-            alert("A cópia de conteúdo está bloqueada na versão de demonstração. Preencha seus dados de contato e libere a exportação para copiar ou baixar o documento.");
-            return true;
-          }
           return false;
         },
         cut: (view, event) => {
-          if (!isPaid) {
-            event.preventDefault();
-            return true;
-          }
           return false;
         },
         contextmenu: (view, event) => {
-          if (!isPaid) {
-            event.preventDefault();
-            return true;
-          }
           return false;
         }
       },
@@ -558,28 +545,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
     if (!editor) return;
 
     const calculateLockHeight = () => {
-      if (isPaid || isGenerating) {
-        setLockHeight("none");
-        return;
-      }
-      
-      try {
-        const editorDom = editor.view.dom;
-        const h2Elements = Array.from(editorDom.querySelectorAll('h2'));
-        const pedidosH2 = h2Elements.find(h2 => {
-          const text = h2.textContent?.toLowerCase() || '';
-          return text.includes('pedido') || text.includes('requerimento');
-        });
-        
-        if (pedidosH2) {
-           const relativeTop = (pedidosH2 as HTMLElement).offsetTop;
-           setLockHeight(`${relativeTop + 120}px`);
-        } else {
-           setLockHeight("150vh"); // fallback
-        }
-      } catch(e) {
-        setLockHeight("150vh");
-      }
+      setLockHeight("none");
     };
 
     calculateLockHeight();
@@ -958,7 +924,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
         >
           <button
             onClick={() => {
-              if (window.confirm("Tem certeza que deseja descartar esta notificação? Todos os dados serão perdidos.")) {
+              if (window.confirm("Tem certeza que deseja descartar esta petição? Todos os dados serão perdidos.")) {
                 localStorage.clear();
                 window.location.href = "/";
               }
@@ -1107,7 +1073,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
                         letterSpacing: "-0.02em",
                         lineHeight: 1.2,
                       }}>
-                        {discountActive ? "Oferta Exclusiva" : "Notificação Concluída"}
+                        {discountActive ? "Oferta Exclusiva" : "Petição Concluída"}
                       </h2>
                       <p style={{
                         margin: 0,
@@ -1117,7 +1083,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
                       }}>
                         {discountActive
                           ? "Aproveite o desconto especial antes que expire."
-                          : "Libere, edite e faça o download de sua notificação."}
+                          : "Libere, edite e faça o download de sua petição."}
                       </p>
                     </div>
 
@@ -1154,7 +1120,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
                 {/* Feature checklist */}
                 <div style={{ padding: "20px 28px" }}>
                   {[
-                    { icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z", text: "Notificação com validade jurídica nacional" },
+                    { icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z", text: "Petição judicial completa e fundamentada" },
                     { icon: "M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z", text: "Download imediato em Word (.docx) e PDF" },
                     { icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z", text: "Redigida com base no Código Civil Brasileiro" },
                     { icon: "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z", text: "Pagamento 100% seguro" },
@@ -1233,7 +1199,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
                       <polyline points="7 10 12 15 17 10" />
                       <line x1="12" y1="15" x2="12" y2="3" />
                     </svg>
-                    Desbloquear Notificação
+                    Desbloquear Petição
                   </button>
 
                   {/* Guarantee micro-text */}

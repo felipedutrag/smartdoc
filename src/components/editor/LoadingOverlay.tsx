@@ -107,7 +107,7 @@ export function LoadingOverlay({
           letterSpacing: "-0.02em",
           marginBottom: "10px"
         }}>
-          Preparando sua notificação...
+          Elaborando sua petição judicial...
         </h3>
         <p style={{
           color: "rgba(255, 255, 255, 0.75)",
@@ -116,7 +116,7 @@ export function LoadingOverlay({
           fontWeight: 500,
           margin: 0
         }}>
-          Sua notificação está sendo redigida para resolver essa situação e garantir a solução definitiva que você precisa.
+          Sua petição inicial está sendo redigida com fundamentação técnica e precisão.
         </p>
       </div>
     </div>

@@ -21,8 +21,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Conteúdo vazio" }, { status: 400 });
     }
 
-    const fileBuffer = await getWordBuffer(title || "Notificacao_Extrajudicial", content);
-    const filename = `${(title || 'notificacao_extrajudicial').replace(/[^a-zA-Z0-9\-_]/g, '_')}.docx`;
+    const fileBuffer = await getWordBuffer(title || "Peticao_Inicial", content);
+    const filename = `${(title || 'peticao_inicial').replace(/[^a-zA-Z0-9\-_]/g, '_')}.docx`;
 
     return new NextResponse(fileBuffer as unknown as BodyInit, {
       status: 200,

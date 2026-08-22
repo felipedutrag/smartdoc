@@ -1,15 +1,5 @@
 import { NextResponse } from "next/server";
-
-// Simulação de um "banco de dados em memória" para o MVP.
-// Em produção, isso seria substituído por uma consulta ao seu banco de dados (ex: Supabase).
-// Como você mencionou que configurará o webhook depois, este endpoint servirá para 
-// o polling consultar o status de um 'externalId'.
-
-// Nota de Dev: Como não temos um DB conectado ainda, o status será sempre 'PENDING'
-// a menos que o botão de simulação 'Dev' atualize esse estado de alguma forma.
-// Para este MVP isolado, o botão "Simular Pago" no frontend forçará a liberação.
-
-// Se você já tiver a tabela no Supabase conectada, pode colar o código de consulta aqui.
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(request: Request) {
   try {
@@ -21,6 +11,24 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "ID externo ou ID da transação ausente" }, { status: 400 });
     }
 
+    const supabase = createAdminClient();
+
+    // 1. Verificar primeiro no banco de dados
+    let paymentRecord: any = null;
+    if (externalId) {
+      const { data } = await supabase
+        .from("payments")
+        .select("*, documents(id, is_paid)")
+        .eq("external_id", externalId)
+        .single();
+      paymentRecord = data;
+    }
+
+    if (paymentRecord && paymentRecord.status === "PAID") {
+      return NextResponse.json({ status: "COMPLETE", paid: true });
+    }
+
+    // 2. Consultar a API do GG Pix caso ainda esteja pendente
     if (id) {
       const ggResponse = await fetch(`https://ggpixapi.com/api/v1/transactions/${id}`, {
         method: "GET",
@@ -31,16 +39,33 @@ export async function GET(request: Request) {
       
       if (ggResponse.ok) {
         const ggData = await ggResponse.json();
-        // If it's already complete, return it
-        if (ggData.status === "COMPLETE") {
-          return NextResponse.json({ status: "COMPLETE" });
+        if (ggData.status === "COMPLETE" || ggData.status === "PAID") {
+          // Atualizar banco de dados
+          if (externalId) {
+            await supabase
+              .from("payments")
+              .update({
+                status: "PAID",
+                paid_at: new Date().toISOString(),
+              })
+              .eq("external_id", externalId);
+
+            if (paymentRecord?.document_id) {
+              await supabase
+                .from("documents")
+                .update({ is_paid: true })
+                .eq("id", paymentRecord.document_id);
+            }
+          }
+
+          return NextResponse.json({ status: "COMPLETE", paid: true });
         }
       } else {
         console.error("Erro ao consultar status na GG Pix:", await ggResponse.text().catch(() => ""));
       }
     }
 
-    return NextResponse.json({ status: "PENDING" });
+    return NextResponse.json({ status: "PENDING", paid: false });
 
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Erro desconhecido";

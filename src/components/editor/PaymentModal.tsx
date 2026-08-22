@@ -200,7 +200,7 @@ export function PaymentModal({
                     fontWeight: 800,
                     color: "var(--text-primary)",
                   }}>
-                    {discountActive ? "Oferta Exclusiva" : "Notificação Concluída"}
+                    {discountActive ? "Oferta Exclusiva" : "Petição Concluída"}
                   </h4>
                   <p style={{
                     margin: 0,
@@ -210,7 +210,7 @@ export function PaymentModal({
                   }}>
                     {discountActive
                       ? "Aproveite o desconto especial antes que expire."
-                      : "Libere, edite e faça o download de sua notificação."}
+                      : "Libere, edite e faça o download de sua petição."}
                   </p>
                 </div>
 
@@ -230,7 +230,7 @@ export function PaymentModal({
                     letterSpacing: "-0.02em",
                     lineHeight: 1,
                   }}>
-                    R$ {(price + (upsellLawyer ? 67.00 : 0) + (upsellWhatsapp ? 19.90 : 0)).toFixed(2).replace(".", ",")}
+                    R$ {(price).toFixed(2).replace(".", ",")}
                   </span>
                   <span style={{ fontSize: "9px", color: "var(--text-muted)", marginTop: "2px" }}>pagamento único</span>
                 </div>
@@ -261,7 +261,7 @@ export function PaymentModal({
                     margin: 0,
                     letterSpacing: "-0.02em"
                   }}>
-                    Desbloquear Notificação Oficial
+                    Desbloquear Petição Inicial
                   </h3>
                   <p style={{
                     fontSize: isMobile ? "12px" : "14px",
@@ -302,69 +302,6 @@ export function PaymentModal({
                 />
               </div>
 
-
-              <label className={`order-bump-card ${upsellLawyer ? "active" : ""}`}>
-                <input 
-                  type="checkbox" 
-                  checked={upsellLawyer}
-                  onChange={(e) => setUpsellLawyer(e.target.checked)}
-                  style={{ position: "absolute", opacity: 0, width: 0, height: 0 }}
-                />
-                
-                {/* Header row with Checkbox on left and badge on right */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                  <div className={`custom-checkbox ${upsellLawyer ? "checked" : ""}`}>
-                    {upsellLawyer && (
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    )}
-                  </div>
-                  <span className="order-bump-badge">RECOMENDADO</span>
-                </div>
-
-                <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "6px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                    <strong style={{ color: "var(--text-primary)", fontSize: isMobile ? "14px" : "16px", fontWeight: 800 }}>
-                      Assinatura de Advogado Parceiro <span style={{ fontWeight: 400, color: "var(--text-muted)", fontSize: isMobile ? "12px" : "13px" }}>(opcional)</span>
-                    </strong>
-                  </div>
-                  <span style={{ color: "var(--text-muted)", fontSize: isMobile ? "13px" : "15px", lineHeight: "1.4" }}>
-                    Aumente drasticamente o peso legal do seu documento. Um advogado parceiro revisará e assinará digitalmente a notificação, transmitindo máxima autoridade e urgência para quem receber. Entregue no e-mail em até 24h. (+R$ 67,00)
-                  </span>
-                </div>
-              </label>
-
-              <label className={`order-bump-card ${upsellWhatsapp ? "active" : ""}`}>
-                <input 
-                  type="checkbox" 
-                  checked={upsellWhatsapp}
-                  onChange={(e) => setUpsellWhatsapp(e.target.checked)}
-                  style={{ position: "absolute", opacity: 0, width: 0, height: 0 }}
-                />
-                
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                  <div className={`custom-checkbox ${upsellWhatsapp ? "checked" : ""}`}>
-                    {upsellWhatsapp && (
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    )}
-                  </div>
-                  <span className="order-bump-badge">RECOMENDADO</span>
-                </div>
-
-                <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "6px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                    <strong style={{ color: "var(--text-primary)", fontSize: isMobile ? "14px" : "16px", fontWeight: 800 }}>
-                      Envio e Acompanhamento via WhatsApp <span style={{ fontWeight: 400, color: "var(--text-muted)", fontSize: isMobile ? "12px" : "13px" }}>(opcional)</span>
-                    </strong>
-                  </div>
-                  <span style={{ color: "var(--text-muted)", fontSize: isMobile ? "13px" : "15px", lineHeight: "1.4" }}>
-                    Garanta que sua notificação seja recebida e lida. Nossa equipe cuidará do envio oficial via WhatsApp, com monitoramento de leitura e até 3 tentativas de contato. Instruções de envio pelo e-mail informado. (+R$ 19,90)
-                  </span>
-                </div>
-              </label>
 
               <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
                 <button
@@ -416,7 +353,7 @@ export function PaymentModal({
                       : "0 4px 12px rgba(217, 119, 6, 0.2)";
                   }}
                 >
-                  {inline ? "Desbloquear Notificação" : `Ir para o Pagamento (R$ ${(price + (upsellLawyer ? 67.00 : 0) + (upsellWhatsapp ? 19.90 : 0)).toFixed(2).replace('.', ',')})`}
+                  {inline ? "Desbloquear Petição" : `Ir para o Pagamento (R$ ${(price).toFixed(2).replace('.', ',')})`}
                 </button>
                 {discountActive && (
                   <span style={{ color: "#ef4444", fontSize: "12px", fontWeight: 700, animation: "pulseBtn 2s infinite" }}>
@@ -447,7 +384,7 @@ export function PaymentModal({
                 {!inline && (
                   <button
                     onClick={() => {
-                      if (window.confirm("Tem certeza que deseja descartar esta notificação? Todos os dados serão perdidos.")) {
+                      if (window.confirm("Tem certeza que deseja descartar esta petição? Todos os dados serão perdidos.")) {
                         localStorage.clear();
                         window.location.href = "/";
                       }
@@ -465,7 +402,7 @@ export function PaymentModal({
                       transition: "background 0.2s"
                     }}
                   >
-                    Descartar notificação
+                    Descartar petição
                   </button>
                 )}
               </div>

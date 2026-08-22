@@ -40,8 +40,7 @@ export default function EditorPage() {
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
-  const [upsellLawyer, setUpsellLawyer] = useState(false);
-  const [upsellWhatsapp, setUpsellWhatsapp] = useState(false);
+  // Upsells removidos
   // Scarcity & Negotiation States
   const [discountActive, setDiscountActive] = useState(false);
   const [discountTimeLeft, setDiscountTimeLeft] = useState(120); // 2 min
@@ -173,7 +172,7 @@ export default function EditorPage() {
     if (!isConnected || isPaid || isGenerating) return;
 
     const timeout = setTimeout(() => {
-      sendMessage("SYSTEM: O usuário está há 45 segundos parado sem interagir. Faça um comentário prestativo e simpático com sua personalidade marcante perguntando se ele quer fazer mais alguma alteração ou se tem alguma dúvida sobre a Notificação Extrajudicial.");
+      sendMessage("SYSTEM: O usuário está há 45 segundos parado sem interagir. Faça um comentário prestativo e simpático com sua personalidade marcante perguntando se ele quer fazer mais alguma alteração ou se tem alguma dúvida sobre a Petição Inicial.");
     }, 45000);
 
     return () => clearTimeout(timeout);
@@ -188,7 +187,7 @@ export default function EditorPage() {
       localStorage.setItem("extrajus_payment_status", "paid");
     }
 
-    const hasOrderBump = upsellLawyer || upsellWhatsapp;
+    const hasOrderBump = false;
 
     // Trigger confirmation email via Resend
     try {
@@ -203,8 +202,6 @@ export default function EditorPage() {
           name,
           amount,
           hasOrderBump,
-          upsellLawyer,
-          upsellWhatsapp,
           phone: customerPhone,
           facts,
           draft
@@ -226,7 +223,7 @@ export default function EditorPage() {
           const data = await res.json();
 
           if (data.status === "COMPLETE") {
-            const finalPrice = price + (upsellLawyer ? 67.00 : 0) + (upsellWhatsapp ? 19.90 : 0);
+            const finalPrice = price;
             handlePaymentSuccess(customerEmail, customerName, finalPrice);
             clearInterval(intervalId);
 
@@ -249,14 +246,43 @@ export default function EditorPage() {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [isPaymentModalOpen, pixData, customerEmail, customerName, price, upsellLawyer, upsellWhatsapp]);
+  }, [isPaymentModalOpen, pixData, customerEmail, customerName, price]);
 
-  const generateDocument = async () => {
-    const facts = localStorage.getItem("extrajus_facts");
-    if (!facts) return;
+  const [currentDocId, setCurrentDocId] = useState<string | null>(null);
+
+  const generateDocument = async (factsToUse?: string) => {
+    const facts = factsToUse || localStorage.getItem("extrajus_facts");
+    if (!facts) {
+      setIsGenerating(false);
+      return;
+    }
 
     setIsGenerating(true);
     setStreamStarted(false);
+
+    // Criar documento inicial no banco se estiver autenticado
+    let docId = currentDocId;
+    try {
+      const createRes = await fetch("/api/documents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: facts.slice(0, 70).replace(/\n/g, " ") + "...",
+          facts,
+          status: "generating",
+          content_html: ""
+        })
+      });
+      if (createRes.ok) {
+        const createData = await createRes.json();
+        if (createData.document?.id) {
+          docId = createData.document.id;
+          setCurrentDocId(docId);
+        }
+      }
+    } catch (e) {
+      console.warn("Could not create document record in DB:", e);
+    }
 
     let retryCount = 0;
     let fullHtml = "";
@@ -300,12 +326,24 @@ export default function EditorPage() {
           } catch (streamError) {
             const streamMsg = streamError instanceof Error ? streamError.message : String(streamError);
             console.warn(`Stream interrompido na tentativa ${retryCount + 1}: ${streamMsg}`);
-            // Continua a execução para verificar se está incompleto e fazer retry
           }
 
           // Verifica se o documento terminou corretamente
-          if (fullHtml.includes("Notificante")) {
+          if (fullHtml.toLowerCase().includes("deferimento") || fullHtml.toLowerCase().includes("advogado")) {
             isComplete = true;
+            
+            // Atualizar no banco como concluído
+            if (docId) {
+              fetch(`/api/documents/${docId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  content_html: cleanMarkdownBold(fullHtml),
+                  status: "completed",
+                })
+              }).catch(console.error);
+            }
+
             if (typeof window !== "undefined" && "gtag" in window) {
               const g = (window as unknown as { gtag: (type: string, action: string, data: Record<string, unknown>) => void }).gtag;
               g('event', 'conversion', {
@@ -329,14 +367,37 @@ export default function EditorPage() {
 
     setIsGenerating(false);
     setStreamStarted(false);
-    window.history.replaceState({}, document.title, "/editor");
+    window.history.replaceState({}, document.title, docId ? `/editor?id=${docId}` : "/editor");
   };
 
   useEffect(() => {
     setMounted(true);
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    if (params.get("generate") === "true") {
+    const idParam = params.get("id");
+
+    if (idParam) {
+      setCurrentDocId(idParam);
+      // Carregar documento do Supabase
+      fetch(`/api/documents/${idParam}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.document) {
+            if (data.document.content_html) {
+              localStorage.setItem("extrajus_draft", data.document.content_html);
+              window.dispatchEvent(new Event("storage_extrajus_draft"));
+            }
+            if (data.document.facts) {
+              localStorage.setItem("extrajus_facts", data.document.facts);
+            }
+            if (data.document.is_paid) {
+              setIsPaid(true);
+              setIsPaymentModalOpen(false);
+            }
+          }
+        })
+        .catch(console.error);
+    } else if (params.get("generate") === "true") {
       setIsGenerating(true);
       generateDocument();
     } else {
@@ -356,9 +417,7 @@ export default function EditorPage() {
       setIsPaymentModalOpen(true);
     }
 
-    return () => {
-      // Remover a limpeza automática para permitir a persistência
-    };
+    return () => {};
   }, []);
 
   const handlePaymentRequest = async () => {
@@ -393,10 +452,8 @@ export default function EditorPage() {
       });
     }
 
-    // Calcula total com upsells
+    // Calcula total
     let finalPrice = price;
-    if (upsellLawyer) finalPrice += 67.00; // Placeholder price
-    if (upsellWhatsapp) finalPrice += 19.90; // Placeholder price
 
     try {
       const response = await fetch("/api/payment", {
@@ -432,7 +489,7 @@ export default function EditorPage() {
   };
 
   const simulatePaymentSuccess = () => {
-    const finalPrice = price + (upsellLawyer ? 67.00 : 0) + (upsellWhatsapp ? 19.90 : 0);
+    const finalPrice = price;
     handlePaymentSuccess(customerEmail || "contato@smartdoc.work", customerName || "Usuário Teste", finalPrice);
 
     if (typeof window !== "undefined" && "gtag" in window) {
@@ -580,7 +637,7 @@ export default function EditorPage() {
                 marginBottom: "32px",
                 lineHeight: "1.5"
               }}>
-                Sua notificação foi desbloqueada. O editor completo está liberado acima e você já pode baixar o documento.
+                Sua petição judicial foi desbloqueada. O editor completo está liberado acima e você já pode baixar o documento.
               </p>
 
                <button
@@ -703,10 +760,10 @@ export default function EditorPage() {
                     setCustomerEmail={setCustomerEmail}
                     customerPhone={customerPhone}
                     handlePhoneChange={handlePhoneChange}
-                    upsellLawyer={upsellLawyer}
-                    setUpsellLawyer={setUpsellLawyer}
-                    upsellWhatsapp={upsellWhatsapp}
-                    setUpsellWhatsapp={setUpsellWhatsapp}
+                    upsellLawyer={false}
+                    setUpsellLawyer={() => {}}
+                    upsellWhatsapp={false}
+                    setUpsellWhatsapp={() => {}}
                     price={price}
                     discountActive={discountActive}
                     isRewriting={isRewriting}
@@ -725,22 +782,20 @@ export default function EditorPage() {
           )}
         </SimpleEditor>
 
-        {!isPaid && (!isPaymentModalOpen || paymentStep !== 2) && !pixData && (
-          <FloatingAiBar
-            isGenerating={isGenerating}
-            isPaid={isPaid}
-            isRewriting={isRewriting}
-            textInput={textInput}
-            setTextInput={setTextInput}
-            onSend={(text) => {
-              editorRef.current?.handleOrbiRewrite(text);
-              setTextInput("");
-            }}
-            isDictating={isDictating}
-            toggleDictation={toggleDictation}
-            hasActiveEdit={hasActiveEdit}
-          />
-        )}
+        <FloatingAiBar
+          isGenerating={isGenerating}
+          isPaid={isPaid}
+          isRewriting={isRewriting}
+          textInput={textInput}
+          setTextInput={setTextInput}
+          onSend={(text) => {
+            editorRef.current?.handleOrbiRewrite(text);
+            setTextInput("");
+          }}
+          isDictating={isDictating}
+          toggleDictation={toggleDictation}
+          hasActiveEdit={hasActiveEdit}
+        />
       </div>
     </main>
   );

@@ -1,7 +1,23 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { Mic, ArrowRight, Sparkles, Clock, Send } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import {
+  Mic,
+  ArrowRight,
+  Sparkles,
+  Zap,
+  ShieldCheck,
+  FileText,
+  Cpu,
+  CheckCircle2,
+  Sliders,
+  ChevronDown,
+  Layers,
+  FileCode2,
+  Terminal,
+  MousePointerClick,
+  Scale
+} from "lucide-react";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 
 export default function Home() {
@@ -11,6 +27,7 @@ export default function Home() {
   const [recognition, setRecognition] = useState<any>(null);
   const [redirecting, setRedirecting] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const isMobileRaw = useIsBreakpoint("max", 768);
   const isMobile = isMobileRaw ?? false;
@@ -31,35 +48,23 @@ export default function Home() {
       rec.interimResults = false;
       rec.lang = "pt-BR";
 
-      rec.onstart = () => {
-        setIsDictating(true);
-      };
-
+      rec.onstart = () => setIsDictating(true);
       rec.onresult = (event: any) => {
         const resultText = event.results[0][0].transcript;
         setTextInput(prev => prev ? prev + " " + resultText : resultText);
       };
-
       rec.onerror = (event: any) => {
         console.error("Speech recognition error", event.error);
-        if (event.error !== "no-speech") {
-          setIsDictating(false);
-        }
+        if (event.error !== "no-speech") setIsDictating(false);
       };
-
-      rec.onend = () => {
-        setIsDictating(false);
-      };
-
+      rec.onend = () => setIsDictating(false);
       setRecognition(rec);
     }
   }, []);
 
-  // Removido useEffect que causava re-render automático do tema para evitar FOUC
-
   const toggleDictation = () => {
     if (!recognition) {
-      alert("Reconhecimento de fala não suportado neste navegador. Tente usar o Google Chrome ou Edge.");
+      alert("Reconhecimento de fala não suportado neste navegador. Recomendamos o Google Chrome ou Microsoft Edge.");
       return;
     }
     if (isDictating) {
@@ -69,15 +74,22 @@ export default function Home() {
     }
   };
 
-  const handleGenerate = () => {
-    if (!textInput.trim() || redirecting) return;
+  const handleGenerate = (customText?: string) => {
+    const textToUse = customText || textInput;
+    if (!textToUse.trim() || redirecting) return;
     setRedirecting(true);
 
     if (typeof window !== "undefined") {
-      localStorage.setItem("extrajus_facts", textInput);
+      localStorage.setItem("extrajus_facts", textToUse);
       localStorage.removeItem("extrajus_payment_status");
       window.location.href = "/editor?generate=true";
     }
+  };
+
+  const scrollToGenerator = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    const textarea = document.querySelector(".home-textarea") as HTMLTextAreaElement;
+    if (textarea) textarea.focus();
   };
 
   return (
@@ -94,8 +106,7 @@ export default function Home() {
         overflowX: "hidden",
       }}
     >
-      {/* ── Background Effects ── */}
-      {/* Premium Tech Grid & Dot Grid Blend */}
+      {/* ── Ambient Linear Background Glows & Grids ── */}
       <div style={{
         position: "fixed",
         inset: 0,
@@ -104,61 +115,33 @@ export default function Home() {
           linear-gradient(to right, var(--grid-color) 0.8px, transparent 0.8px),
           linear-gradient(to bottom, var(--grid-color) 0.8px, transparent 0.8px)
         `,
-        backgroundSize: "32px 32px, 64px 64px, 64px 64px",
+        backgroundSize: "36px 36px, 72px 72px, 72px 72px",
         pointerEvents: "none",
         zIndex: 0,
         opacity: 0.35,
       }} />
 
-      {/* Floating Ambient Aura Blobs */}
+      {/* Glow Orbs */}
       <div style={{
-        position: "fixed",
-        top: "-15%",
-        left: "5%",
-        width: "60vw",
-        height: "60vw",
-        borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(217, 119, 6, 0.04) 0%, transparent 70%)",
-        filter: "blur(90px)",
+        position: "absolute",
+        top: "-100px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        width: "800px",
+        height: "400px",
+        background: "radial-gradient(ellipse at 50% 30%, rgba(217, 119, 6, 0.15), rgba(217, 119, 6, 0.02) 60%, transparent 80%)",
+        filter: "blur(70px)",
         pointerEvents: "none",
         zIndex: 0,
-        animation: "aura-movement-1 25s infinite alternate ease-in-out"
-      }} />
-      <div style={{
-        position: "fixed",
-        bottom: "-15%",
-        right: "-10%",
-        width: "55vw",
-        height: "55vw",
-        borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(251, 191, 36, 0.025) 0%, transparent 70%)",
-        filter: "blur(100px)",
-        pointerEvents: "none",
-        zIndex: 0,
-        animation: "aura-movement-2 30s infinite alternate ease-in-out"
-      }} />
-      <div style={{
-        position: "fixed",
-        top: "25%",
-        right: "10%",
-        width: "45vw",
-        height: "45vw",
-        borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(217, 119, 6, 0.02) 0%, transparent 70%)",
-        filter: "blur(80px)",
-        pointerEvents: "none",
-        zIndex: 0,
-        animation: "aura-movement-3 22s infinite alternate ease-in-out"
       }} />
 
-      {/* ── Header ── */}
-      <div
-        className="header-wrapper"
+      {/* ── Navigation Bar (Linear Style) ── */}
+      <nav
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          padding: "16px 20px 4px",
+          padding: "16px 20px 0",
           zIndex: 50,
           position: "sticky",
           top: 0,
@@ -166,80 +149,65 @@ export default function Home() {
         }}
       >
         <div
-          className="header-pill"
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "10px 20px", /* Slimmer vertical height for a tighter layout */
+            padding: "10px 24px",
             width: "100%",
-            maxWidth: "1200px",
+            maxWidth: "1160px",
             background: "var(--header-pill-bg)",
-            backdropFilter: "blur(12px)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
             borderRadius: "16px",
             border: "var(--header-pill-border)",
-            boxShadow: "var(--header-pill-shadow)",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
           }}
         >
           {/* Logo */}
-          <span
+          <a
+            href="/"
             style={{
               fontSize: 18,
               display: "flex",
               alignItems: "center",
-              cursor: "default",
+              textDecoration: "none",
+              color: "inherit",
               position: "relative",
               fontFamily: "var(--font-sans), sans-serif",
             }}
           >
-            <span style={{ fontWeight: 500, letterSpacing: "-0.05em" }}>SMART</span>
-            <span style={{ fontWeight: 900, color: "#d97706", letterSpacing: "-0.05em", marginLeft: 2 }}>DOC</span>
+            <span style={{ fontWeight: 600, letterSpacing: "-0.04em" }}>SMART</span>
+            <span style={{ fontWeight: 900, color: "#d97706", letterSpacing: "-0.04em", marginLeft: 2 }}>DOC</span>
             <span
               style={{
                 position: "absolute",
                 top: -6,
-                right: -22,
+                right: -24,
                 background: "rgba(217, 119, 6, 0.12)",
-                border: "1px solid rgba(217, 119, 6, 0.25)",
+                border: "1px solid rgba(217, 119, 6, 0.3)",
                 color: "#d97706",
                 fontSize: 8,
                 fontWeight: 900,
                 padding: "1px 5px",
                 borderRadius: "4px",
-              }}>
-              IA
+              }}
+            >
+              PRO
             </span>
-          </span>
+          </a>
 
-          {/* Right Area: Status Badge + Theme Toggle */}
+          {/* Center Links (Desktop only) */}
+          {!isMobile && (
+            <div style={{ display: "flex", alignItems: "center", gap: "28px", fontSize: "13px", fontWeight: 500, color: "var(--text-secondary)" }}>
+              <a href="#recursos" style={{ color: "inherit", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--text-primary)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}>Recursos</a>
+              <a href="#como-funciona" style={{ color: "inherit", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--text-primary)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}>Como Funciona</a>
+              <a href="#faq" style={{ color: "inherit", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--text-primary)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}>Dúvidas</a>
+            </div>
+          )}
+
+          {/* Right Actions: Theme Toggle + Action Button */}
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            {isMounted && !isMobile && (
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "5px 12px",
-                borderRadius: "99px",
-                background: "var(--badge-bg)",
-                border: "1px solid var(--badge-border)",
-                fontSize: "11px",
-                color: "var(--text-secondary)",
-                fontWeight: 600,
-                letterSpacing: "0.02em",
-                cursor: "default"
-              }}>
-                <span style={{
-                  width: "6px",
-                  height: "6px",
-                  borderRadius: "50%",
-                  background: "#10b981",
-                  boxShadow: "0 0 8px rgba(16, 185, 129, 0.6)",
-                  display: "inline-block"
-                }} />
-                <span>SISTEMA ONLINE</span>
-              </div>
-            )}
-
             <button
               onClick={() => {
                 const newTheme = !isDark;
@@ -254,10 +222,10 @@ export default function Home() {
                   localStorage.setItem("theme", "light");
                 }
               }}
-              aria-label="Toggle theme"
+              aria-label="Alternar tema"
               style={{
-                width: 36,
-                height: 36,
+                width: 34,
+                height: 34,
                 borderRadius: "50%",
                 background: "var(--theme-btn-bg)",
                 border: "none",
@@ -269,341 +237,265 @@ export default function Home() {
                 transition: "all 0.2s",
               }}
             >
-              <div className="theme-icon-light">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              {isDark ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                 </svg>
-              </div>
-              <div className="theme-icon-dark">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="5"></circle>
-                  <line x1="12" y1="1" x2="12" y2="3"></line>
-                  <line x1="12" y1="21" x2="12" y2="23"></line>
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                  <line x1="1" y1="12" x2="3" y2="12"></line>
-                  <line x1="21" y1="12" x2="23" y2="12"></line>
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                </svg>
-              </div>
+              )}
+            </button>
+
+            <a
+              href="/login"
+              style={{
+                color: "var(--text-secondary)",
+                textDecoration: "none",
+                fontSize: "13px",
+                fontWeight: 600,
+                padding: "6px 12px",
+                borderRadius: "8px",
+                transition: "color 0.2s",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = "var(--text-primary)"}
+              onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}
+            >
+              Entrar
+            </a>
+
+            <button
+              onClick={scrollToGenerator}
+              style={{
+                background: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
+                color: "#ffffff",
+                border: "1px solid rgba(255, 255, 255, 0.15)",
+                padding: "8px 16px",
+                borderRadius: "10px",
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.filter = "brightness(1.1)"}
+              onMouseLeave={(e) => e.currentTarget.style.filter = "brightness(1)"}
+            >
+              <span>Gerar Peça</span>
+              <ArrowRight size={14} />
             </button>
           </div>
         </div>
-      </div>
+      </nav>
 
-      {/* ── Main Content ── */}
-      <div className="home-main-content" style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+      {/* ── HERO SECTION ── */}
+      <section
+        style={{
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          padding: isMobile ? "40px 16px 60px" : "60px 24px 80px",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <div style={{ maxWidth: "860px", width: "100%", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          
+          {/* Release Pill Badge */}
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "6px 14px",
+              borderRadius: "999px",
+              background: "rgba(217, 119, 6, 0.08)",
+              border: "1px solid rgba(217, 119, 6, 0.25)",
+              color: "#d97706",
+              fontSize: "12px",
+              fontWeight: 600,
+              letterSpacing: "0.02em",
+              marginBottom: "20px",
+              boxShadow: "0 2px 10px rgba(217, 119, 6, 0.05)",
+            }}
+          >
+            <Zap size={14} />
+            <span>Motor Jurídico de Alta Velocidade para Advogados</span>
+          </div>
 
-        <div style={{ maxWidth: "800px", width: "100%", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          {/* Main Title */}
           <h1
-            className="hero-title"
             style={{
-              fontSize: "clamp(32px, 5vw + 12px, 52px)",
-              fontWeight: 500,
-              letterSpacing: "-0.03em",
-              lineHeight: 1.1,
-              background: "var(--hero-title-bg)",
-              WebkitBackgroundClip: "var(--hero-title-clip)",
-              WebkitTextFillColor: "var(--hero-title-color)",
-              color: "var(--hero-title-color)",
-              marginBottom: "clamp(12px, 3vw, 24px)"
+              fontSize: "clamp(34px, 5.5vw, 56px)",
+              fontWeight: 600,
+              letterSpacing: "-0.04em",
+              lineHeight: 1.08,
+              color: "var(--text-primary)",
+              marginBottom: "20px",
             }}
           >
-            A Notificação Extrajudicial{" "}
-            <br />
-            <strong style={{ fontWeight: 800 }}>que resolve de verdade.</strong>
+            Petições Judiciais completas, <br />
+            <span style={{
+              background: "linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #fbbf24 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              fontWeight: 800
+            }}>
+              redigidas em poucos segundos.
+            </span>
           </h1>
+
           <p
-            className="hero-subtitle"
             style={{
-              fontSize: "clamp(16px, 2.5vw, 20px)",
+              fontSize: "clamp(15px, 2vw, 18px)",
               color: "var(--text-secondary)",
-              lineHeight: 1.7,
-              marginBottom: "clamp(16px, 3vw, 24px)",
-              maxWidth: "700px"
+              lineHeight: 1.6,
+              maxWidth: "680px",
+              marginBottom: "36px",
             }}
           >
-            Gere notificações com fundamentação jurídica{" "}
-            <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
-              {" "}altamente qualificada e personalizada em poucos minutos.
-            </span>{" "}
-            Rápido, inteligente e eficiente.
+            Narre os fatos do seu cliente por texto ou voz. Nossa IA estruturada elabora a petição inicial com fundamentação legal, doutrina, jurisprudência e formatação pronta para o PJe.
           </p>
 
-          <style>{`
-            /* Default: show subtle static gradient border */
-            .textarea-wrapper .accelerator-effect {
-              opacity: 1 !important;
-            }
-            .home-textarea::placeholder {
-              color: var(--text-muted) !important;
-              opacity: 0.85 !important;
-            }
-          `}</style>
+          {/* ── Interactive Generator Input Box ── */}
           <div
-            className="textarea-wrapper"
             style={{
               width: "100%",
-              borderRadius: "24px",
+              maxWidth: "760px",
+              borderRadius: "20px",
               padding: "1px",
-              overflow: "hidden",
               position: "relative",
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              boxShadow: "var(--textarea-shadow, none)"
+              boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.2), 0 0 0 1px var(--border)",
+              background: "linear-gradient(135deg, rgba(217, 119, 6, 0.4) 0%, rgba(217, 119, 6, 0.05) 100%)",
             }}
           >
-            {/* Static gradient border background (visible when not focused) */}
             <div
-              className="accelerator-effect"
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: "linear-gradient(135deg, rgba(217, 119, 6, 0.3) 0%, rgba(217, 119, 6, 0.08) 100%)",
-                zIndex: 0,
-                transition: "opacity 0.4s ease",
-              }}
-            />
-
-            {/* Inner Content Container */}
-            <div
-              className="textarea-inner"
               style={{
                 width: "100%",
                 background: "var(--textarea-wrapper-bg)",
-                backdropFilter: "blur(24px)",
-                WebkitBackdropFilter: "blur(24px)",
-                borderRadius: "23px",
+                backdropFilter: "blur(20px)",
+                borderRadius: "19px",
                 overflow: "hidden",
                 display: "flex",
                 flexDirection: "column",
                 position: "relative",
                 zIndex: 1,
-                border: "none"
-              }}>
-
-              {/* Chips slider with arrows */}
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0",
-                padding: "12px 2px",
-                background: "var(--chips-track-bg)",
-                borderBottom: "1px solid var(--chips-track-border)",
-                flexShrink: 0,
-                position: "relative",
-                zIndex: 1
-              }}>
-                <style>{`
-                .chips-track::-webkit-scrollbar { display: none; }
-              `}</style>
-                {/* Left arrow */}
-                <button
-                  onClick={() => {
-                    const el = document.getElementById("chips-track");
-                    if (el) el.scrollBy({ left: -200, behavior: "smooth" });
-                  }}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    color: "var(--text-muted)",
-                    cursor: "pointer",
-                    padding: "4px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                    opacity: 0.5,
-                    transition: "opacity 0.2s",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.5"; }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="15 18 9 12 15 6" />
-                  </svg>
-                </button>
-
-                {/* Track */}
-                <div
-                  id="chips-track"
-                  className="chips-track"
-                  style={{
-                    display: "flex",
-                    gap: "8px",
-                    overflowX: "auto",
-                    scrollbarWidth: "none",
-                    msOverflowStyle: "none",
-                    flex: 1,
-                    padding: "0 4px",
-                  }}
-                >
-                  {[
-                    { label: "Aluguel atrasado", text: "Meu inquilino está com o aluguel atrasado há 3 meses e não responde minhas mensagens. Quero notificá-lo para pagar os valores devidos ou desocupar o imóvel em 15 dias." },
-                    { label: "Vizinho barulhento", text: "Meu vizinho faz festas e barulho excessivo durante a madrugada, todos os fins de semana, descumprindo as regras do condomínio. Já reclamei várias vezes e nada mudou." },
-                    { label: "Produto com defeito", text: "Comprei um produto que veio com defeito e a loja se recusa a trocar ou devolver o dinheiro. Já entrei em contato diversas vezes sem solução." },
-                    { label: "Serviço não prestado", text: "Contratei e paguei por um serviço que nunca foi realizado. O prestador não responde e se recusa a devolver o valor pago." },
-                    { label: "Dívida não paga", text: "Emprestei dinheiro a uma pessoa que se comprometeu a devolver em uma data específica, mas não pagou e agora ignora meus contatos." },
-                    { label: "Rescisão contratual", text: "A outra parte descumpriu cláusulas importantes do contrato que assinamos. Quero notificá-la formalmente sobre o descumprimento e exigir a resolução ou rescisão." },
-                    { label: "Vazamento / Infiltração", text: "Há uma infiltração vinda do apartamento superior que está danificando o teto do meu banheiro. O proprietário do imóvel de cima ignora minhas tentativas de contato para resolver a reforma." },
-                    { label: "Cobrança indevida", text: "Recebi uma cobrança indevida em meu nome por um serviço de assinatura que cancelei há meses. Exijo a exclusão do débito e a retirada do meu nome dos órgãos de proteção ao crédito." },
-                    { label: "Atraso na entrega", text: "Comprei móveis planejados com entrega prometida para 30 dias úteis, mas o prazo já venceu há mais de um mês e a empresa não me dá uma resposta concreta sobre a data de entrega." },
-                    { label: "Desocupação de imóvel", text: "Quero notificar formalmente meu locador de que irei desocupar o imóvel alugado no prazo de 30 dias, conforme prevê a Lei do Inquilinato, para evitar multas de aviso prévio." },
-                    { label: "Despesas de muro / cerca", text: "Preciso construir ou reparar o muro divisório entre o meu terreno e o do vizinho. Quero notificá-lo para compartilharmos as despesas da obra, como prevê o Código Civil." },
-                    { label: "Carro com defeito", text: "Comprei um carro usado e, após duas semanas, o motor apresentou um defeito grave preexistente (vício oculto) que a concessionária se recusa a cobrir na garantia legal de 90 dias." },
-                    { label: "Quebra de sigilo (NDA)", text: "Uma empresa parceira violou o acordo de confidencialidade (NDA) que assinamos, compartilhando informações estratégicas do meu projeto com terceiros sem minha autorização." },
-                    { label: "Uso indevido de marca", text: "Identifiquei que outra empresa está utilizando comercialmente uma marca registrada de minha propriedade no mesmo segmento de atuação, gerando confusão nos clientes." },
-                    { label: "Reembolso de curso", text: "Comprei um curso online e solicitei o cancelamento e reembolso dentro do prazo de 7 dias previsto no Código de Defesa do Consumidor, mas o suporte ignora minhas mensagens." },
-                    { label: "Atraso na entrega de chaves", text: "A construtora atrasou a entrega das chaves do meu apartamento além do prazo de tolerância de 180 dias previsto no contrato. Exijo esclarecimentos e indenização." },
-                    { label: "Perturbação do sossego", text: "Estou notificando o síndico e o condomínio sobre as constantes perturbações do sossego no prédio causadas por barulhos fora do horário permitido, exigindo providências." },
-                    { label: "Aviso de fiador", text: "O inquilino principal do contrato de locação do qual sou fiador não pagou o aluguel. Quero notificar o proprietário exigindo informações detalhadas antes de qualquer ação judicial." },
-                    { label: "Uso indevido de imagem", text: "Uma marca está utilizando fotos e vídeos do meu perfil pessoal em campanhas publicitárias nas redes sociais sem qualquer contrato de licença ou autorização de imagem." },
-                    { label: "Retenção de documento", text: "A instituição está retendo meus documentos originais ou histórico escolar, o que é proibido por lei, impedindo minha matrícula em outro local." },
-                    { label: "Invasão de limites", text: "O proprietário do terreno vizinho avançou a cerca sobre o meu limite de propriedade. Exijo que ele reposicione a demarcação para o limite correto imediatamente." },
-                    { label: "Reembolso de voo", text: "Meu voo foi cancelado pela companhia aérea e a empresa se recusa a fazer o reembolso integral em dinheiro do valor da passagem, oferecendo apenas créditos expiráveis." },
-                    { label: "Reajuste de plano de saúde", text: "Meu plano de saúde aplicou um reajuste de mensalidade abusivo por mudança de faixa etária que descumpre as regras da ANS e o Estatuto da Pessoa Idosa." },
-                    { label: "Dano em estacionamento", text: "Deixei meu carro em um estacionamento pago e, ao retirar, notei um risco profundo na lateral. A empresa se recusa a assumir a responsabilidade pelo dano causado." },
-                    { label: "Internet interrompida", text: "Meu serviço de internet foi interrompido por mais de 48 horas seguidas sem qualquer aviso prévio ou desconto proporcional na fatura mensal." },
-                    { label: "LGPD / Remoção de dados", text: "Quero notificar um site ou provedor para remover imediatamente informações difamatórias ou vazamento de dados pessoais de minha titularidade, em conformidade com a LGPD." },
-                  ].map((chip) => (
-                    <button
-                      key={chip.label}
-                      onClick={() => setTextInput(chip.text)}
-                      style={{
-                        padding: "4px 10px",
-                        borderRadius: "999px",
-                        background: "var(--chip-bg)",
-                        border: "1px solid var(--chip-border)",
-                        color: "var(--text-muted)",
-                        fontSize: "11px",
-                        fontWeight: 500,
-                        cursor: "pointer",
-                        transition: "all 0.2s",
-                        whiteSpace: "nowrap",
-                        flexShrink: 0,
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "var(--chip-hover-bg)";
-                        e.currentTarget.style.borderColor = "var(--chip-hover-border)";
-                        e.currentTarget.style.color = "var(--chip-hover-color)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "var(--chip-bg)";
-                        e.currentTarget.style.borderColor = "var(--chip-border)";
-                        e.currentTarget.style.color = "var(--text-muted)";
-                      }}
-                    >
-                      {chip.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Right arrow */}
-                <button
-                  onClick={() => {
-                    const el = document.getElementById("chips-track");
-                    if (el) el.scrollBy({ left: 200, behavior: "smooth" });
-                  }}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    color: "var(--text-muted)",
-                    cursor: "pointer",
-                    padding: "4px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                    opacity: 0.5,
-                    transition: "opacity 0.2s",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.5"; }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-                </button>
+              }}
+            >
+              {/* Quick Prompt Chips */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "10px 14px",
+                  background: "var(--chips-track-bg)",
+                  borderBottom: "1px solid var(--border)",
+                  overflowX: "auto",
+                  gap: "8px",
+                  scrollbarWidth: "none",
+                }}
+              >
+                {[
+                  { label: "Ação de Cobrança", text: "Ação de cobrança fundada em prestação de serviços não adimplida, com pedido de atualização monetária e juros de mora." },
+                  { label: "Despejo por Falta de Pagamento", text: "Ação de despejo por falta de pagamento cumulada com cobrança de aluguéis e encargos locatícios em atraso há 3 meses." },
+                  { label: "Indenizatória por Dano Moral", text: "Ação declaratória de inexistência de débito c/c reparação por danos morais e tutela de urgência devido a negativação indevida no SPC/Serasa." },
+                  { label: "Obrigação de Fazer (Saúde)", text: "Ação com pedido de tutela provisória de urgência de natureza antecipada para fornecimento de medicamento de alto custo pelo plano de saúde/Estado." },
+                  { label: "Rescisão Contratual", text: "Ação de rescisão contratual cumulada com restituição integral de valores pagos e indenização por danos materiais e morais." },
+                ].map((chip) => (
+                  <button
+                    key={chip.label}
+                    onClick={() => setTextInput(chip.text)}
+                    style={{
+                      padding: "5px 12px",
+                      borderRadius: "999px",
+                      background: "var(--chip-bg)",
+                      border: "1px solid var(--chip-border)",
+                      color: "var(--text-muted)",
+                      fontSize: "12px",
+                      fontWeight: 500,
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                      transition: "all 0.2s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = "var(--text-primary)";
+                      e.currentTarget.style.borderColor = "#d97706";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = "var(--text-muted)";
+                      e.currentTarget.style.borderColor = "var(--chip-border)";
+                    }}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
               </div>
 
+              {/* Textarea */}
               <textarea
                 className="home-textarea"
                 value={textInput}
                 onChange={(e) => setTextInput(e.target.value)}
-                placeholder={isMounted && isMobile ? "Descreva o caso/ocorrido..." : "Digite seu problema e como desejaria de resolver..."}
+                placeholder="Descreva o caso do cliente ou clique em uma das ações acima (ex: O autor contratou o réu para reforma residencial, pagou 50% adiantado e o réu abandonou a obra...)"
                 style={{
                   width: "100%",
-                  minHeight: isMounted && isMobile ? "130px" : "185px",
+                  minHeight: isMobile ? "120px" : "150px",
                   background: "transparent",
                   border: "none",
                   outline: "none",
                   resize: "none",
-                  padding: isMounted && isMobile ? "16px 16px 12px" : "24px clamp(16px, 3vw, 24px) 16px",
-                  fontSize: isMounted && isMobile ? "14.5px" : "clamp(14px, 2vw, 16px)",
+                  padding: "16px 20px",
+                  fontSize: isMobile ? "14px" : "15px",
                   color: "var(--text-primary)",
                   lineHeight: 1.6,
-                  position: "relative",
-                  zIndex: 1,
-                  transition: "min-height 0.2s ease, padding 0.2s ease"
+                  fontFamily: "inherit",
                 }}
               />
 
               {/* Action Bar */}
               <div
-                className="textarea-action-bar"
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  padding: "clamp(10px, 1.5vw, 12px)",
+                  padding: "12px 18px",
                   borderTop: "1px solid var(--border)",
                   background: "var(--action-bar-bg)",
-                  position: "relative",
-                  zIndex: 1
-                }}>
+                }}
+              >
                 <button
-                  className="btn-dictate"
                   onClick={toggleDictation}
                   style={{
                     display: "flex",
                     alignItems: "center",
                     gap: "8px",
-                    padding: "clamp(8px, 1vw, 10px) clamp(12px, 1.5vw, 16px)",
+                    padding: "8px 14px",
                     borderRadius: "99px",
-                    background: isDictating ? "rgba(239, 68, 68, 0.1)" : "transparent",
+                    background: isDictating ? "rgba(239, 68, 68, 0.15)" : "transparent",
                     color: isDictating ? "#ef4444" : "var(--text-secondary)",
-                    border: isDictating ? "1px solid rgba(239, 68, 68, 0.2)" : "1px solid transparent",
+                    border: isDictating ? "1px solid rgba(239, 68, 68, 0.3)" : "1px solid transparent",
                     cursor: "pointer",
-                    fontSize: "clamp(13px, 1.5vw, 14px)",
+                    fontSize: "13px",
                     fontWeight: 500,
-                    transition: "all 0.2s"
+                    transition: "all 0.2s",
                   }}
                 >
-                  {isDictating ? (
-                    <>
-                      <Mic size={16} />
-                      <span>Ouvindo...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Mic size={16} />
-                      <span style={{ display: "flex", gap: "4px" }}>
-                        Ditar<span className="desktop-only-flex"> por voz</span>
-                      </span>
-                    </>
-                  )}
+                  <Mic size={16} className={isDictating ? "animate-pulse" : ""} />
+                  <span>{isDictating ? "Ouvindo fatos..." : "Ditar por voz"}</span>
                 </button>
 
                 <button
-                  className="btn-generate"
-                  onClick={handleGenerate}
+                  onClick={() => handleGenerate()}
                   disabled={!textInput.trim() || redirecting}
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
-                    gap: "10px",
-                    padding: "12px 28px",
+                    gap: "8px",
+                    padding: "10px 24px",
                     borderRadius: "12px",
                     background: !textInput.trim() || redirecting
                       ? "var(--surface-elevated)"
@@ -611,93 +503,514 @@ export default function Home() {
                     color: !textInput.trim() || redirecting ? "var(--text-muted)" : "#ffffff",
                     border: "none",
                     cursor: !textInput.trim() || redirecting ? "not-allowed" : "pointer",
-                    fontSize: "clamp(14px, 1.5vw, 15px)",
+                    fontSize: "14px",
                     fontWeight: 600,
-                    letterSpacing: "0.01em",
-                    textShadow: "none",
-                    boxShadow: !textInput.trim() || redirecting ? "none" : "0 4px 12px rgba(217, 119, 6, 0.15)",
-                    transition: "all 0.2s ease",
-                    transform: "translateY(0)"
-                  }}
-                  onMouseEnter={(e) => {
-                    if (textInput.trim() && !redirecting) {
-                      e.currentTarget.style.transform = "translateY(-1px)";
-                      e.currentTarget.style.boxShadow = "0 6px 16px rgba(217, 119, 6, 0.25)";
-                      e.currentTarget.style.filter = "brightness(1.08)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (textInput.trim() && !redirecting) {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(217, 119, 6, 0.15)";
-                      e.currentTarget.style.filter = "brightness(1)";
-                    }
-                  }}
-                  onMouseDown={(e) => {
-                    if (textInput.trim() && !redirecting) {
-                      e.currentTarget.style.transform = "translateY(1px)";
-                      e.currentTarget.style.boxShadow = "0 2px 6px rgba(217, 119, 6, 0.1)";
-                    }
-                  }}
-                  onMouseUp={(e) => {
-                    if (textInput.trim() && !redirecting) {
-                      e.currentTarget.style.transform = "translateY(-1px)";
-                      e.currentTarget.style.boxShadow = "0 6px 16px rgba(217, 119, 6, 0.25)";
-                    }
+                    boxShadow: !textInput.trim() || redirecting ? "none" : "0 4px 14px rgba(217, 119, 6, 0.3)",
+                    transition: "all 0.2s",
                   }}
                 >
                   {redirecting ? (
-                    <span>Gerando...</span>
+                    <span>Elaborando peça...</span>
                   ) : (
                     <>
-                      <span>Gerar Notificação</span>
-                      <ArrowRight size={18} strokeWidth={2.5} />
+                      <span>Gerar Petição Inicial</span>
+                      <ArrowRight size={16} />
                     </>
                   )}
                 </button>
               </div>
-            </div> {/* Inner Container Closing */}
-          </div> {/* Wrapper Closing */}
-          {/* Elegant Features Badges */}
+            </div>
+          </div>
+
+          {/* Sub Hero Micro Badges */}
           <div
-            className="features-badges-container"
             style={{
               display: "flex",
               flexWrap: "wrap",
               justifyContent: "center",
-              gap: "12px",
-              width: "100%",
-              marginTop: "24px"
+              gap: "20px",
+              marginTop: "24px",
+              color: "var(--text-muted)",
+              fontSize: "13px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <CheckCircle2 size={15} style={{ color: "#10b981" }} />
+              <span>Petições completas com Fatos, Direito e Pedidos</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <CheckCircle2 size={15} style={{ color: "#10b981" }} />
+              <span>Exportação nativa em .docx (Word)</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <CheckCircle2 size={15} style={{ color: "#10b981" }} />
+              <span>Edição em tempo real com IA cirúrgica</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ── PRODUCT PREVIEW (Linear-style Mockup Window) ── */}
+      <section
+        style={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          padding: "0 20px 80px",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "1000px",
+            borderRadius: "20px",
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            boxShadow: "0 24px 60px rgba(0, 0, 0, 0.3)",
+            overflow: "hidden",
+          }}
+        >
+          {/* Mockup Header */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "12px 20px",
+              borderBottom: "1px solid var(--border)",
+              background: "var(--header-pill-bg)",
+            }}
+          >
+            <div style={{ display: "flex", gap: "6px" }}>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ef4444" }} />
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#f59e0b" }} />
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#10b981" }} />
+            </div>
+            <div style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "monospace" }}>
+              editor.smartdoc.work — peticao_inicial.docx
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ fontSize: "11px", color: "#10b981", background: "rgba(16, 185, 129, 0.1)", padding: "2px 8px", borderRadius: "6px", fontWeight: 600 }}>
+                IA Ativa
+              </span>
+            </div>
+          </div>
+
+          {/* Mockup Document Body */}
+          <div
+            style={{
+              padding: isMobile ? "24px 16px" : "40px 60px",
+              background: "var(--bg)",
+              fontFamily: "'Georgia', serif",
+              lineHeight: 1.7,
+              fontSize: "14px",
+              color: "var(--text-primary)",
+              opacity: 0.95,
+            }}
+          >
+            <p style={{ textAlign: "justify", fontWeight: "bold", textTransform: "uppercase", marginBottom: "20px" }}>
+              EXCELENTÍSSIMO(A) SENHOR(A) DOUTOR(A) JUIZ(A) DE DIREITO DA ___ VARA CÍVEL DA COMARCA DE SÃO PAULO/SP
+            </p>
+            <p style={{ textAlign: "justify", marginBottom: "16px" }}>
+              <strong>[NOME DO AUTOR]</strong>, brasileiro, solteiro, empresário, inscrito no CPF sob o nº [Número], residente em [Endereço Completo], por seu advogado que esta subscreve, vem propor a presente
+            </p>
+            <h3 style={{ textAlign: "center", textTransform: "uppercase", fontSize: "15px", margin: "20px 0", letterSpacing: "0.02em", color: "#d97706" }}>
+              AÇÃO DE RESCISÃO CONTRATUAL C/C INDENIZATÓRIA
+            </h3>
+            <p style={{ textAlign: "justify", marginBottom: "16px" }}>
+              em face de <strong>[NOME DO RÉU]</strong>, pelos fatos e fundamentos a seguir aduzidos.
+            </p>
+            <div style={{
+              margin: "20px 0",
+              padding: "12px 18px",
+              background: "rgba(217, 119, 6, 0.05)",
+              borderLeft: "3px solid #d97706",
+              borderRadius: "0 8px 8px 0",
+              fontSize: "13px",
+              fontStyle: "italic",
+              fontFamily: "var(--font-sans), sans-serif",
             }}>
+              💡 <strong>Visual Law Integrado:</strong> A petição já é gerada estruturada em tópicos claros, sem marcadores confusos e com pedidos em alíneas precisas (a, b, c).
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── BENTO GRID: RECURSOS PROJETADOS PARA ALTA PERFORMANCE ── */}
+      <section
+        id="recursos"
+        style={{
+          width: "100%",
+          maxWidth: "1160px",
+          margin: "0 auto",
+          padding: "40px 20px 80px",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: "48px" }}>
+          <span style={{ fontSize: "12px", fontWeight: 700, color: "#d97706", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            Arquitetura Jurídica
+          </span>
+          <h2 style={{ fontSize: "clamp(26px, 4vw, 38px)", fontWeight: 700, letterSpacing: "-0.03em", marginTop: "8px" }}>
+            Tudo o que seu escritório precisa para produzir mais rápido.
+          </h2>
+        </div>
+
+        {/* Bento Grid Layout */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
+            gap: "20px",
+          }}
+        >
+          {/* Card 1 (Span 2 cols on Desktop) */}
+          <div
+            style={{
+              gridColumn: isMobile ? "1" : "span 2",
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "20px",
+              padding: "32px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <div>
+              <div style={{ width: 40, height: 40, borderRadius: "10px", background: "rgba(217, 119, 6, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#d97706", marginBottom: "16px" }}>
+                <Scale size={20} />
+              </div>
+              <h3 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "10px" }}>
+                Fundamentação Técnica e Jurisprudência Coerente
+              </h3>
+              <p style={{ color: "var(--text-secondary)", fontSize: "14.5px", lineHeight: 1.6, maxWidth: "560px" }}>
+                Chega de modelos genéricos ou petições vazias. Nosso modelo foi instruído para citar artigos pertinentes da legislação brasileira (CPC, CC, CDC, CLT) e construir teses jurídicas sólidas com base estrita no caso narrado.
+              </p>
+            </div>
+            <div style={{ marginTop: "24px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
+              <span style={{ fontSize: "12px", background: "var(--surface-elevated)", padding: "4px 10px", borderRadius: "6px", border: "1px solid var(--border)" }}>
+                ⚖️ Código de Processo Civil
+              </span>
+              <span style={{ fontSize: "12px", background: "var(--surface-elevated)", padding: "4px 10px", borderRadius: "6px", border: "1px solid var(--border)" }}>
+                🛡️ Código de Defesa do Consumidor
+              </span>
+              <span style={{ fontSize: "12px", background: "var(--surface-elevated)", padding: "4px 10px", borderRadius: "6px", border: "1px solid var(--border)" }}>
+                📜 Código Civil Brasileiro
+              </span>
+            </div>
+          </div>
+
+          {/* Card 2 */}
+          <div
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "20px",
+              padding: "32px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>
+              <div style={{ width: 40, height: 40, borderRadius: "10px", background: "rgba(16, 185, 129, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#10b981", marginBottom: "16px" }}>
+                <Cpu size={20} />
+              </div>
+              <h3 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "10px" }}>
+                Motor Groq de Baixa Latência
+              </h3>
+              <p style={{ color: "var(--text-secondary)", fontSize: "14.5px", lineHeight: 1.6 }}>
+                Geração em streaming ultra veloz com até 8.192 tokens de saída, gerando peças longas e exaustivas sem truncamento.
+              </p>
+            </div>
+            <div style={{ marginTop: "20px", fontSize: "12px", color: "#10b981", fontWeight: 600 }}>
+              ⚡ Tempo médio: ~2.8s
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "20px",
+              padding: "32px",
+            }}
+          >
+            <div style={{ width: 40, height: 40, borderRadius: "10px", background: "rgba(59, 130, 246, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#3b82f6", marginBottom: "16px" }}>
+              <FileCode2 size={20} />
+            </div>
+            <h3 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "10px" }}>
+              Edição com IA Cirúrgica
+            </h3>
+            <p style={{ color: "var(--text-secondary)", fontSize: "14.5px", lineHeight: 1.6 }}>
+              Dite ou digite qualquer ajuste na barra flutuante (&quot;mude o valor para R$ 10.000&quot; ou &quot;adicione dano moral&quot;) e veja os parágrafos se atualizarem com destaque visual de diff.
+            </p>
+          </div>
+
+          {/* Card 4 */}
+          <div
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "20px",
+              padding: "32px",
+            }}
+          >
+            <div style={{ width: 40, height: 40, borderRadius: "10px", background: "rgba(245, 158, 11, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#f59e0b", marginBottom: "16px" }}>
+              <FileText size={20} />
+            </div>
+            <h3 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "10px" }}>
+              Exportação Word (.docx)
+            </h3>
+            <p style={{ color: "var(--text-secondary)", fontSize: "14.5px", lineHeight: 1.6 }}>
+              Gere o documento final em formato Microsoft Word perfeitamente estruturado, pronto para revisão final e protocolo direto nos tribunais (PJe, e-SAJ, Projudi).
+            </p>
+          </div>
+
+          {/* Card 5 */}
+          <div
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "20px",
+              padding: "32px",
+            }}
+          >
+            <div style={{ width: 40, height: 40, borderRadius: "10px", background: "rgba(168, 85, 247, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#a855f7", marginBottom: "16px" }}>
+              <ShieldCheck size={20} />
+            </div>
+            <h3 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "10px" }}>
+              Zero Alucinação de Dados
+            </h3>
+            <p style={{ color: "var(--text-secondary)", fontSize: "14.5px", lineHeight: 1.6 }}>
+              Informações não fornecidas recebem marcadores inteligentes como <code>[NOME DO AUTOR]</code> e <code>[CPF]</code>, garantindo total segurança contra invenções acidentais.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS: WORKFLOW SECTION ── */}
+      <section
+        id="como-funciona"
+        style={{
+          width: "100%",
+          background: "var(--surface)",
+          borderTop: "1px solid var(--border)",
+          borderBottom: "1px solid var(--border)",
+          padding: "80px 20px",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <div style={{ maxWidth: "1160px", margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: "56px" }}>
+            <span style={{ fontSize: "12px", fontWeight: 700, color: "#d97706", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              Fluxo Otimizado
+            </span>
+            <h2 style={{ fontSize: "clamp(26px, 4vw, 36px)", fontWeight: 700, letterSpacing: "-0.03em", marginTop: "8px" }}>
+              Do relato do cliente à petição pronta em 3 etapas.
+            </h2>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
+              gap: "32px",
+            }}
+          >
             {[
-              { icon: <Sparkles size={14} style={{ color: "#d97706" }} />, text: "Edite com IA" },
-              { icon: <Clock size={14} style={{ color: "#d97706" }} />, text: "Entrega Imediata" },
-              { icon: <Send size={14} style={{ color: "#d97706" }} />, text: "Envio Digital" }
-            ].map((badge, idx) => (
+              {
+                step: "01",
+                title: "Narre o Caso",
+                desc: "Digite ou fale ao microfone os fatos relatados pelo cliente. Não precisa se preocupar com formalismos nessa etapa.",
+                icon: <Mic size={22} style={{ color: "#d97706" }} />
+              },
+              {
+                step: "02",
+                title: "IA Estrutura a Peça",
+                desc: "O motor processual gera o cabeçalho, qualificação, fatos, teses de direito e pedidos em alíneas (a, b, c).",
+                icon: <Sparkles size={22} style={{ color: "#d97706" }} />
+              },
+              {
+                step: "03",
+                title: "Edite e Exporte",
+                desc: "Refine os pontos que desejar diretamente no editor ou peça comandos à IA. Baixe em DOCX com 1 clique.",
+                icon: <FileText size={22} style={{ color: "#d97706" }} />
+              },
+            ].map((item, idx) => (
               <div
                 key={idx}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "6px 14px",
-                  borderRadius: "99px",
-                  background: "var(--badge-bg)",
-                  border: "1px solid var(--badge-border)",
-                  color: "var(--text-secondary)",
-                  fontSize: "13px",
-                  fontWeight: 500
+                  background: "var(--bg)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "16px",
+                  padding: "28px",
+                  position: "relative",
                 }}
               >
-                {badge.icon}
-                <span>{badge.text}</span>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+                  <div style={{ width: 44, height: 44, borderRadius: "12px", background: "rgba(217, 119, 6, 0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {item.icon}
+                  </div>
+                  <span style={{ fontSize: "28px", fontWeight: 900, color: "var(--text-muted)", opacity: 0.3, fontFamily: "monospace" }}>
+                    {item.step}
+                  </span>
+                </div>
+                <h3 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "10px" }}>{item.title}</h3>
+                <p style={{ color: "var(--text-secondary)", fontSize: "14px", lineHeight: 1.6 }}>{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
+      </section>
 
-      </div>
+      {/* ── FAQ SECTION (ACCORDION) ── */}
+      <section
+        id="faq"
+        style={{
+          width: "100%",
+          maxWidth: "860px",
+          margin: "0 auto",
+          padding: "80px 20px",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: "48px" }}>
+          <span style={{ fontSize: "12px", fontWeight: 700, color: "#d97706", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            Tire suas dúvidas
+          </span>
+          <h2 style={{ fontSize: "clamp(26px, 4vw, 36px)", fontWeight: 700, letterSpacing: "-0.03em", marginTop: "8px" }}>
+            Perguntas Frequentes
+          </h2>
+        </div>
 
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {[
+            {
+              q: "As petições geradas são compatíveis com os tribunais brasileiros?",
+              a: "Sim! Toda a estrutura segue estritamente os requisitos do Art. 319 do CPC (Endereçamento, Qualificação, Fatos, Direito com legislação pertinente, Pedidos em alíneas e Valor da Causa)."
+            },
+            {
+              q: "Posso editar o documento antes de baixar?",
+              a: "Sim, o editor é totalmente livre e desbloqueado. Você pode alterar qualquer texto manualmente ou usar a barra de inteligência artificial por áudio e texto para fazer edições cirúrgicas em tempo real."
+            },
+            {
+              q: "O arquivo exportado abre normalmente no Microsoft Word?",
+              a: "Sim. A exportação é feita em formato .docx nativo com formatação de parágrafos justificados, espaçamentos adequados e títulos estruturados."
+            },
+            {
+              q: "Como a IA evita inventar dados pessoais do cliente?",
+              a: "Nosso sistema é configurado com travas rigorosas contra alucinação de dados. Quando um dado não for fornecido nos fatos (como número de RG ou CPF), a IA insere colchetes [PREENCHER RG] para que você finalize com segurança."
+            },
+          ].map((faq, idx) => (
+            <div
+              key={idx}
+              onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+              style={{
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: "14px",
+                padding: "20px 24px",
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: "15px", fontWeight: 600 }}>{faq.q}</span>
+                <ChevronDown
+                  size={18}
+                  style={{
+                    color: "var(--text-muted)",
+                    transform: openFaq === idx ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "transform 0.2s ease",
+                  }}
+                />
+              </div>
+              {openFaq === idx && (
+                <p style={{ marginTop: "12px", color: "var(--text-secondary)", fontSize: "14px", lineHeight: 1.6 }}>
+                  {faq.a}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── FINAL CTA BANNER (Linear Glow Style) ── */}
+      <section
+        style={{
+          width: "100%",
+          padding: "0 20px 80px",
+          display: "flex",
+          justifyContent: "center",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "1160px",
+            background: "linear-gradient(135deg, rgba(217, 119, 6, 0.12) 0%, rgba(217, 119, 6, 0.02) 100%)",
+            border: "1px solid rgba(217, 119, 6, 0.25)",
+            borderRadius: "24px",
+            padding: isMobile ? "40px 24px" : "60px 48px",
+            textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            boxShadow: "0 20px 40px rgba(0, 0, 0, 0.2)",
+          }}
+        >
+          <h2 style={{ fontSize: "clamp(24px, 4vw, 36px)", fontWeight: 700, letterSpacing: "-0.03em", marginBottom: "16px" }}>
+            Acelere a produção jurídica do seu escritório hoje.
+          </h2>
+          <p style={{ color: "var(--text-secondary)", fontSize: "16px", maxWidth: "600px", marginBottom: "32px" }}>
+            Economize horas de trabalho repetitivo e entregue peças de alto impacto em minutos com o SmartDoc.
+          </p>
+          <button
+            onClick={scrollToGenerator}
+            style={{
+              background: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
+              color: "#ffffff",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              padding: "14px 36px",
+              borderRadius: "12px",
+              fontSize: "15px",
+              fontWeight: 700,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              boxShadow: "0 8px 24px rgba(217, 119, 6, 0.35)",
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = "0 12px 28px rgba(217, 119, 6, 0.45)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 8px 24px rgba(217, 119, 6, 0.35)";
+            }}
+          >
+            <span>Experimentar Gerador Agora</span>
+            <ArrowRight size={18} />
+          </button>
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
       <footer
         style={{
           padding: "32px 20px",
@@ -705,26 +1018,33 @@ export default function Home() {
           marginTop: "auto",
           width: "100%",
           display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          background: "rgba(0, 0, 0, 0.01)",
+          justifyContent: "center",
+          background: "var(--surface)",
           position: "relative",
-          zIndex: 10
+          zIndex: 10,
         }}
       >
-        {/* Disclaimer and Copyright */}
-        <div style={{
-          width: "100%",
-          maxWidth: "1200px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-          textAlign: "center",
-          fontSize: "11px",
-          color: "var(--text-muted)",
-          lineHeight: "1.6"
-        }}>
-          <p>© {new Date().getFullYear()} SmartDoc. Todos os direitos reservados.</p>
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "1160px",
+            display: "flex",
+            flexDirection: isMobile ? "column" : "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "16px",
+            fontSize: "13px",
+            color: "var(--text-muted)",
+          }}
+        >
+          <div>
+            © {new Date().getFullYear()} SmartDoc. Ferramenta de inteligência artificial para advogados.
+          </div>
+          <div style={{ display: "flex", gap: "20px" }}>
+            <a href="#recursos" style={{ color: "inherit", textDecoration: "none" }}>Recursos</a>
+            <a href="#como-funciona" style={{ color: "inherit", textDecoration: "none" }}>Como Funciona</a>
+            <a href="#faq" style={{ color: "inherit", textDecoration: "none" }}>Dúvidas</a>
+          </div>
         </div>
       </footer>
     </main>

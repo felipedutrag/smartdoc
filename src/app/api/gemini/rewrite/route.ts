@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 
     const systemInstruction = `
       Você é um Assistente Jurídico Especializado em Edição Cirúrgica.
-      O usuário enviou uma instrução para alterar uma Notificação Extrajudicial.
+      O usuário enviou uma instrução para alterar uma Petição Judicial.
       Sua tarefa é ler o documento, localizar os blocos exatos que precisam ser modificados com base na instrução (e no trecho selecionado), aplicar a mudança e retornar APENAS os blocos modificados.
 
       REGRAS CRÍTICAS PARA A SAÍDA (FORMATO NODE-BASED):
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
       
       REGRAS GERAIS:
       1. Formate CPFs como XXX.XXX.XXX-XX, Valores como R$ X.XXX,XX e Nomes Próprios com Iniciais Maiúsculas.
-      2. NÃO mencione advogados ou assinaturas de advogados.
+      2. NUNCA use bullets (•), listas <ul> ou <li>. Para listas e pedidos, utilize alíneas com letras: a), b), c)... em parágrafos separados (<p style="text-align: justify;"><strong>a)</strong> ...</p>).
       3. NÃO use marcadores de markdown ("**"). Use a tag <strong>.
       4. NÃO inclua nenhum tipo de comentário, saudação ou bloco \`\`\`html. Apenas as tags <update> são permitidas na sua resposta.
     `;

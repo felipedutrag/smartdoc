@@ -28,7 +28,7 @@ export function FloatingAiBar({
 }: FloatingAiBarProps) {
   const [isFocused, setIsFocused] = useState(false);
 
-  if (isGenerating || isPaid) return null;
+  if (isGenerating) return null;
 
   const showAccelerator = !isFocused;
 

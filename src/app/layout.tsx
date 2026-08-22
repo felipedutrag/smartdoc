@@ -10,12 +10,12 @@ const sans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "SmartDoc | Notificação Extrajudicial com Validade Jurídica",
-  description: "Gere notificações extrajudiciais completas e fundamentadas usando inteligência artificial jurídica. Faça cobranças, encerre contratos e exija seus direitos em segundos.",
-  keywords: "notificação extrajudicial, cobrança extrajudicial, gerador de notificação extrajudicial, advogado online, carta extrajudicial, modelo de notificação extrajudicial, notificação de cobrança, smartdoc",
+  title: "SmartDoc | Gerador de Petições Judiciais",
+  description: "Gere petições iniciais completas e fundamentadas usando inteligência artificial jurídica. Ganhe produtividade no seu escritório de advocacia.",
+  keywords: "petição judicial, petição inicial, gerador de petição, ia para advogados, inteligência artificial jurídica, smartdoc, software jurídico",
   openGraph: {
-    title: "SmartDoc | Notificação Extrajudicial",
-    description: "Gere notificações extrajudiciais completas e fundamentadas usando inteligência artificial jurídica.",
+    title: "SmartDoc | Gerador de Petições Judiciais",
+    description: "Gere petições iniciais completas e fundamentadas usando inteligência artificial jurídica.",
     url: "https://extrajus.pro",
     siteName: "SmartDoc",
     locale: "pt_BR",

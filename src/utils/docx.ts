@@ -5,8 +5,8 @@ export function compileWordHtml(title: string, rawHtml: string): string {
   let styledHtml = rawHtml.replace(/^(<p><\/p>|<p><br><\/p>|\s|<br>)+/gi, '').trim();
 
   // Force inline styles for Headings because html-to-docx sometimes ignores CSS classes for alignment
-  styledHtml = styledHtml.replace(/<h1/gi, '<h1 align="center" style="text-align: center; font-size: 18.0pt; text-transform: uppercase; margin-top: 0pt; margin-bottom: 24pt; border-bottom: 2px solid #d97706; padding-bottom: 10px; color: #000000;"');
-  styledHtml = styledHtml.replace(/<h2/gi, '<h2 style="font-size: 14.0pt; font-weight: bold; margin-top: 18pt; margin-bottom: 6pt; color: #111827; border-left: 4px solid #d97706; padding-left: 8px;"');
+  styledHtml = styledHtml.replace(/<h1/gi, '<h1 align="justify" style="text-align: justify; font-size: 12.0pt; font-weight: bold; text-transform: uppercase; margin-top: 0pt; margin-bottom: 18pt; color: #000000;"');
+  styledHtml = styledHtml.replace(/<h2/gi, '<h2 style="font-size: 12.0pt; font-weight: bold; margin-top: 14pt; margin-bottom: 6pt; color: #111827;"');
 
   // Customize blockquote style (Visual Law box)
   styledHtml = styledHtml.replace(/<blockquote([^>]*)>/gi, (match, attrs) => {
@@ -41,24 +41,20 @@ export function compileWordHtml(title: string, rawHtml: string): string {
           color: #1a1a1a;
         }
         h1 {
-          font-size: 18.0pt;
+          font-size: 12.0pt;
           font-weight: bold;
-          text-align: center;
+          text-align: justify;
           text-transform: uppercase;
           margin-top: 12.0pt;
-          margin-bottom: 24.0pt;
+          margin-bottom: 18.0pt;
           color: #000000;
-          border-bottom: 2.0pt solid #d97706;
-          padding-bottom: 6.0pt;
         }
         h2 {
-          font-size: 14.0pt;
+          font-size: 13.0pt;
           font-weight: bold;
           margin-top: 18.0pt;
           margin-bottom: 6.0pt;
           color: #111827;
-          border-left: 3.0pt solid #d97706;
-          padding-left: 8.0pt;
         }
         p {
           font-family: 'Georgia', serif;
