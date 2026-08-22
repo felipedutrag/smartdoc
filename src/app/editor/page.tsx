@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import React, { useEffect, useState } from "react";
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 import { useGeminiLive } from "@/hooks/use-gemini-live";
