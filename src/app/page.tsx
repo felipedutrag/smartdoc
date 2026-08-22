@@ -221,7 +221,7 @@ export default function Home() {
             </div>
           )}
 
-          {/* Right Actions: Theme Toggle + Action Button */}
+          {/* Right Actions: Theme Toggle */}
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <button
               onClick={() => {
@@ -262,47 +262,6 @@ export default function Home() {
                 </svg>
               )}
             </button>
-
-            <a
-              href="/login"
-              style={{
-                color: "var(--text-secondary)",
-                textDecoration: "none",
-                fontSize: "13px",
-                fontWeight: 600,
-                padding: "8px 14px",
-                borderRadius: "8px",
-                transition: "color 0.2s",
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.color = "var(--text-primary)"}
-              onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}
-            >
-              Entrar
-            </a>
-
-            <a
-              href="/register"
-              style={{
-                background: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
-                color: "#ffffff",
-                border: "1px solid rgba(255, 255, 255, 0.15)",
-                padding: "8px 18px",
-                borderRadius: "10px",
-                fontSize: "13px",
-                fontWeight: 600,
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                boxShadow: "0 2px 10px rgba(217, 119, 6, 0.25)",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.filter = "brightness(1.1)"}
-              onMouseLeave={(e) => e.currentTarget.style.filter = "brightness(1)"}
-            >
-              <span>Criar Conta</span>
-              <ArrowRight size={14} />
-            </a>
           </div>
         </div>
       </nav>
@@ -371,11 +330,81 @@ export default function Home() {
               color: "var(--text-secondary)",
               lineHeight: 1.6,
               maxWidth: "680px",
-              marginBottom: "24px",
+              marginBottom: "32px",
             }}
           >
             Narre os fatos do seu cliente por texto ou voz. Nossa IA estruturada elabora a petição inicial com fundamentação legal, doutrina, jurisprudência e formatação pronta para o PJe.
           </p>
+
+          {/* ── Hero Call to Action Buttons ── */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexWrap: "wrap",
+              gap: "14px",
+              marginBottom: "36px",
+            }}
+          >
+            <a
+              href="/register"
+              style={{
+                background: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
+                color: "#ffffff",
+                border: "1px solid rgba(255, 255, 255, 0.15)",
+                padding: "14px 32px",
+                borderRadius: "14px",
+                fontSize: "15px",
+                fontWeight: 700,
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                boxShadow: "0 8px 24px rgba(217, 119, 6, 0.35)",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.filter = "brightness(1.1)";
+                e.currentTarget.style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.filter = "brightness(1)";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              <span>Criar Conta Gratuita</span>
+              <ArrowRight size={18} />
+            </a>
+
+            <a
+              href="/login"
+              style={{
+                background: "var(--surface)",
+                color: "var(--text-primary)",
+                border: "1px solid var(--border)",
+                padding: "14px 28px",
+                borderRadius: "14px",
+                fontSize: "15px",
+                fontWeight: 600,
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "#d97706";
+                e.currentTarget.style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "var(--border)";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              <span>Acessar Painel</span>
+            </a>
+          </div>
 
           {/* Sub Hero Micro Badges */}
           <div
@@ -383,16 +412,12 @@ export default function Home() {
               display: "flex",
               flexWrap: "wrap",
               justifyContent: "center",
-              gap: "20px",
-              marginTop: "10px",
+              gap: "24px",
+              marginTop: "4px",
               color: "var(--text-muted)",
               fontSize: "13px",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <CheckCircle2 size={15} style={{ color: "#10b981" }} />
-              <span>Petições completas com Fatos, Direito e Pedidos</span>
-            </div>
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <CheckCircle2 size={15} style={{ color: "#10b981" }} />
               <span>Exportação nativa em .docx (Word)</span>
