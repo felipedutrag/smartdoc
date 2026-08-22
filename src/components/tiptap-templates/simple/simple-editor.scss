@@ -1,0 +1,359 @@
+@import url("https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap");
+
+body {
+  --tt-toolbar-height: 44px;
+  --tt-theme-text: var(--tt-gray-light-900);
+
+  .dark & {
+    --tt-theme-text: var(--tt-gray-dark-900);
+  }
+}
+
+body {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  color: var(--tt-theme-text);
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  padding: 0;
+}
+
+html,
+body,
+#root,
+#app {
+  height: 100%;
+}
+
+::-webkit-scrollbar {
+  width: 0.25rem;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--tt-scrollbar-color) transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--tt-scrollbar-color);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tiptap.ProseMirror {
+  font-family: "Lora", "Georgia", serif;
+  text-align: justify;
+  line-height: 1.65;
+  font-size: var(--editor-font-size, 17px);
+  color: var(--text-primary);
+
+  .dark & {
+    color: #d4d4d8;
+  }
+
+  p, li {
+    font-size: inherit !important;
+  }
+
+  // Remove blue selection background and default mark highlights
+  ::selection {
+    background-color: rgba(0, 0, 0, 0.07) !important;
+    color: inherit !important;
+  }
+
+  .dark & ::selection {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+  }
+
+  .selection {
+    background-color: transparent !important;
+    color: inherit !important;
+  }
+
+  mark {
+    background-color: rgba(217, 119, 6, 0.15) !important;
+    color: rgba(180, 83, 9, 1) !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    font-weight: 600 !important;
+  }
+
+  p {
+    margin-bottom: 1.2rem;
+  }
+
+  // Target the qualification paragraphs (Notificante & Notificado) immediately after the main H1 title
+  h1 + p, 
+  h1 + p + p, 
+  h1 + p + p + p, 
+  h1 + p + br + p,
+  h1 + p + p + br + p,
+  h1 + p + p + p + br + p,
+  h1 + p + br + br + p {
+    font-size: calc(var(--editor-font-size, 17px) + 2px) !important;
+    line-height: 1.7;
+    margin-bottom: 1.2rem;
+  }
+
+  h1, h2, h3, h4 {
+    color: var(--text-primary);
+    font-weight: 700;
+    margin-top: 1.75rem;
+    margin-bottom: 0.5rem;
+    text-align: left;
+  }
+
+  h1 {
+    font-family: "Lora", "Georgia", serif; /* Elegant serif font */
+    font-size: calc(var(--editor-font-size, 17px) * 1.8) !important;
+    font-weight: 700;
+    text-align: center;
+    margin-top: 3.5rem; /* Space above the title inside the A4 sheet */
+    border-bottom: 2px solid rgba(0, 0, 0, 0.08); /* slightly transparent divider */
+    padding-bottom: 1.25rem;
+    margin-bottom: 2.5rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+
+    .dark & {
+      border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  h2 {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: calc(var(--editor-font-size, 17px) * 1.3) !important;
+    border-left: 3px solid var(--text-primary);
+    padding-left: 0.75rem;
+    margin-top: 2.2rem;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-size: calc(var(--editor-font-size, 17px) * 1.15) !important;
+  }
+
+  blockquote {
+    border-left: 1px solid #d97706; /* Accent color for Visual Law box (Gold) */
+    background: rgba(217, 119, 6, 0.03);
+    padding: 0.75rem 1.25rem; /* Thinner padding */
+    margin: 1rem 0; /* Compact margins */
+    border-radius: 0 6px 6px 0;
+    font-style: italic;
+
+    p {
+      margin-bottom: 0;
+    }
+    
+    .dark & {
+      background: rgba(217, 119, 6, 0.06);
+      border-left-color: #d97706;
+    }
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1rem 0;
+  }
+
+  ul, ol {
+    margin-bottom: 1.2rem;
+    padding-left: 1.5rem;
+    
+    li {
+      margin-bottom: 0.4rem;
+    }
+  }
+
+  // Target the last few paragraphs (date, line, and name) to bring them closer together
+  p:nth-last-child(1),
+  p:nth-last-child(2),
+  p:nth-last-child(3) {
+    margin-top: 0.15rem !important;
+    margin-bottom: 0.15rem !important;
+  }
+}
+
+.simple-editor-wrapper {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.simple-editor-content {
+  max-width: 850px;
+  width: 100%;
+  margin: 2rem auto;
+  min-height: 1200px; /* A4 aspect ratio height (~1.414 * width) */
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 2px solid rgba(217, 119, 6, 0.6); /* Gold top line — subtle */
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.01);
+
+  /* Proteção contra cópia antes do pagamento */
+  &[style*="user-select: none"] {
+    cursor: default;
+    
+    * :not(.unlock-button-container):not(.unlock-button-container *) {
+      pointer-events: none !important;
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      user-select: none !important;
+    }
+  }
+
+  .dark & {
+    background: #000000 !important; /* Match page background */
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-top: 2px solid rgba(217, 119, 6, 0.5); /* Gold top line — subtle */
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.simple-editor-title-container {
+  padding: 4rem 3rem 0; /* Match editor horizontal padding */
+  width: 100%;
+  text-align: center; /* Center the title by default */
+}
+
+.simple-editor-content .tiptap.ProseMirror.simple-editor {
+  flex: 1;
+  padding: 5rem 3rem 5rem; /* Reduced bottom padding to avoid massive space under signature */
+}
+
+@media screen and (max-width: 860px) {
+  .simple-editor-content {
+    margin: 0 auto 25px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  .simple-editor-title-container {
+    padding: 2rem 1.5rem 0;
+  }
+  .simple-editor-content .tiptap.ProseMirror.simple-editor {
+    padding: 5rem 1.5rem 3rem;
+  }
+}
+
+@keyframes orbSpinFlow {
+  0% {
+    transform: rotate(0deg);
+    background-position: 0% 50%;
+  }
+  50% {
+    transform: rotate(180deg);
+    background-position: 100% 50%;
+  }
+  100% {
+    transform: rotate(360deg);
+    background-position: 0% 50%;
+  }
+}
+
+.font-controls-panel {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  right: calc(50% - 450px); /* Aproximado da borda do editor de 800px no desktop */
+  left: auto;
+  
+  @media (max-width: 950px) {
+    right: 12px;
+  }
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 6px;
+  border-radius: 14px;
+  z-index: 100;
+  align-items: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Grayscale Theme (No gold) */
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+
+  .font-label {
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-bottom: 2px;
+    user-select: none;
+    color: var(--text-secondary) !important;
+  }
+
+  .font-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border) !important;
+    background: var(--bg) !important;
+    color: var(--text-primary) !important;
+
+    &:hover {
+      background: var(--text-primary) !important;
+      color: var(--bg) !important;
+      border-color: var(--text-primary) !important;
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  .font-value {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 0;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary) !important;
+  }
+
+  .dark &, html.dark & {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+
+    .font-label {
+      color: var(--text-secondary) !important;
+    }
+
+    .font-btn {
+      border: 1px solid var(--border) !important;
+      background: var(--bg) !important;
+      color: var(--text-primary) !important;
+
+      &:hover {
+        background: var(--text-primary) !important;
+        color: var(--bg) !important;
+        border-color: var(--text-primary) !important;
+        transform: scale(1.05);
+      }
+    }
+
+    .font-value {
+      color: var(--text-primary) !important;
+    }
+  }
+}
+
+/* Media query for hiding font controls removed so they show on mobile */
