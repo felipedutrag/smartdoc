@@ -273,7 +273,7 @@ export default function Home() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          padding: isMobile ? "40px 16px 60px" : "60px 24px 80px",
+          padding: isMobile ? "60px 16px 60px" : "100px 24px 80px",
           position: "relative",
           zIndex: 1,
         }}
