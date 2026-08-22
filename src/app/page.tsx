@@ -371,81 +371,11 @@ export default function Home() {
               color: "var(--text-secondary)",
               lineHeight: 1.6,
               maxWidth: "680px",
-              marginBottom: "36px",
+              marginBottom: "24px",
             }}
           >
             Narre os fatos do seu cliente por texto ou voz. Nossa IA estruturada elabora a petição inicial com fundamentação legal, doutrina, jurisprudência e formatação pronta para o PJe.
           </p>
-
-          {/* ── Hero Call to Action Buttons ── */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexWrap: "wrap",
-              gap: "14px",
-              marginBottom: "36px",
-            }}
-          >
-            <a
-              href="/register"
-              style={{
-                background: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
-                color: "#ffffff",
-                border: "1px solid rgba(255, 255, 255, 0.15)",
-                padding: "14px 32px",
-                borderRadius: "14px",
-                fontSize: "15px",
-                fontWeight: 700,
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                boxShadow: "0 8px 24px rgba(217, 119, 6, 0.35)",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.filter = "brightness(1.1)";
-                e.currentTarget.style.transform = "translateY(-1px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.filter = "brightness(1)";
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
-            >
-              <span>Criar Conta Gratuita</span>
-              <ArrowRight size={18} />
-            </a>
-
-            <a
-              href="/login"
-              style={{
-                background: "var(--surface)",
-                color: "var(--text-primary)",
-                border: "1px solid var(--border)",
-                padding: "14px 28px",
-                borderRadius: "14px",
-                fontSize: "15px",
-                fontWeight: 600,
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "#d97706";
-                e.currentTarget.style.transform = "translateY(-1px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "var(--border)";
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
-            >
-              <span>Acessar Painel</span>
-            </a>
-          </div>
 
           {/* Sub Hero Micro Badges */}
           <div
