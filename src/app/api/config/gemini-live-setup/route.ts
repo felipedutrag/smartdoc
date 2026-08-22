@@ -6,12 +6,8 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   const sessionId = new URL(req.url).searchParams.get("sessionId") || "extrajus_default";
   const keys = [
-    process.env.GEMINI_AUDIO_API_KEY,
-    process.env.NEXT_PUBLIC_GEMINI_API_KEY_FALLBACK_3, // Correspondente ao GEMINI_AUDIO_API_KEY no bot
     process.env.GEMINI_API_KEY,
-    process.env.NEXT_PUBLIC_GEMINI_API_KEY,
-    process.env.GEMINI_API_KEY_FALLBACK_2,
-    process.env.NEXT_PUBLIC_GEMINI_API_KEY_FALLBACK_2,
+    process.env.GEMINI_AUDIO_API_KEY,
   ].filter(Boolean) as string[];
 
   const key = keys.length > 0 ? keys[0] : "";

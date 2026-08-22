@@ -5,12 +5,8 @@ export const runtime = 'edge';
 
 export async function GET() {
   const keys = [
-    process.env.GEMINI_AUDIO_API_KEY,
-    process.env.NEXT_PUBLIC_GEMINI_API_KEY_FALLBACK_3,
     process.env.GEMINI_API_KEY,
-    process.env.NEXT_PUBLIC_GEMINI_API_KEY,
-    process.env.GEMINI_API_KEY_FALLBACK_2,
-    process.env.NEXT_PUBLIC_GEMINI_API_KEY_FALLBACK_2,
+    process.env.GEMINI_AUDIO_API_KEY,
   ].filter(Boolean) as string[];
 
   const apiKey = keys.length > 0 ? keys[0] : "";
