@@ -247,7 +247,7 @@ const MainToolbarContent = ({
 
         {/* Center: Logo - PERFECTLY CENTERED */}
         <Link 
-          href="/"
+          href="/dashboard"
           style={{ 
             position: "absolute",
             left: "50%",
@@ -908,9 +908,6 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
           </div>
         )}
 
-        {/* Floating Font Size Controls — mobile only removed */}
-
-
         <div 
           className="simple-editor-content" 
           style={{ 
@@ -922,56 +919,8 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
             msUserSelect: editable ? "text" : "none",
           }}
         >
-          <button
-            onClick={() => {
-              if (window.confirm("Tem certeza que deseja descartar esta petição? Todos os dados serão perdidos.")) {
-                localStorage.clear();
-                window.location.href = "/";
-              }
-            }}
-            title="Descartar documento"
-            style={{
-              position: "absolute",
-              top: isMobile ? "64px" : "24px",
-              right: isMobile ? "12px" : "24px",
-              background: "transparent",
-              color: "var(--text-muted)",
-              border: "none",
-              padding: "8px",
-              borderRadius: "8px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              opacity: 0.4,
-              transition: "all 0.2s",
-              zIndex: 10,
-            }}
-            onMouseEnter={(e) => { 
-              e.currentTarget.style.color = "#ef4444"; 
-              e.currentTarget.style.opacity = "1";
-              e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)";
-            }}
-            onMouseLeave={(e) => { 
-              e.currentTarget.style.color = "var(--text-muted)"; 
-              e.currentTarget.style.opacity = "0.4";
-              e.currentTarget.style.background = "transparent";
-            }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 6h18" />
-              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-              <line x1="10" y1="11" x2="10" y2="17" />
-              <line x1="14" y1="11" x2="14" y2="17" />
-            </svg>
-          </button>
-
           <div style={{
-            maxHeight: lockHeight,
-            overflow: (!isPaid && !isGenerating) ? "hidden" : "visible",
-            maskImage: (!isPaid && !isGenerating) ? "linear-gradient(to bottom, black calc(100% - 150px), transparent 100%)" : "none",
-            WebkitMaskImage: (!isPaid && !isGenerating) ? "linear-gradient(to bottom, black calc(100% - 150px), transparent 100%)" : "none"
+            overflow: "visible",
           }}>
             <EditorContent
               editor={editor}
@@ -980,255 +929,10 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
             />
           </div>
           {children}
-          {!editable && onUnlockRequest && !isGenerating && (
-            <div 
-              className="unlock-button-container"
-              style={{
-                marginTop: "40px",
-                marginBottom: "60px",
-                alignSelf: "center",
-                zIndex: 100,
-              }}
-            >
-            {/* ═══ PAYWALL – Premium Checkout Card ═══ */}
-            <div style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "0",
-              margin: "80px auto 60px",
-              width: "calc(100% - 40px)",
-              maxWidth: "460px",
-              position: "relative",
-            }}>
-
-              {/* Ambient glow */}
-              <div style={{
-                position: "absolute",
-                inset: "-40px",
-                background: discountActive
-                  ? "radial-gradient(ellipse at 50% 60%, rgba(239,68,68,0.07) 0%, transparent 70%)"
-                  : "radial-gradient(ellipse at 50% 60%, rgba(217,119,6,0.07) 0%, transparent 70%)",
-                pointerEvents: "none",
-                zIndex: 0,
-              }} />
-
-              {/* Status badge pill */}
-              <div style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "5px 14px",
-                borderRadius: "999px",
-                background: discountActive ? "rgba(239,68,68,0.08)" : "rgba(16,185,129,0.08)",
-                border: discountActive ? "1px solid rgba(239,68,68,0.2)" : "1px solid rgba(16,185,129,0.2)",
-                color: discountActive ? "#ef4444" : "#10b981",
-                fontSize: "11px",
-                fontWeight: 700,
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                marginBottom: "16px",
-                zIndex: 1,
-              }}>
-                <span style={{
-                  width: "6px", height: "6px", borderRadius: "50%",
-                  background: "currentColor",
-                  animation: "pulse 1.8s ease-in-out infinite",
-                }} />
-                {discountActive ? `Oferta expira em ${discountTimerDisplay}` : "Documento pronto"}
-              </div>
-
-              {/* Main card */}
-              <div style={{
-                width: "100%",
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                borderRadius: "24px",
-                overflow: "hidden",
-                boxShadow: "0 24px 60px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06)",
-                zIndex: 1,
-                position: "relative",
-              }}>
-
-                {/* Card top accent bar */}
-                <div style={{
-                  height: "3px",
-                  background: discountActive
-                    ? "linear-gradient(90deg, #ef4444, #f97316)"
-                    : "linear-gradient(90deg, #d97706, #f59e0b)",
-                }} />
-
-                {/* Card header */}
-                <div style={{
-                  padding: "28px 28px 20px",
-                  borderBottom: "1px solid var(--border)",
-                }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
-                    <div>
-                      <h2 style={{
-                        margin: "0 0 6px",
-                        fontSize: "20px",
-                        fontWeight: 800,
-                        color: "var(--text-primary)",
-                        letterSpacing: "-0.02em",
-                        lineHeight: 1.2,
-                      }}>
-                        {discountActive ? "Oferta Exclusiva" : "Petição Concluída"}
-                      </h2>
-                      <p style={{
-                        margin: 0,
-                        fontSize: "13px",
-                        color: "var(--text-muted)",
-                        lineHeight: 1.5,
-                      }}>
-                        {discountActive
-                          ? "Aproveite o desconto especial antes que expire."
-                          : "Libere, edite e faça o download de sua petição."}
-                      </p>
-                    </div>
-
-                    {/* Price badge */}
-                    <div style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-end",
-                      flexShrink: 0,
-                    }}>
-                      {discountActive && (
-                        <span style={{
-                          fontSize: "11px",
-                          color: "var(--text-muted)",
-                          textDecoration: "line-through",
-                        }}>
-                          R$ 39,00
-                        </span>
-                      )}
-                      <span style={{
-                        fontSize: "28px",
-                        fontWeight: 900,
-                        color: discountActive ? "#ef4444" : "var(--text-primary)",
-                        letterSpacing: "-0.03em",
-                        lineHeight: 1,
-                      }}>
-                        R$ {Math.round(price)},00
-                      </span>
-                      <span style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "3px" }}>pagamento único</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Feature checklist */}
-                <div style={{ padding: "20px 28px" }}>
-                  {[
-                    { icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z", text: "Petição judicial completa e fundamentada" },
-                    { icon: "M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z", text: "Download imediato em Word (.docx) e PDF" },
-                    { icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z", text: "Redigida com base no Código Civil Brasileiro" },
-                    { icon: "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z", text: "Pagamento 100% seguro" },
-                  ].map((item, i) => (
-                    <div key={i} style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      marginBottom: i < 3 ? "12px" : "0",
-                    }}>
-                      <div style={{
-                        width: "20px",
-                        height: "20px",
-                        borderRadius: "50%",
-                        background: discountActive ? "rgba(239,68,68,0.08)" : "rgba(217,119,6,0.08)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                        color: discountActive ? "#ef4444" : "#d97706",
-                      }}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d={item.icon} />
-                        </svg>
-                      </div>
-                      <span style={{ fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.4 }}>
-                        {item.text}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* CTA section */}
-                <div style={{ padding: "0 28px 28px" }}>
-                  <button
-                    onClick={onUnlockRequest}
-                    style={{
-                      width: "100%",
-                      padding: "16px 24px",
-                      borderRadius: "14px",
-                      border: "none",
-                      background: discountActive
-                        ? "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
-                        : "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
-                      color: "white",
-                      fontSize: "16px",
-                      fontWeight: 800,
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "10px",
-                      boxShadow: discountActive
-                        ? "0 8px 24px rgba(239,68,68,0.35), 0 2px 6px rgba(239,68,68,0.2)"
-                        : "0 8px 24px rgba(217,119,6,0.35), 0 2px 6px rgba(217,119,6,0.2)",
-                      transition: "all 0.25s cubic-bezier(0.4,0,0.2,1)",
-                      letterSpacing: "-0.01em",
-                      position: "relative",
-                      overflow: "hidden",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "translateY(-2px)";
-                      e.currentTarget.style.boxShadow = discountActive
-                        ? "0 12px 32px rgba(239,68,68,0.45), 0 4px 8px rgba(239,68,68,0.25)"
-                        : "0 12px 32px rgba(217,119,6,0.45), 0 4px 8px rgba(217,119,6,0.25)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow = discountActive
-                        ? "0 8px 24px rgba(239,68,68,0.35), 0 2px 6px rgba(239,68,68,0.2)"
-                        : "0 8px 24px rgba(217,119,6,0.35), 0 2px 6px rgba(217,119,6,0.2)";
-                    }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="7 10 12 15 17 10" />
-                      <line x1="12" y1="15" x2="12" y2="3" />
-                    </svg>
-                    Desbloquear Petição
-                  </button>
-
-                  {/* Guarantee micro-text */}
-                  <div style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "6px",
-                    marginTop: "12px",
-                    color: "var(--text-muted)",
-                    fontSize: "11px",
-                  }}>
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                    </svg>
-                    Pagamento seguro via Stripe • Acesso imediato
-                  </div>
-                </div>
-              </div>
-
-
-            </div>
-          </div>
-          )}
         </div>
       </EditorContext.Provider>
     </div>
-  )
+  );
 });
 
 SimpleEditor.displayName = "SimpleEditor";

@@ -162,6 +162,7 @@ export default function Home() {
             borderRadius: "16px",
             border: "var(--header-pill-border)",
             boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
+            position: "relative",
           }}
         >
           {/* Logo */}
@@ -197,9 +198,23 @@ export default function Home() {
             </span>
           </a>
 
-          {/* Center Links (Desktop only) */}
+          {/* Center Links (Desktop only) - ABSOLUTELY CENTERED */}
           {!isMobile && (
-            <div style={{ display: "flex", alignItems: "center", gap: "28px", fontSize: "13px", fontWeight: 500, color: "var(--text-secondary)" }}>
+            <div
+              style={{
+                position: "absolute",
+                left: "50%",
+                top: "50%",
+                transform: "translate(-50%, -50%)",
+                display: "flex",
+                alignItems: "center",
+                gap: "28px",
+                fontSize: "13px",
+                fontWeight: 500,
+                color: "var(--text-secondary)",
+                pointerEvents: "auto",
+              }}
+            >
               <a href="#recursos" style={{ color: "inherit", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--text-primary)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}>Recursos</a>
               <a href="#como-funciona" style={{ color: "inherit", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--text-primary)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}>Como Funciona</a>
               <a href="#faq" style={{ color: "inherit", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--text-primary)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}>Dúvidas</a>
@@ -255,7 +270,7 @@ export default function Home() {
                 textDecoration: "none",
                 fontSize: "13px",
                 fontWeight: 600,
-                padding: "6px 12px",
+                padding: "8px 14px",
                 borderRadius: "8px",
                 transition: "color 0.2s",
               }}
@@ -265,28 +280,29 @@ export default function Home() {
               Entrar
             </a>
 
-            <button
-              onClick={scrollToGenerator}
+            <a
+              href="/register"
               style={{
                 background: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
                 color: "#ffffff",
                 border: "1px solid rgba(255, 255, 255, 0.15)",
-                padding: "8px 16px",
+                padding: "8px 18px",
                 borderRadius: "10px",
                 fontSize: "13px",
                 fontWeight: 600,
-                cursor: "pointer",
-                display: "flex",
+                textDecoration: "none",
+                display: "inline-flex",
                 alignItems: "center",
                 gap: "6px",
+                boxShadow: "0 2px 10px rgba(217, 119, 6, 0.25)",
                 transition: "all 0.2s",
               }}
               onMouseEnter={(e) => e.currentTarget.style.filter = "brightness(1.1)"}
               onMouseLeave={(e) => e.currentTarget.style.filter = "brightness(1)"}
             >
-              <span>Gerar Peça</span>
+              <span>Criar Conta</span>
               <ArrowRight size={14} />
-            </button>
+            </a>
           </div>
         </div>
       </nav>
@@ -361,165 +377,74 @@ export default function Home() {
             Narre os fatos do seu cliente por texto ou voz. Nossa IA estruturada elabora a petição inicial com fundamentação legal, doutrina, jurisprudência e formatação pronta para o PJe.
           </p>
 
-          {/* ── Interactive Generator Input Box ── */}
+          {/* ── Hero Call to Action Buttons ── */}
           <div
             style={{
-              width: "100%",
-              maxWidth: "760px",
-              borderRadius: "20px",
-              padding: "1px",
-              position: "relative",
-              boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.2), 0 0 0 1px var(--border)",
-              background: "linear-gradient(135deg, rgba(217, 119, 6, 0.4) 0%, rgba(217, 119, 6, 0.05) 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexWrap: "wrap",
+              gap: "14px",
+              marginBottom: "36px",
             }}
           >
-            <div
+            <a
+              href="/register"
               style={{
-                width: "100%",
-                background: "var(--textarea-wrapper-bg)",
-                backdropFilter: "blur(20px)",
-                borderRadius: "19px",
-                overflow: "hidden",
-                display: "flex",
-                flexDirection: "column",
-                position: "relative",
-                zIndex: 1,
+                background: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
+                color: "#ffffff",
+                border: "1px solid rgba(255, 255, 255, 0.15)",
+                padding: "14px 32px",
+                borderRadius: "14px",
+                fontSize: "15px",
+                fontWeight: 700,
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                boxShadow: "0 8px 24px rgba(217, 119, 6, 0.35)",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.filter = "brightness(1.1)";
+                e.currentTarget.style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.filter = "brightness(1)";
+                e.currentTarget.style.transform = "translateY(0)";
               }}
             >
-              {/* Quick Prompt Chips */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "10px 14px",
-                  background: "var(--chips-track-bg)",
-                  borderBottom: "1px solid var(--border)",
-                  overflowX: "auto",
-                  gap: "8px",
-                  scrollbarWidth: "none",
-                }}
-              >
-                {[
-                  { label: "Ação de Cobrança", text: "Ação de cobrança fundada em prestação de serviços não adimplida, com pedido de atualização monetária e juros de mora." },
-                  { label: "Despejo por Falta de Pagamento", text: "Ação de despejo por falta de pagamento cumulada com cobrança de aluguéis e encargos locatícios em atraso há 3 meses." },
-                  { label: "Indenizatória por Dano Moral", text: "Ação declaratória de inexistência de débito c/c reparação por danos morais e tutela de urgência devido a negativação indevida no SPC/Serasa." },
-                  { label: "Obrigação de Fazer (Saúde)", text: "Ação com pedido de tutela provisória de urgência de natureza antecipada para fornecimento de medicamento de alto custo pelo plano de saúde/Estado." },
-                  { label: "Rescisão Contratual", text: "Ação de rescisão contratual cumulada com restituição integral de valores pagos e indenização por danos materiais e morais." },
-                ].map((chip) => (
-                  <button
-                    key={chip.label}
-                    onClick={() => setTextInput(chip.text)}
-                    style={{
-                      padding: "5px 12px",
-                      borderRadius: "999px",
-                      background: "var(--chip-bg)",
-                      border: "1px solid var(--chip-border)",
-                      color: "var(--text-muted)",
-                      fontSize: "12px",
-                      fontWeight: 500,
-                      cursor: "pointer",
-                      whiteSpace: "nowrap",
-                      transition: "all 0.2s",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.color = "var(--text-primary)";
-                      e.currentTarget.style.borderColor = "#d97706";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = "var(--text-muted)";
-                      e.currentTarget.style.borderColor = "var(--chip-border)";
-                    }}
-                  >
-                    {chip.label}
-                  </button>
-                ))}
-              </div>
+              <span>Criar Conta Gratuita</span>
+              <ArrowRight size={18} />
+            </a>
 
-              {/* Textarea */}
-              <textarea
-                className="home-textarea"
-                value={textInput}
-                onChange={(e) => setTextInput(e.target.value)}
-                placeholder="Descreva o caso do cliente ou clique em uma das ações acima (ex: O autor contratou o réu para reforma residencial, pagou 50% adiantado e o réu abandonou a obra...)"
-                style={{
-                  width: "100%",
-                  minHeight: isMobile ? "120px" : "150px",
-                  background: "transparent",
-                  border: "none",
-                  outline: "none",
-                  resize: "none",
-                  padding: "16px 20px",
-                  fontSize: isMobile ? "14px" : "15px",
-                  color: "var(--text-primary)",
-                  lineHeight: 1.6,
-                  fontFamily: "inherit",
-                }}
-              />
-
-              {/* Action Bar */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "12px 18px",
-                  borderTop: "1px solid var(--border)",
-                  background: "var(--action-bar-bg)",
-                }}
-              >
-                <button
-                  onClick={toggleDictation}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "8px 14px",
-                    borderRadius: "99px",
-                    background: isDictating ? "rgba(239, 68, 68, 0.15)" : "transparent",
-                    color: isDictating ? "#ef4444" : "var(--text-secondary)",
-                    border: isDictating ? "1px solid rgba(239, 68, 68, 0.3)" : "1px solid transparent",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                    fontWeight: 500,
-                    transition: "all 0.2s",
-                  }}
-                >
-                  <Mic size={16} className={isDictating ? "animate-pulse" : ""} />
-                  <span>{isDictating ? "Ouvindo fatos..." : "Ditar por voz"}</span>
-                </button>
-
-                <button
-                  onClick={() => handleGenerate()}
-                  disabled={!textInput.trim() || redirecting}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "10px 24px",
-                    borderRadius: "12px",
-                    background: !textInput.trim() || redirecting
-                      ? "var(--surface-elevated)"
-                      : "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
-                    color: !textInput.trim() || redirecting ? "var(--text-muted)" : "#ffffff",
-                    border: "none",
-                    cursor: !textInput.trim() || redirecting ? "not-allowed" : "pointer",
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    boxShadow: !textInput.trim() || redirecting ? "none" : "0 4px 14px rgba(217, 119, 6, 0.3)",
-                    transition: "all 0.2s",
-                  }}
-                >
-                  {redirecting ? (
-                    <span>Elaborando peça...</span>
-                  ) : (
-                    <>
-                      <span>Gerar Petição Inicial</span>
-                      <ArrowRight size={16} />
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
+            <a
+              href="/login"
+              style={{
+                background: "var(--surface)",
+                color: "var(--text-primary)",
+                border: "1px solid var(--border)",
+                padding: "14px 28px",
+                borderRadius: "14px",
+                fontSize: "15px",
+                fontWeight: 600,
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "#d97706";
+                e.currentTarget.style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "var(--border)";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              <span>Acessar Painel</span>
+            </a>
           </div>
 
           {/* Sub Hero Micro Badges */}
@@ -529,7 +454,7 @@ export default function Home() {
               flexWrap: "wrap",
               justifyContent: "center",
               gap: "20px",
-              marginTop: "24px",
+              marginTop: "10px",
               color: "var(--text-muted)",
               fontSize: "13px",
             }}
@@ -565,7 +490,7 @@ export default function Home() {
         <div
           style={{
             width: "100%",
-            maxWidth: "1000px",
+            maxWidth: "780px",
             borderRadius: "20px",
             background: "var(--surface)",
             border: "1px solid var(--border)",
@@ -602,33 +527,33 @@ export default function Home() {
           {/* Mockup Document Body */}
           <div
             style={{
-              padding: isMobile ? "24px 16px" : "40px 60px",
+              padding: isMobile ? "24px 20px" : "44px 72px",
               background: "var(--bg)",
               fontFamily: "'Georgia', serif",
-              lineHeight: 1.7,
+              lineHeight: 1.75,
               fontSize: "14px",
               color: "var(--text-primary)",
               opacity: 0.95,
             }}
           >
-            <p style={{ textAlign: "justify", fontWeight: "bold", textTransform: "uppercase", marginBottom: "20px" }}>
+            <p style={{ textAlign: "justify", fontWeight: "bold", textTransform: "uppercase", marginBottom: "20px", fontSize: "13.5px" }}>
               EXCELENTÍSSIMO(A) SENHOR(A) DOUTOR(A) JUIZ(A) DE DIREITO DA ___ VARA CÍVEL DA COMARCA DE SÃO PAULO/SP
             </p>
             <p style={{ textAlign: "justify", marginBottom: "16px" }}>
               <strong>[NOME DO AUTOR]</strong>, brasileiro, solteiro, empresário, inscrito no CPF sob o nº [Número], residente em [Endereço Completo], por seu advogado que esta subscreve, vem propor a presente
             </p>
-            <h3 style={{ textAlign: "center", textTransform: "uppercase", fontSize: "15px", margin: "20px 0", letterSpacing: "0.02em", color: "#d97706" }}>
+            <h3 style={{ textAlign: "center", textTransform: "uppercase", fontSize: "15px", margin: "22px 0", letterSpacing: "0.02em", color: "#d97706" }}>
               AÇÃO DE RESCISÃO CONTRATUAL C/C INDENIZATÓRIA
             </h3>
-            <p style={{ textAlign: "justify", marginBottom: "16px" }}>
+            <p style={{ textAlign: "justify", marginBottom: "18px" }}>
               em face de <strong>[NOME DO RÉU]</strong>, pelos fatos e fundamentos a seguir aduzidos.
             </p>
             <div style={{
-              margin: "20px 0",
-              padding: "12px 18px",
-              background: "rgba(217, 119, 6, 0.05)",
+              margin: "24px 0 6px",
+              padding: "14px 20px",
+              background: "rgba(217, 119, 6, 0.06)",
               borderLeft: "3px solid #d97706",
-              borderRadius: "0 8px 8px 0",
+              borderRadius: "0 10px 10px 0",
               fontSize: "13px",
               fontStyle: "italic",
               fontFamily: "var(--font-sans), sans-serif",
@@ -943,70 +868,6 @@ export default function Home() {
               )}
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* ── FINAL CTA BANNER (Linear Glow Style) ── */}
-      <section
-        style={{
-          width: "100%",
-          padding: "0 20px 80px",
-          display: "flex",
-          justifyContent: "center",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "1160px",
-            background: "linear-gradient(135deg, rgba(217, 119, 6, 0.12) 0%, rgba(217, 119, 6, 0.02) 100%)",
-            border: "1px solid rgba(217, 119, 6, 0.25)",
-            borderRadius: "24px",
-            padding: isMobile ? "40px 24px" : "60px 48px",
-            textAlign: "center",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            boxShadow: "0 20px 40px rgba(0, 0, 0, 0.2)",
-          }}
-        >
-          <h2 style={{ fontSize: "clamp(24px, 4vw, 36px)", fontWeight: 700, letterSpacing: "-0.03em", marginBottom: "16px" }}>
-            Acelere a produção jurídica do seu escritório hoje.
-          </h2>
-          <p style={{ color: "var(--text-secondary)", fontSize: "16px", maxWidth: "600px", marginBottom: "32px" }}>
-            Economize horas de trabalho repetitivo e entregue peças de alto impacto em minutos com o SmartDoc.
-          </p>
-          <button
-            onClick={scrollToGenerator}
-            style={{
-              background: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
-              color: "#ffffff",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              padding: "14px 36px",
-              borderRadius: "12px",
-              fontSize: "15px",
-              fontWeight: 700,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              boxShadow: "0 8px 24px rgba(217, 119, 6, 0.35)",
-              transition: "all 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "0 12px 28px rgba(217, 119, 6, 0.45)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "0 8px 24px rgba(217, 119, 6, 0.35)";
-            }}
-          >
-            <span>Experimentar Gerador Agora</span>
-            <ArrowRight size={18} />
-          </button>
         </div>
       </section>
 

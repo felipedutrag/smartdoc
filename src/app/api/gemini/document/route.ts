@@ -28,14 +28,14 @@ export async function POST(req: Request) {
     }
 
     const fallbackModels = [
-      "gemini-2.5-flash",        // Tentativa 0 (Principal - Alto throughput e velocidade)
-      "gemini-2.5-pro",          // Tentativa 1 (Alta capacidade analítica jurídica)
-      "gemini-3.0-flash",        // Tentativa 2
-      "gemini-3.1-flash-lite",   // Tentativa 3
-      "llama-3.3-70b-versatile", // Tentativa 4 (Groq Fallback)
+      "openai/gpt-oss-120b",     // Tentativa 0 (Principal - Groq GPT-OSS 120B)
+      "llama-3.3-70b-versatile", // Tentativa 1 (Fallback Groq Llama 3.3 70B)
+      "gemini-2.5-flash",        // Tentativa 2 (Fallback Gemini Flash)
+      "gemini-2.5-pro",          // Tentativa 3 (Fallback Gemini Pro)
+      "gemini-3.0-flash",        // Tentativa 4
     ];
     
-    const modelName = fallbackModels[attempt] || "gemini-2.5-flash";
+    const modelName = fallbackModels[attempt] || "openai/gpt-oss-120b";
     const systemInstruction = `
         Você é um especialista em redação de peças processuais e petições judiciais de alto impacto.
         Seu objetivo é redigir uma Petição Inicial EXTENSA, ALTAMENTE TÉCNICA e com PROFUNDA FUNDAMENTAÇÃO JURÍDICA.

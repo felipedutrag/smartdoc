@@ -3,13 +3,12 @@
 import React, { useEffect, useState } from "react";
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 import { useGeminiLive } from "@/hooks/use-gemini-live";
-import { FileDown } from "lucide-react";
+import { FileDown, ArrowLeft } from "lucide-react";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import { SimpleEditorRef } from "@/components/tiptap-templates/simple/simple-editor";
+import Link from "next/link";
 
-import { DiscountBanner } from "@/components/editor/DiscountBanner";
 import { LoadingOverlay } from "@/components/editor/LoadingOverlay";
-import { PaymentModal } from "@/components/editor/PaymentModal";
 import { FloatingAiBar } from "@/components/editor/FloatingAiBar";
 
 const cleanMarkdownBold = (html: string): string => {
@@ -23,31 +22,17 @@ export default function EditorPage() {
   const isMobileRaw = useIsBreakpoint("max", 860);
   const isMobile = isMobileRaw ?? false;
   const editorRef = React.useRef<SimpleEditorRef>(null);
-  const [isPaid, setIsPaid] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [streamStarted, setStreamStarted] = useState(false);
   const [isRewriting, setIsRewriting] = useState(false);
   const [hasActiveEdit, setHasActiveEdit] = useState(false);
 
-  // Payment States
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(true);
-  const [isLoadingPix, setIsLoadingPix] = useState(false);
-  const [pixData, setPixData] = useState<{ pixCode: string; externalId: string } | null>(null);
-
-  // Multi-step Checkout States
-  const [paymentStep, setPaymentStep] = useState<1 | 2 | 3>(1);
-  const [customerName, setCustomerName] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
-  // Upsells removidos
-  // Scarcity & Negotiation States
-  const [discountActive, setDiscountActive] = useState(false);
-  const [discountTimeLeft, setDiscountTimeLeft] = useState(120); // 2 min
-  const [price, setPrice] = useState(29.00);
   const [textInput, setTextInput] = useState("");
   const [isDictating, setIsDictating] = useState(false);
   const [recognition, setRecognition] = useState<any>(null);
+  const [currentDocId, setCurrentDocId] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -94,21 +79,13 @@ export default function EditorPage() {
   };
 
   const handleToolCall = React.useCallback(async (name: string, args: Record<string, unknown>) => {
-    if (name === "apply_discount") {
-      setDiscountActive(true);
-      const newPrice = typeof args.new_price === 'number' ? args.new_price : 27.00;
-      setPrice(newPrice);
-      const timerMinutes = typeof args.timer_minutes === 'number' ? args.timer_minutes : 2;
-      setDiscountTimeLeft(timerMinutes * 60);
-    } else if (name === "edit_document") {
+    if (name === "edit_document") {
       const instruction = typeof args.instruction === 'string' ? args.instruction : "";
       if (instruction) {
         await editorRef.current?.handleOrbiRewrite(instruction);
       }
     }
   }, []);
-
-
 
   const [documentContext, setDocumentContext] = useState("");
 
@@ -118,7 +95,6 @@ export default function EditorPage() {
     const draft = localStorage.getItem("extrajus_draft") || "";
     if (facts || draft) {
       const newContext = `Fatos narrados: ${facts}\n\nRascunho atual do documento: ${draft.substring(0, 3000)}`;
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDocumentContext(prev => prev !== newContext ? newContext : prev);
     }
   }, []);
@@ -139,118 +115,9 @@ export default function EditorPage() {
     }
   };
 
-  // Timer de 2 minutos mágico e restrição de conexão
-  useEffect(() => {
-    // Se o desconto estiver ativo, mas o usuário desligar, perde o desconto imediatamente
-    if (discountActive && !isConnected && !isPaid) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setDiscountActive(false);
-      setPrice(39.00);
-      setDiscountTimeLeft(0);
-      return;
-    }
+  const hasTriggeredGen = React.useRef(false);
 
-    if (!discountActive || discountTimeLeft <= 0) return;
-
-    const interval = setInterval(() => {
-      setDiscountTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          // eslint-disable-next-line react-hooks/set-state-in-effect
-          setDiscountActive(false);
-          setPrice(39.00);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [discountActive, discountTimeLeft, isConnected, isPaid]);
-
-  // Proactive Ping (45s Inactivity)
-  useEffect(() => {
-    if (!isConnected || isPaid || isGenerating) return;
-
-    const timeout = setTimeout(() => {
-      sendMessage("SYSTEM: O usuário está há 45 segundos parado sem interagir. Faça um comentário prestativo e simpático com sua personalidade marcante perguntando se ele quer fazer mais alguma alteração ou se tem alguma dúvida sobre a Petição Inicial.");
-    }, 45000);
-
-    return () => clearTimeout(timeout);
-  }, [isConnected, isPaid, isGenerating, sendMessage]);
-
-  // Payment success handler
-  const handlePaymentSuccess = async (email: string, name: string, amount: number) => {
-    setIsPaid(true);
-    setIsPaymentModalOpen(false);
-
-    if (typeof window !== "undefined") {
-      localStorage.setItem("extrajus_payment_status", "paid");
-    }
-
-    const hasOrderBump = false;
-
-    // Trigger confirmation email via Resend
-    try {
-      const facts = localStorage.getItem("extrajus_facts") || "";
-      const draft = localStorage.getItem("extrajus_draft") || "";
-
-      await fetch("/api/payment/confirm-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          name,
-          amount,
-          hasOrderBump,
-          phone: customerPhone,
-          facts,
-          draft
-        })
-      });
-    } catch (error) {
-      console.error("Erro ao enviar e-mail de confirmação", error);
-    }
-  };
-
-  // Polling for payment status
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-
-    if (isPaymentModalOpen && pixData?.externalId) {
-      intervalId = setInterval(async () => {
-        try {
-          const res = await fetch(`/api/payment/status?externalId=${pixData.externalId}&id=${(pixData as any).id || ""}`);
-          const data = await res.json();
-
-          if (data.status === "COMPLETE") {
-            const finalPrice = price;
-            handlePaymentSuccess(customerEmail, customerName, finalPrice);
-            clearInterval(intervalId);
-
-            if (typeof window !== "undefined" && "gtag" in window) {
-              const g = (window as unknown as { gtag: (type: string, action: string, data: Record<string, unknown>) => void }).gtag;
-              g('event', 'conversion', {
-                'send_to': 'AW-18263949464/rL2JCPWf7cMcEJiB94RE',
-                'value': finalPrice,
-                'currency': 'BRL',
-                'transaction_id': pixData.externalId
-              });
-            }
-          }
-        } catch (error) {
-          console.error("Erro no polling de pagamento", error);
-        }
-      }, 3000); // Checa a cada 3 segundos
-    }
-
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [isPaymentModalOpen, pixData, customerEmail, customerName, price]);
-
-  const [currentDocId, setCurrentDocId] = useState<string | null>(null);
-
-  const generateDocument = async (factsToUse?: string) => {
+  const generateDocument = async (factsToUse?: string, existingDocId?: string | null) => {
     const facts = factsToUse || localStorage.getItem("extrajus_facts");
     if (!facts) {
       setIsGenerating(false);
@@ -260,28 +127,31 @@ export default function EditorPage() {
     setIsGenerating(true);
     setStreamStarted(false);
 
-    // Criar documento inicial no banco se estiver autenticado
-    let docId = currentDocId;
-    try {
-      const createRes = await fetch("/api/documents", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: facts.slice(0, 70).replace(/\n/g, " ") + "...",
-          facts,
-          status: "generating",
-          content_html: ""
-        })
-      });
-      if (createRes.ok) {
-        const createData = await createRes.json();
-        if (createData.document?.id) {
-          docId = createData.document.id;
-          setCurrentDocId(docId);
+    let docId = existingDocId || currentDocId;
+
+    // Se ainda não temos um docId, cria UM único registro no banco
+    if (!docId) {
+      try {
+        const createRes = await fetch("/api/documents", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: facts.slice(0, 70).replace(/\n/g, " ") + "...",
+            facts,
+            status: "draft",
+            content_html: ""
+          })
+        });
+        if (createRes.ok) {
+          const createData = await createRes.json();
+          if (createData.document?.id) {
+            docId = createData.document.id;
+            setCurrentDocId(docId);
+          }
         }
+      } catch (e) {
+        console.warn("Could not create document record in DB:", e);
       }
-    } catch (e) {
-      console.warn("Could not create document record in DB:", e);
     }
 
     let retryCount = 0;
@@ -289,7 +159,6 @@ export default function EditorPage() {
     let isComplete = false;
 
     while (retryCount <= 4 && !isComplete) {
-      // Backoff entre tentativas: 0s, 2s, 4s, 6s, 8s
       if (retryCount > 0) {
         await new Promise(resolve => setTimeout(resolve, retryCount * 2000));
       }
@@ -328,29 +197,19 @@ export default function EditorPage() {
             console.warn(`Stream interrompido na tentativa ${retryCount + 1}: ${streamMsg}`);
           }
 
-          // Verifica se o documento terminou corretamente
           if (fullHtml.toLowerCase().includes("deferimento") || fullHtml.toLowerCase().includes("advogado")) {
             isComplete = true;
             
-            // Atualizar no banco como concluído
+            // Salva o conteúdo final no banco mantendo como rascunho até que o advogado finalize/baixe
             if (docId) {
               fetch(`/api/documents/${docId}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                   content_html: cleanMarkdownBold(fullHtml),
-                  status: "completed",
+                  status: "draft",
                 })
               }).catch(console.error);
-            }
-
-            if (typeof window !== "undefined" && "gtag" in window) {
-              const g = (window as unknown as { gtag: (type: string, action: string, data: Record<string, unknown>) => void }).gtag;
-              g('event', 'conversion', {
-                'send_to': 'AW-18263949464/JsWBCPyw7MMcEJiB94RE',
-                'value': 1.0,
-                'currency': 'BRL'
-              });
             }
           } else {
             console.warn(`Documento incompleto na tentativa ${retryCount + 1}. Tentando continuar...`);
@@ -367,16 +226,22 @@ export default function EditorPage() {
 
     setIsGenerating(false);
     setStreamStarted(false);
-    window.history.replaceState({}, document.title, docId ? `/editor?id=${docId}` : "/editor");
+    if (docId) {
+      window.history.replaceState({}, document.title, `/editor?id=${docId}`);
+    }
   };
 
   useEffect(() => {
     setMounted(true);
     if (typeof window === "undefined") return;
+    if (hasTriggeredGen.current) return;
+
     const params = new URLSearchParams(window.location.search);
     const idParam = params.get("id");
+    const isGenerate = params.get("generate") === "true";
 
     if (idParam) {
+      hasTriggeredGen.current = true;
       setCurrentDocId(idParam);
       // Carregar documento do Supabase
       fetch(`/api/documents/${idParam}`)
@@ -390,120 +255,27 @@ export default function EditorPage() {
             if (data.document.facts) {
               localStorage.setItem("extrajus_facts", data.document.facts);
             }
-            if (data.document.is_paid) {
-              setIsPaid(true);
-              setIsPaymentModalOpen(false);
+            if (isGenerate && !data.document.content_html) {
+              generateDocument(data.document.facts, idParam);
             }
           }
         })
         .catch(console.error);
-    } else if (params.get("generate") === "true") {
+    } else if (isGenerate) {
+      hasTriggeredGen.current = true;
       setIsGenerating(true);
       generateDocument();
     } else {
       const facts = localStorage.getItem("extrajus_facts");
       const draft = localStorage.getItem("extrajus_draft");
       if (!facts && !draft) {
-        localStorage.removeItem("extrajus_checkout_started");
         window.location.href = "/";
         return;
       }
     }
 
-    if (localStorage.getItem("extrajus_payment_status") === "paid") {
-      setIsPaid(true);
-      setIsPaymentModalOpen(false);
-    } else if (localStorage.getItem("extrajus_checkout_started") === "true") {
-      setIsPaymentModalOpen(true);
-    }
-
     return () => {};
   }, []);
-
-  const handlePaymentRequest = async () => {
-    setIsPaymentModalOpen(true);
-    setPaymentStep(1);
-    localStorage.setItem("extrajus_checkout_started", "true");
-  };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, "");
-    if (value.length > 11) value = value.slice(0, 11);
-
-    if (value.length > 2) {
-      value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
-    }
-    if (value.length > 10) {
-      value = `${value.slice(0, 10)}-${value.slice(10)}`;
-    }
-    setCustomerPhone(value);
-  };
-
-  const handleGeneratePix = async () => {
-    setPaymentStep(2);
-    setIsLoadingPix(true);
-
-    if (typeof window !== "undefined" && "gtag" in window) {
-      const g = (window as unknown as { gtag: (type: string, action: string, data: Record<string, unknown>) => void }).gtag;
-      g('event', 'conversion', {
-        'send_to': 'AW-18263949464/PoDHCPCn2MMcEJiB94RE',
-        'value': 5.0,
-        'currency': 'BRL'
-      });
-    }
-
-    // Calcula total
-    let finalPrice = price;
-
-    try {
-      const response = await fetch("/api/payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ price: finalPrice })
-      });
-      const data = await response.json();
-
-      if (data.pixCode) {
-        setPixData(data);
-        if (isConnected) {
-          sendMessage(`SYSTEM: O QR Code do PIX foi gerado na tela com sucesso no valor de R$ ${finalPrice.toFixed(2).replace('.', ',')}! Fale que está tudo certo, o desconto está garantido, e peça para ele escanear o QR Code ou usar o PIX Copia e Cola. Diga que assim que o banco aprovar (geralmente em segundos), o documento é liberado instantaneamente na tela.`);
-        }
-      } else {
-        alert("Erro ao gerar PIX: " + (data.error || "Desconhecido"));
-        setPaymentStep(1); // Volta pro passo anterior
-      }
-    } catch (error) {
-      console.error("Payment error", error);
-      alert("Erro de conexão ao gerar PIX");
-      setPaymentStep(1);
-    } finally {
-      setIsLoadingPix(false);
-    }
-  };
-
-  const handleCopyPix = () => {
-    if (pixData?.pixCode) {
-      navigator.clipboard.writeText(pixData.pixCode);
-      alert("Código PIX copiado!");
-    }
-  };
-
-  const simulatePaymentSuccess = () => {
-    const finalPrice = price;
-    handlePaymentSuccess(customerEmail || "contato@smartdoc.work", customerName || "Usuário Teste", finalPrice);
-
-    if (typeof window !== "undefined" && "gtag" in window) {
-      const g = (window as unknown as { gtag: (type: string, action: string, data: Record<string, unknown>) => void }).gtag;
-      g('event', 'conversion', {
-        'send_to': 'AW-18263949464/rL2JCPWf7cMcEJiB94RE',
-        'value': finalPrice,
-        'currency': 'BRL',
-        'transaction_id': pixData?.externalId || `simulated_${Date.now()}`
-      });
-    }
-  };
-
-  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownloadDocx = async () => {
     const draft = localStorage.getItem("extrajus_draft") || "";
@@ -515,11 +287,23 @@ export default function EditorPage() {
     setIsDownloading(true);
 
     try {
+      // Marca no banco de dados como CONCLUÍDO (completed) ao baixar
+      if (currentDocId) {
+        fetch(`/api/documents/${currentDocId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            status: "completed",
+            content_html: draft
+          })
+        }).catch(console.error);
+      }
+
       const response = await fetch("/api/document/docx", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: "Notificacao_Extrajudicial",
+          title: "Peticao_Inicial_SmartDoc",
           content: draft
         })
       });
@@ -530,7 +314,7 @@ export default function EditorPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "notificacao_extrajudicial.docx";
+      a.download = "peticao_inicial.docx";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -542,8 +326,6 @@ export default function EditorPage() {
       setIsDownloading(false);
     }
   };
-
-  const isDev = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname.includes("local"));
 
   if (!mounted) {
     return <main style={{ minHeight: "100vh", background: "var(--bg)" }} />;
@@ -565,226 +347,109 @@ export default function EditorPage() {
         <SimpleEditor
           ref={editorRef}
           editable={true}
-          onUnlockRequest={handlePaymentRequest}
           isGenerating={isGenerating}
-          discountActive={discountActive}
-          discountTimerDisplay={`${String(Math.floor(discountTimeLeft / 60)).padStart(2, '0')}:${String(discountTimeLeft % 60).padStart(2, '0')}`}
-          price={price}
           isRewriting={isRewriting}
           setIsRewriting={setIsRewriting}
-          isPaid={isPaid}
+          isPaid={true}
           onActiveEditChange={setHasActiveEdit}
+          leftContent={
+            <Link
+              href="/dashboard"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "6px 10px",
+                borderRadius: "8px",
+                background: "var(--bg)",
+                border: "1px solid var(--border)",
+                color: "var(--text-secondary)",
+                fontSize: "12px",
+                fontWeight: 600,
+                textDecoration: "none",
+                transition: "all 0.2s",
+              }}
+            >
+              <ArrowLeft size={14} />
+              <span>Painel</span>
+            </Link>
+          }
         >
-          <DiscountBanner
-            discountActive={discountActive}
-            discountTimeLeft={discountTimeLeft}
-            isPaid={isPaid}
-            isMobile={isMobile}
-          />
-
           <LoadingOverlay
             mounted={mounted}
             isGenerating={isGenerating}
             streamStarted={streamStarted}
           />
 
-          {isPaid ? (
+          {!isGenerating && (
             <div style={{
               width: "100%",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              padding: isMobile ? "32px 20px" : "48px 48px",
+              justifyContent: "center",
+              textAlign: "center",
+              padding: isMobile ? "24px 16px" : "32px 32px",
               background: "var(--surface)",
               borderTop: "1px solid var(--border)",
-              borderRadius: "0 0 12px 12px",
+              borderRadius: "0 0 16px 16px",
               boxSizing: "border-box",
-              marginTop: "0px",
-              color: "var(--text-primary)"
+              gap: "18px",
             }}>
-              <div style={{
-                width: "64px",
-                height: "64px",
-                borderRadius: "50%",
-                background: "rgba(16, 185, 129, 0.1)",
-                border: "1px solid rgba(16, 185, 129, 0.2)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                marginBottom: "20px",
-                boxShadow: "0 0 30px rgba(16, 185, 129, 0.1)"
-              }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
+              <div>
+                <h3 style={{ fontSize: "17px", fontWeight: 700, margin: "0 0 6px 0", color: "var(--text-primary)" }}>
+                  Petição Pronta para Uso
+                </h3>
+                <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0, maxWidth: "480px", lineHeight: 1.5 }}>
+                  Você pode editar o texto livremente no editor acima ou fazer o download do arquivo Word (.docx).
+                </p>
               </div>
 
-              <h2 style={{
-                fontSize: isMobile ? "22px" : "28px",
-                fontWeight: 800,
-                color: "var(--text-primary)",
-                marginBottom: "8px",
-                letterSpacing: "-0.02em"
-              }}>
-                Pagamento Confirmado!
-              </h2>
-              <p style={{
-                color: "var(--text-secondary)",
-                fontSize: isMobile ? "14px" : "15px",
-                textAlign: "center",
-                maxWidth: "400px",
-                marginBottom: "32px",
-                lineHeight: "1.5"
-              }}>
-                Sua petição judicial foi desbloqueada. O editor completo está liberado acima e você já pode baixar o documento.
-              </p>
-
-               <button
-                 onClick={handleDownloadDocx}
-                 disabled={isDownloading}
-                 style={{
-                   background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-                   color: "white",
-                   border: "1px solid rgba(255,255,255,0.1)",
-                   padding: isMobile ? "16px 24px" : "18px 36px",
-                   borderRadius: "14px",
-                   fontSize: "16px",
-                   fontWeight: 800,
-                   display: "flex",
-                   alignItems: "center",
-                   justifyContent: "center",
-                   gap: "10px",
-                   cursor: "pointer",
-                   boxShadow: "0 8px 24px rgba(16, 185, 129, 0.25)",
-                   transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-                   width: isMobile ? "100%" : "auto"
-                 }}
-                 onMouseEnter={(e) => {
-                   e.currentTarget.style.transform = "translateY(-2px)";
-                   e.currentTarget.style.boxShadow = "0 12px 32px rgba(16, 185, 129, 0.35)";
-                 }}
-                 onMouseLeave={(e) => {
-                   e.currentTarget.style.transform = "translateY(0)";
-                   e.currentTarget.style.boxShadow = "0 8px 24px rgba(16, 185, 129, 0.25)";
-                 }}
+              <button
+                onClick={handleDownloadDocx}
+                disabled={isDownloading}
+                style={{
+                  background: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
+                  color: "white",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  padding: isMobile ? "12px 24px" : "14px 32px",
+                  borderRadius: "12px",
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 14px rgba(217, 119, 6, 0.3)",
+                  transition: "all 0.2s ease",
+                  width: isMobile ? "100%" : "auto"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.filter = "brightness(1.1)";
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.filter = "brightness(1)";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
               >
                 {isDownloading ? (
                   <span className="animate-pulse">Exportando...</span>
                 ) : (
                   <>
-                    <FileDown size={22} />
-                    Baixar Documento (.docx)
+                    <FileDown size={18} />
+                    <span>Baixar Documento (.docx)</span>
                   </>
                 )}
               </button>
             </div>
-          ) : (
-            !isGenerating && (
-              <div style={{
-                width: "100%",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                marginTop: "0px",
-                position: "relative",
-                zIndex: 10
-              }}>
-
-                {/* Subtle Amber Glow to guide visual interest */}
-                <div style={{
-                  position: "absolute",
-                  bottom: "20px",
-                  width: "280px",
-                  height: "180px",
-                  background: discountActive
-                    ? "radial-gradient(ellipse at 50% 50%, rgba(239,68,68,0.05) 0%, transparent 70%)"
-                    : "radial-gradient(ellipse at 50% 50%, rgba(217,119,6,0.05) 0%, transparent 70%)",
-                  pointerEvents: "none",
-                  zIndex: 0,
-                }} />
-
-                {/* Status pill inside sheet */}
-                {discountActive && (
-                  <div style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "7px",
-                    padding: "5px 14px",
-                    borderRadius: "999px",
-                    background: "rgba(239,68,68,0.06)",
-                    border: "1px solid rgba(239,68,68,0.15)",
-                    color: "#ef4444",
-                    fontSize: "11px",
-                    fontWeight: 700,
-                    letterSpacing: "0.06em",
-                    textTransform: "uppercase" as const,
-                    marginBottom: "20px",
-                    zIndex: 1,
-                  }}>
-                    <span style={{
-                      width: "6px", height: "6px", borderRadius: "50%",
-                      background: "currentColor",
-                      animation: "pulse 1.8s ease-in-out infinite",
-                      display: "inline-block",
-                    }} />
-                    {`Oferta expira em ${String(Math.floor(discountTimeLeft / 60)).padStart(2, '0')}:${String(discountTimeLeft % 60).padStart(2, '0')}`}
-                  </div>
-                )}
-
-                {/* Integrated Container spanning edge-to-edge */}
-                <div style={{
-                  width: "100%",
-                  background: "var(--surface)",
-                  borderTop: "none", // Removido para integração perfeita com o blur
-                  borderLeft: "none",
-                  borderRight: "none",
-                  borderBottom: "none",
-                  borderRadius: "0 0 12px 12px",
-                  marginTop: "-10px", // Puxar levemente para cima sob o blur
-                  padding: isMobile ? "16px 16px" : "32px 48px",
-                  zIndex: 1,
-                  textAlign: "center",
-                  boxSizing: "border-box"
-                }}>
-                  <PaymentModal
-                    isOpen={true}
-                    onClose={() => {
-                      setPaymentStep(1);
-                      setPixData(null);
-                    }}
-                    paymentStep={paymentStep}
-                    customerName={customerName}
-                    setCustomerName={setCustomerName}
-                    customerEmail={customerEmail}
-                    setCustomerEmail={setCustomerEmail}
-                    customerPhone={customerPhone}
-                    handlePhoneChange={handlePhoneChange}
-                    upsellLawyer={false}
-                    setUpsellLawyer={() => {}}
-                    upsellWhatsapp={false}
-                    setUpsellWhatsapp={() => {}}
-                    price={price}
-                    discountActive={discountActive}
-                    isRewriting={isRewriting}
-                    handleGeneratePix={handleGeneratePix}
-                    isMobile={isMobile}
-                    isDev={isDev}
-                    isLoadingPix={isLoadingPix}
-                    pixData={pixData}
-                    handleCopyPix={handleCopyPix}
-                    simulatePaymentSuccess={simulatePaymentSuccess}
-                    inline={true}
-                  />
-                </div>
-              </div>
-            )
           )}
         </SimpleEditor>
 
         <FloatingAiBar
           isGenerating={isGenerating}
-          isPaid={isPaid}
+          isPaid={true}
           isRewriting={isRewriting}
           textInput={textInput}
           setTextInput={setTextInput}

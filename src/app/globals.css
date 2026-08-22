@@ -2,6 +2,11 @@
 @import "../styles/_keyframe-animations.scss";
 @import "tailwindcss";
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+}
+
 :root {
   --bg: #f8fafc; /* Clean cool off-white (slate-50) to neutralize pink/warm tones */
   --surface: #ffffff;

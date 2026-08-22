@@ -14,7 +14,9 @@ import {
   ShieldCheck,
   X,
   Mic,
-  ArrowRight
+  ArrowRight,
+  Sun,
+  Moon
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
@@ -51,6 +53,7 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDark, setIsDark] = useState(true);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,6 +61,14 @@ export default function DashboardPage() {
   const [isDictating, setIsDictating] = useState(false);
   const [recognition, setRecognition] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedTheme = localStorage.getItem("theme");
+      const isDarkTheme = savedTheme === "dark" || (!savedTheme && document.documentElement.classList.contains("dark"));
+      setIsDark(isDarkTheme);
+    }
+  }, []);
 
   // Carregar perfil e documentos
   useEffect(() => {
@@ -142,14 +153,42 @@ export default function DashboardPage() {
     }
   };
 
-  const handleCreateDocument = () => {
+  const handleCreateDocument = async () => {
     if (!modalText.trim() || isSubmitting) return;
     setIsSubmitting(true);
 
-    if (typeof window !== "undefined") {
-      localStorage.setItem("extrajus_facts", modalText.trim());
-      localStorage.removeItem("extrajus_payment_status");
-      localStorage.removeItem("extrajus_draft");
+    try {
+      // Criação direta e única no banco
+      const res = await fetch("/api/documents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: modalText.trim().slice(0, 70).replace(/\n/g, " ") + "...",
+          facts: modalText.trim(),
+          status: "draft",
+          content_html: ""
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const docId = data.document?.id;
+        if (typeof window !== "undefined") {
+          localStorage.setItem("extrajus_facts", modalText.trim());
+          localStorage.removeItem("extrajus_payment_status");
+          localStorage.removeItem("extrajus_draft");
+          window.location.href = docId ? `/editor?id=${docId}&generate=true` : "/editor?generate=true";
+        }
+      } else {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("extrajus_facts", modalText.trim());
+          localStorage.removeItem("extrajus_payment_status");
+          localStorage.removeItem("extrajus_draft");
+          window.location.href = "/editor?generate=true";
+        }
+      }
+    } catch (e) {
+      console.error(e);
       window.location.href = "/editor?generate=true";
     }
   };
@@ -269,30 +308,41 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* User Profile & Actions */}
-          <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "10px" : "16px" }}>
+          {/* Theme Toggle & User Profile */}
+          <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "8px" : "12px" }}>
+            {/* Theme Toggle Button */}
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => {
+                const nextDark = !isDark;
+                setIsDark(nextDark);
+                if (nextDark) {
+                  document.documentElement.classList.add("dark");
+                  document.documentElement.classList.remove("light");
+                  localStorage.setItem("theme", "dark");
+                } else {
+                  document.documentElement.classList.remove("dark");
+                  document.documentElement.classList.add("light");
+                  localStorage.setItem("theme", "light");
+                }
+              }}
+              aria-label="Alternar tema"
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: isMobile ? "8px 12px" : "8px 16px",
+                width: 36,
+                height: 36,
                 borderRadius: "10px",
-                background: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
-                color: "#ffffff",
-                fontSize: "13px",
-                fontWeight: 600,
-                border: "none",
+                background: "var(--bg)",
+                border: "1px solid var(--border)",
                 cursor: "pointer",
-                boxShadow: "0 2px 8px rgba(217, 119, 6, 0.3)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--text-primary)",
                 transition: "all 0.2s",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.filter = "brightness(1.1)")}
-              onMouseLeave={(e) => (e.currentTarget.style.filter = "brightness(1)")}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#d97706")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
             >
-              <Plus size={16} />
-              <span>{isMobile ? "Nova" : "Nova Petição"}</span>
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
 
             {/* Profile badge */}
@@ -556,6 +606,38 @@ export default function DashboardPage() {
                 </button>
               ))}
             </div>
+
+            {/* Action: Nova Petição Button */}
+            <button
+              onClick={() => setIsModalOpen(true)}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "8px 16px",
+                borderRadius: "10px",
+                background: "var(--surface)",
+                border: "1.5px solid #d97706",
+                color: "var(--text-primary)",
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: "pointer",
+                boxShadow: "0 2px 8px rgba(217, 119, 6, 0.12)",
+                transition: "all 0.2s ease",
+                whiteSpace: "nowrap",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(217, 119, 6, 0.08)";
+                e.currentTarget.style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "var(--surface)";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              <span>Nova Petição</span>
+              <ArrowRight size={15} style={{ color: "#d97706" }} />
+            </button>
           </div>
         </div>
 
@@ -613,19 +695,29 @@ export default function DashboardPage() {
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                gap: "8px",
-                padding: "10px 20px",
-                borderRadius: "10px",
-                background: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
-                color: "#ffffff",
-                fontSize: "13px",
+                gap: "10px",
+                padding: "12px 24px",
+                borderRadius: "12px",
+                background: "var(--surface)",
+                border: "1.5px solid #d97706",
+                color: "var(--text-primary)",
+                fontSize: "14px",
                 fontWeight: 600,
-                border: "none",
                 cursor: "pointer",
+                boxShadow: "0 4px 16px rgba(217, 119, 6, 0.12)",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(217, 119, 6, 0.08)";
+                e.currentTarget.style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "var(--surface)";
+                e.currentTarget.style.transform = "translateY(0)";
               }}
             >
-              <Sparkles size={16} />
-              <span>Criar Nova Petição com IA</span>
+              <span>Criar Nova Petição</span>
+              <ArrowRight size={16} style={{ color: "#d97706" }} />
             </button>
           </div>
         ) : (
@@ -682,7 +774,7 @@ export default function DashboardPage() {
                     </span>
 
                     <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      {doc.is_paid ? (
+                      {doc.status === "completed" ? (
                         <span
                           style={{
                             fontSize: "11px",
@@ -696,8 +788,8 @@ export default function DashboardPage() {
                             gap: "4px",
                           }}
                         >
-                          <ShieldCheck size={12} />
-                          Liberado
+                          <CheckCircle2 size={12} />
+                          Pronta
                         </span>
                       ) : (
                         <span
@@ -708,9 +800,13 @@ export default function DashboardPage() {
                             background: "rgba(245, 158, 11, 0.1)",
                             padding: "3px 8px",
                             borderRadius: "6px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "4px",
                           }}
                         >
-                          {doc.status === "completed" ? "Pronta" : "Rascunho"}
+                          <Clock size={12} />
+                          Rascunho
                         </span>
                       )}
                     </div>
