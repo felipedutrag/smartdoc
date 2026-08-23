@@ -339,7 +339,7 @@ export default function EditorPage() {
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <div className="w-full px-4 sm:px-6 md:px-8 pb-20">
+      <div className="w-full pb-20">
         <SimpleEditor
           ref={editorRef}
           editable={true}

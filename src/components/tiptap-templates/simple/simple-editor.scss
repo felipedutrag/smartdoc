@@ -172,7 +172,7 @@ body,
 
 .simple-editor-content {
   max-width: 850px;
-  width: 100%;
+  width: calc(100% - 32px); /* Margem lateral nas bordas da tela */
   margin: 2rem auto;
   min-height: 1200px; /* A4 aspect ratio height (~1.414 * width) */
   display: flex;
