@@ -261,14 +261,14 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Top Navigation */}
-      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
           {/* Brand */}
           <div className="flex items-center gap-6">
             <Link href="/dashboard" className="inline-flex items-center text-xl font-bold tracking-tight">
               <span>SMART</span>
-              <span className="ml-0.5 text-amber-600 dark:text-amber-500">DOC</span>
-              <Badge variant="outline" className="ml-2 border-amber-500/30 bg-amber-500/10 text-[10px] font-extrabold text-amber-600 dark:text-amber-500">
+              <span className="ml-0.5 text-primary">DOC</span>
+              <Badge variant="outline" className="ml-2 border-primary/30 bg-primary/10 text-[10px] font-extrabold text-primary">
                 PRO
               </Badge>
             </Link>
@@ -306,9 +306,9 @@ export default function DashboardPage() {
             </Button>
 
             {/* Profile badge / Avatar */}
-            <div className="flex items-center gap-2 rounded-xl border border-border/80 bg-muted/30 p-1.5 sm:px-3 sm:py-1.5">
-              <Avatar className="size-8 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 font-bold text-white text-xs">
-                <AvatarFallback className="bg-transparent text-white font-bold">
+            <div className="flex items-center gap-2 rounded-xl border border-border bg-muted/30 p-1.5 sm:px-3 sm:py-1.5">
+              <Avatar className="size-8 rounded-lg bg-primary font-bold text-primary-foreground text-xs">
+                <AvatarFallback className="bg-transparent text-primary-foreground font-bold">
                   {profile?.name ? profile.name.charAt(0).toUpperCase() : "A"}
                 </AvatarFallback>
               </Avatar>
@@ -343,20 +343,20 @@ export default function DashboardPage() {
         {/* Metric Cards */}
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
           {/* Total */}
-          <Card className="flex items-center justify-between p-5 border-border/70 shadow-sm">
+          <Card className="flex items-center justify-between p-5 border-border shadow-sm">
             <div>
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Total de Peças
               </div>
               <div className="mt-1 text-2xl font-bold">{totalDocuments}</div>
             </div>
-            <div className="flex size-11 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-500">
+            <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <FileText className="size-5" />
             </div>
           </Card>
 
           {/* Completed */}
-          <Card className="flex items-center justify-between p-5 border-border/70 shadow-sm">
+          <Card className="flex items-center justify-between p-5 border-border shadow-sm">
             <div>
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Prontas / Finalizadas
@@ -369,14 +369,14 @@ export default function DashboardPage() {
           </Card>
 
           {/* Drafts */}
-          <Card className="flex items-center justify-between p-5 border-border/70 shadow-sm">
+          <Card className="flex items-center justify-between p-5 border-border shadow-sm">
             <div>
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Em Rascunho / Edição
               </div>
-              <div className="mt-1 text-2xl font-bold text-amber-500">{draftDocuments}</div>
+              <div className="mt-1 text-2xl font-bold text-muted-foreground">{draftDocuments}</div>
             </div>
-            <div className="flex size-11 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+            <div className="flex size-11 items-center justify-center rounded-xl bg-muted text-muted-foreground">
               <Clock className="size-5" />
             </div>
           </Card>
@@ -408,7 +408,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex rounded-lg border border-border/80 bg-muted/40 p-1">
+            <div className="flex rounded-lg border border-border bg-muted/40 p-1">
               {[
                 { id: "all", label: "Todas" },
                 { id: "completed", label: "Prontas" },
@@ -419,7 +419,7 @@ export default function DashboardPage() {
                   onClick={() => setStatusFilter(tab.id)}
                   className={`rounded-md px-3 py-1 text-xs font-medium transition-all ${
                     statusFilter === tab.id
-                      ? "bg-background text-amber-600 shadow-sm font-semibold dark:text-amber-500"
+                      ? "bg-background text-primary shadow-sm font-semibold"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -431,7 +431,7 @@ export default function DashboardPage() {
             {/* Action: Nova Petição Button */}
             <Button
               onClick={() => setIsModalOpen(true)}
-              className="h-9 gap-1.5 bg-amber-600 text-white hover:bg-amber-700 font-semibold shadow-sm"
+              className="h-9 gap-1.5 bg-primary text-primary-foreground font-semibold shadow-sm hover:opacity-90"
             >
               <span>Nova Petição</span>
               <ArrowRight className="size-4" />
@@ -442,12 +442,12 @@ export default function DashboardPage() {
         {/* Documents Grid / List */}
         {loading ? (
           <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed">
-            <Clock className="size-8 animate-spin text-amber-600 dark:text-amber-500 mb-3" />
+            <Clock className="size-8 animate-spin text-primary mb-3" />
             <p className="text-sm text-muted-foreground">Carregando suas petições...</p>
           </Card>
         ) : filteredDocuments.length === 0 ? (
           <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed">
-            <div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-500">
+            <div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <FileText className="size-7" />
             </div>
             <h3 className="text-base font-bold text-foreground">
@@ -460,7 +460,7 @@ export default function DashboardPage() {
             </p>
             <Button
               onClick={() => setIsModalOpen(true)}
-              className="gap-2 bg-amber-600 text-white hover:bg-amber-700 font-semibold"
+              className="gap-2 bg-primary text-primary-foreground font-semibold hover:opacity-90"
             >
               <span>Criar Nova Petição</span>
               <ArrowRight className="size-4" />
@@ -472,11 +472,11 @@ export default function DashboardPage() {
               <Card
                 key={doc.id}
                 onClick={() => router.push(`/editor?id=${doc.id}`)}
-                className="group relative flex flex-col justify-between p-5 transition-all hover:-translate-y-0.5 hover:border-amber-500/50 hover:shadow-md cursor-pointer"
+                className="group relative flex flex-col justify-between p-5 transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-md cursor-pointer"
               >
                 <div>
                   <div className="mb-3 flex items-center justify-between">
-                    <Badge variant="outline" className="border-amber-500/20 bg-amber-500/10 text-[10px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-wide">
+                    <Badge variant="outline" className="border-primary/20 bg-primary/10 text-[10px] font-bold text-primary uppercase tracking-wide">
                       {doc.action_type || "Petição Inicial"}
                     </Badge>
 
@@ -486,14 +486,14 @@ export default function DashboardPage() {
                         Pronta
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="border-amber-500/20 bg-amber-500/10 text-[10px] font-semibold text-amber-500 gap-1">
+                      <Badge variant="outline" className="border-border bg-muted/50 text-[10px] font-semibold text-muted-foreground gap-1">
                         <Clock className="size-3" />
                         Rascunho
                       </Badge>
                     )}
                   </div>
 
-                  <h3 className="line-clamp-2 text-sm font-bold text-foreground group-hover:text-amber-600 dark:group-hover:text-amber-500 transition-colors">
+                  <h3 className="line-clamp-2 text-sm font-bold text-foreground group-hover:text-primary transition-colors">
                     {doc.title || "Petição sem título"}
                   </h3>
                 </div>
@@ -516,7 +516,7 @@ export default function DashboardPage() {
                       <Trash2 className="size-3.5" />
                     </Button>
 
-                    <span className="inline-flex items-center gap-0.5 font-semibold text-amber-600 dark:text-amber-500">
+                    <span className="inline-flex items-center gap-0.5 font-semibold text-primary">
                       <span>Abrir</span>
                       <ChevronRight className="size-3.5" />
                     </span>
@@ -530,10 +530,10 @@ export default function DashboardPage() {
 
       {/* ── Modal de Nova Petição (Dialog shadcn) ── */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[650px] p-0 overflow-hidden border-border/80">
-          <DialogHeader className="p-5 border-b border-border/80">
+        <DialogContent className="sm:max-w-[650px] p-0 overflow-hidden border-border">
+          <DialogHeader className="p-5 border-b border-border">
             <div className="flex items-center gap-3">
-              <div className="flex size-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-500">
+              <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Sparkles className="size-5" />
               </div>
               <div>
@@ -548,7 +548,7 @@ export default function DashboardPage() {
           </DialogHeader>
 
           {/* Quick chips */}
-          <div className="flex items-center gap-2 overflow-x-auto border-b border-border/80 bg-muted/30 p-2.5 px-5">
+          <div className="flex items-center gap-2 overflow-x-auto border-b border-border bg-muted/30 p-2.5 px-5">
             {[
               { label: "Ação de Cobrança", text: "Ação de cobrança fundada em prestação de serviços não adimplida, com pedido de atualização monetária e juros de mora." },
               { label: "Despejo por Falta de Pagamento", text: "Ação de despejo por falta de pagamento cumulada com cobrança de aluguéis e encargos locatícios em atraso há 3 meses." },
@@ -559,7 +559,7 @@ export default function DashboardPage() {
                 key={chip.label}
                 type="button"
                 onClick={() => setModalText(chip.text)}
-                className="whitespace-nowrap rounded-full border border-border bg-background px-3 py-1 text-[11px] font-medium text-muted-foreground hover:border-amber-500 hover:text-foreground transition-colors"
+                className="whitespace-nowrap rounded-full border border-border bg-background px-3 py-1 text-[11px] font-medium text-muted-foreground hover:border-primary hover:text-foreground transition-colors"
               >
                 {chip.label}
               </button>
@@ -573,7 +573,7 @@ export default function DashboardPage() {
               onChange={(e) => setModalText(e.target.value)}
               placeholder="Descreva os fatos do caso (ex: O autor celebrou contrato de locação com o réu em 10/01/2023 pelo valor mensal de R$ 3.500,00. Ocorre que o réu deixou de adimplir os aluguéis a partir de outubro de 2023...)"
               rows={5}
-              className="w-full resize-y rounded-xl border border-border bg-background p-3.5 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="w-full resize-y rounded-xl border border-border bg-background p-3.5 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary"
             />
 
             {/* Action Toolbar */}
@@ -605,7 +605,7 @@ export default function DashboardPage() {
                   size="sm"
                   onClick={handleCreateDocument}
                   disabled={!modalText.trim() || isSubmitting}
-                  className="bg-amber-600 text-white hover:bg-amber-700 font-semibold gap-1.5"
+                  className="bg-primary text-primary-foreground hover:opacity-90 font-semibold gap-1.5"
                 >
                   <span>{isSubmitting ? "Iniciando IA..." : "Gerar Petição"}</span>
                   <ArrowRight className="size-4" />

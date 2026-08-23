@@ -112,7 +112,7 @@ export default function Home() {
 
       {/* ── Navigation Bar (Shadcn style) ── */}
       <nav className="sticky top-0 z-50 flex w-full items-center justify-center p-4">
-        <div className="flex w-full max-w-6xl items-center justify-between rounded-2xl border border-border/80 bg-background/80 px-6 py-2.5 shadow-sm backdrop-blur-md">
+        <div className="flex w-full max-w-6xl items-center justify-between rounded-2xl border border-border bg-background/80 px-6 py-2.5 shadow-sm backdrop-blur-md">
           {/* Logo */}
           <Link href="/" className="relative flex items-center text-lg font-bold tracking-tight">
             <span>SMART</span>
@@ -228,9 +228,9 @@ export default function Home() {
 
       {/* ── PRODUCT PREVIEW (Mockup Window) ── */}
       <section className="relative z-10 flex w-full justify-center px-4 pb-20">
-        <Card className="w-full max-w-3xl overflow-hidden border-border/80 p-0 shadow-2xl">
+        <Card className="w-full max-w-3xl overflow-hidden border-border p-0 shadow-2xl">
           {/* Mockup Header */}
-          <div className="flex items-center justify-between border-b border-border/80 bg-muted/40 px-5 py-3">
+          <div className="flex items-center justify-between border-b border-border bg-muted/40 px-5 py-3">
             <div className="flex gap-1.5">
               <div className="size-2.5 rounded-full bg-rose-500" />
               <div className="size-2.5 rounded-full bg-amber-500" />

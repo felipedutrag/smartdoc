@@ -197,11 +197,12 @@ export default function AuthPage() {
         {/* Left Side: Auth Form */}
         <div className="flex flex-col justify-center p-6 sm:p-10 md:col-span-7">
           {/* Logo Header */}
+          {/* Logo Header */}
           <div className="mb-6">
             <a href="/" className="inline-flex items-center text-xl font-bold tracking-tight">
               <span className="tracking-tight">SMART</span>
-              <span className="ml-0.5 text-amber-600 dark:text-amber-500">DOC</span>
-              <Badge variant="outline" className="ml-2 border-amber-500/30 bg-amber-500/10 text-[10px] font-extrabold text-amber-600 dark:text-amber-500">
+              <span className="ml-0.5 text-primary">DOC</span>
+              <Badge variant="outline" className="ml-2 border-primary/30 bg-primary/10 text-[10px] font-extrabold text-primary">
                 PRO
               </Badge>
             </a>
@@ -313,7 +314,7 @@ export default function AuthPage() {
                   <button
                     type="button"
                     onClick={handleForgotPassword}
-                    className="text-xs text-amber-600 hover:underline dark:text-amber-500"
+                    className="text-xs text-primary hover:underline"
                   >
                     Esqueceu a senha?
                   </button>
@@ -362,7 +363,7 @@ export default function AuthPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="mt-2 h-11 w-full bg-amber-600 text-white hover:bg-amber-700 font-semibold shadow-md shadow-amber-600/20"
+              className="mt-2 h-11 w-full bg-primary text-primary-foreground hover:opacity-90 font-semibold shadow-md"
             >
               {loading ? (
                 <>
@@ -386,9 +387,9 @@ export default function AuthPage() {
 
         {/* Right Side: Showcase Testimonial Panel (Desktop Only) */}
         {!isMobile && (
-          <div className="relative flex flex-col justify-between border-l border-border/80 bg-muted/40 p-8 md:col-span-5">
+          <div className="relative flex flex-col justify-between border-l border-border bg-muted/40 p-8 md:col-span-5">
             <div>
-              <div className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-600 dark:text-amber-500">
+              <div className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                 <Scale className="size-3.5" />
                 <span>Alta Eficiência Jurídica</span>
               </div>
@@ -404,7 +405,7 @@ export default function AuthPage() {
 
             {/* Lawyer Persona Card */}
             <div className="mt-8 flex items-center gap-3 rounded-xl border border-border/60 bg-card p-3 shadow-sm">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-amber-700 font-bold text-white text-sm">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-sm">
                 DM
               </div>
               <div>
