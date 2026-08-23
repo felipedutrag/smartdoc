@@ -352,10 +352,16 @@ export function useGeminiLive(
             generationConfig: {
               responseModalities,
             },
-            inputAudioTranscription: {},
-            sessionResumption: resumptionHandleRef.current ? { handle: resumptionHandleRef.current } : {},
           },
         };
+
+        // Somente adiciona se houver resumption handle
+        if (resumptionHandleRef.current) {
+          setupPayload.setup.sessionResumption = { handle: resumptionHandleRef.current };
+        }
+
+        // Por padrão, sempre queremos a transcrição do áudio de entrada
+        setupPayload.setup.inputAudioTranscription = { model: "models/gemini-2.0-flash-exp" };
 
         if (responseModalities.includes("AUDIO")) {
           setupPayload.setup.generationConfig.speechConfig = {
@@ -363,7 +369,6 @@ export function useGeminiLive(
               prebuiltVoiceConfig: { voiceName: "Leda" },
             },
           };
-          setupPayload.setup.outputAudioTranscription = {};
         }
 
         ws.send(JSON.stringify(setupPayload));
@@ -534,6 +539,7 @@ export function useGeminiLive(
       };
 
       ws.onclose = (event) => {
+        console.log(`[WS] Fechado. Code: ${event.code}, Reason: ${event.reason}`);
         if (!setupComplete && resumptionHandleRef.current) {
           console.warn("[WS] Falha ao retomar sessão. Descartando handle de resumo.");
           resumptionHandleRef.current = null;
