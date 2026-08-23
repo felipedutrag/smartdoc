@@ -27,7 +27,12 @@ import {
   Crown,
   Check,
   Briefcase,
-  AlertCircle
+  AlertCircle,
+  Bell,
+  Keyboard,
+  Command,
+  HelpCircle,
+  ExternalLink
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
@@ -41,8 +46,18 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface DocumentItem {
   id: string;
@@ -96,12 +111,40 @@ export default function DashboardPage() {
   const [passMsg, setPassMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [passSaving, setPassSaving] = useState(false);
 
-  // Modal State (Nova Petição)
+  // Modals State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
   const [modalText, setModalText] = useState("");
   const [isDictating, setIsDictating] = useState(false);
   const [recognition, setRecognition] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Notifications State
+  const [notifications, setNotifications] = useState([
+    {
+      id: "1",
+      title: "Modelos com Raciocínio Profundo Ativos",
+      description: "Agora as petições são geradas com jurisprudências atualizadas e fundamentação exaustiva.",
+      time: "Há 10 min",
+      read: false,
+    },
+    {
+      id: "2",
+      title: "Exportação em Word (.docx) Calibrada",
+      description: "Seus arquivos exportam com fonte Cambria e Visual Law perfeitamente formatados.",
+      time: "Há 1 hora",
+      read: false,
+    },
+    {
+      id: "3",
+      title: "Bem-vindo ao SmartDoc Pro",
+      description: "Você está no período de avaliação Pro com acesso completo.",
+      time: "Hoje",
+      read: true,
+    }
+  ]);
+
+  const unreadNotificationsCount = notifications.filter(n => !n.read).length;
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -125,6 +168,23 @@ export default function DashboardPage() {
       }
     }
   };
+
+  // Atalhos Globais de Teclado (Ctrl+N: Nova Petição, Ctrl+K: Atalhos, Ctrl+/: Busca)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "n") {
+        e.preventDefault();
+        setIsModalOpen(true);
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsShortcutsModalOpen(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   // Carregar perfil e documentos
   useEffect(() => {
@@ -327,6 +387,10 @@ export default function DashboardPage() {
     }
   };
 
+  const markAllNotificationsAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  };
+
   const filteredDocuments = documents.filter((doc) => {
     const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (doc.action_type && doc.action_type.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -397,7 +461,7 @@ export default function DashboardPage() {
             className={`w-full bg-primary text-primary-foreground font-semibold shadow-md hover:opacity-90 transition-all ${
               (sidebarOpen || isDrawer) ? "justify-start gap-2 h-10 px-3" : "justify-center h-10 p-0"
             }`}
-            title="Nova Petição"
+            title="Nova Petição (Ctrl+N)"
           >
             <Plus className="size-4 shrink-0" />
             {(sidebarOpen || isDrawer) && <span>Nova Petição</span>}
@@ -523,7 +587,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
-      {/* ── Desktop Sidebar (Expandível / Colapsável via shadcn) ── */}
+      {/* ── Desktop Sidebar (Expandível / Colapsável) ── */}
       {!isMobile && (
         <aside
           className={`fixed inset-y-0 left-0 z-40 flex flex-col border-r border-border bg-card transition-all duration-300 ${
@@ -535,29 +599,159 @@ export default function DashboardPage() {
       )}
 
       {/* ── Main Content Area ── */}
-      <div className={`flex-1 transition-all duration-300 ${!isMobile && sidebarOpen ? "md:ml-64" : !isMobile ? "md:ml-16" : ""}`}>
-        {/* Mobile Top Navbar with shadcn Sheet Drawer */}
-        {isMobile && (
-          <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-card/80 px-4 backdrop-blur-md">
-            <Sheet open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>
-              <SheetTrigger render={<Button variant="ghost" size="icon"><Menu className="size-5" /></Button>} />
-              <SheetContent side="left" className="w-64 p-0 bg-card border-r border-border">
-                {renderSidebarNavigation(true)}
-              </SheetContent>
-            </Sheet>
+      <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${!isMobile && sidebarOpen ? "md:ml-64" : !isMobile ? "md:ml-16" : ""}`}>
+        
+        {/* ── Top Dashboard Header ── */}
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card/80 px-4 sm:px-8 backdrop-blur-md">
+          {/* Left section: Breadcrumb / Mobile menu */}
+          <div className="flex items-center gap-3">
+            {isMobile && (
+              <Sheet open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>
+                <SheetTrigger render={<Button variant="ghost" size="icon"><Menu className="size-5" /></Button>} />
+                <SheetContent side="left" className="w-64 p-0 bg-card border-r border-border">
+                  {renderSidebarNavigation(true)}
+                </SheetContent>
+              </Sheet>
+            )}
 
-            <div className="font-bold text-sm">
-              <span className="text-foreground">SMART</span>
-              <span className="text-primary">DOC</span>
+            <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground font-medium">
+              <span>Painel</span>
+              <ChevronRight className="size-3.5 text-muted-foreground/50" />
+              <span className="text-foreground font-semibold">
+                {activeTab === "documents" && "Minhas Petições"}
+                {activeTab === "plans" && "Planos & Assinatura"}
+                {activeTab === "profile" && "Perfil & OAB"}
+                {activeTab === "security" && "Segurança & Senha"}
+              </span>
             </div>
+          </div>
 
-            <Button variant="ghost" size="icon" onClick={toggleTheme}>
-              {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+          {/* Right section: Shortcuts, Notifications, Profile Dropdown */}
+          <div className="flex items-center gap-2.5">
+            {/* Teclas de Atalho Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsShortcutsModalOpen(true)}
+              className="hidden sm:flex items-center gap-2 border-border bg-background text-muted-foreground hover:text-foreground h-9 px-3 text-xs"
+              title="Ver Teclas de Atalho (Ctrl+K)"
+            >
+              <Keyboard className="size-3.5" />
+              <span>Atalhos</span>
+              <kbd className="pointer-events-none hidden h-4.5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:inline-flex">
+                Ctrl K
+              </kbd>
             </Button>
-          </header>
-        )}
 
-        <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
+            {/* Notificações Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger render={
+                <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
+                  <Bell className="size-4.5" />
+                  {unreadNotificationsCount > 0 && (
+                    <span className="absolute top-2 right-2 flex size-2 rounded-full bg-primary ring-2 ring-card" />
+                  )}
+                </Button>
+              } />
+              <DropdownMenuContent align="end" className="w-80 p-2 border-border bg-card shadow-2xl">
+                <div className="flex items-center justify-between px-2 py-1.5">
+                  <DropdownMenuLabel className="font-bold text-xs p-0 text-foreground">
+                    Notificações e Avisos
+                  </DropdownMenuLabel>
+                  {unreadNotificationsCount > 0 && (
+                    <button
+                      onClick={markAllNotificationsAsRead}
+                      className="text-[11px] text-primary hover:underline font-medium cursor-pointer"
+                    >
+                      Marcar como lidas
+                    </button>
+                  )}
+                </div>
+                <DropdownMenuSeparator />
+                <div className="space-y-1 py-1 max-h-72 overflow-y-auto">
+                  {notifications.map((notif) => (
+                    <div
+                      key={notif.id}
+                      className={`p-2.5 rounded-lg text-xs transition-colors ${
+                        notif.read ? "text-muted-foreground hover:bg-muted/50" : "bg-primary/5 text-foreground hover:bg-primary/10"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between font-semibold">
+                        <span>{notif.title}</span>
+                        <span className="text-[10px] text-muted-foreground font-normal">{notif.time}</span>
+                      </div>
+                      <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">
+                        {notif.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Alternador de Tema */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="text-muted-foreground hover:text-foreground"
+              title={isDark ? "Modo Claro" : "Modo Escuro"}
+            >
+              {isDark ? <Sun className="size-4.5" /> : <Moon className="size-4.5" />}
+            </Button>
+
+            {/* Profile Dropdown Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger render={
+                <button className="flex items-center gap-2 rounded-full border border-border p-0.5 hover:border-primary transition-colors cursor-pointer outline-none">
+                  <Avatar className="size-8">
+                    <AvatarFallback className="bg-primary text-primary-foreground font-bold text-xs">
+                      {profile?.name?.slice(0, 2).toUpperCase() || "ADV"}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              } />
+              <DropdownMenuContent align="end" className="w-56 border-border bg-card shadow-2xl p-1.5">
+                <DropdownMenuLabel className="px-2 py-1.5">
+                  <div className="text-xs font-bold text-foreground">{profile?.name}</div>
+                  <div className="text-[11px] text-muted-foreground font-normal truncate">{profile?.email}</div>
+                  {profile?.oab && (
+                    <Badge variant="outline" className="mt-1.5 border-primary/30 bg-primary/10 text-[10px] text-primary">
+                      {profile.oab}
+                    </Badge>
+                  )}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => setActiveTab("profile")} className="cursor-pointer text-xs">
+                    <User className="size-4 mr-2" />
+                    <span>Meu Perfil (OAB)</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setActiveTab("plans")} className="cursor-pointer text-xs">
+                    <Crown className="size-4 mr-2 text-primary" />
+                    <span>Plano & Assinatura</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setActiveTab("security")} className="cursor-pointer text-xs">
+                    <ShieldCheck className="size-4 mr-2" />
+                    <span>Segurança & Senha</span>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  variant="destructive"
+                  className="cursor-pointer text-xs text-destructive focus:text-destructive focus:bg-destructive/10"
+                >
+                  <LogOut className="size-4 mr-2" />
+                  <span>Sair da Conta</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </header>
+
+        {/* ── Main Dashboard Body ── */}
+        <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto w-full">
           {/* ════ TAB 1: MINHAS PETIÇÕES ════ */}
           {activeTab === "documents" && (
             <div>
@@ -578,6 +772,9 @@ export default function DashboardPage() {
                 >
                   <Sparkles className="size-3.5" />
                   <span>Nova Petição com IA</span>
+                  <kbd className="hidden sm:inline-block ml-1 rounded bg-primary-foreground/20 px-1.5 py-0.5 text-[9px] font-mono">
+                    Ctrl N
+                  </kbd>
                 </Button>
               </div>
 
@@ -994,6 +1191,54 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* ── Dialog: Teclas de Atalho (shadcn Dialog) ── */}
+      <Dialog open={isShortcutsModalOpen} onOpenChange={setIsShortcutsModalOpen}>
+        <DialogContent className="max-w-md border-border bg-card p-6 shadow-2xl rounded-2xl">
+          <DialogHeader>
+            <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+              <Keyboard className="size-3.5" />
+              <span>Produtividade Forense</span>
+            </div>
+            <DialogTitle className="mt-3 text-lg font-bold tracking-tight text-foreground">
+              Teclas de Atalho
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Acelere sua navegação e produção jurídica com comandos de teclado.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-4 space-y-3">
+            <div className="flex items-center justify-between rounded-lg border border-border p-2.5 bg-muted/40">
+              <span className="text-xs font-medium text-foreground">Criar Nova Petição Inicial</span>
+              <kbd className="rounded border border-border bg-card px-2 py-0.5 font-mono text-[11px] font-semibold text-foreground">
+                Ctrl + N
+              </kbd>
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg border border-border p-2.5 bg-muted/40">
+              <span className="text-xs font-medium text-foreground">Abrir Janela de Atalhos</span>
+              <kbd className="rounded border border-border bg-card px-2 py-0.5 font-mono text-[11px] font-semibold text-foreground">
+                Ctrl + K
+              </kbd>
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg border border-border p-2.5 bg-muted/40">
+              <span className="text-xs font-medium text-foreground">Exportar Peça para Word (.docx)</span>
+              <kbd className="rounded border border-border bg-card px-2 py-0.5 font-mono text-[11px] font-semibold text-foreground">
+                No Editor
+              </kbd>
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg border border-border p-2.5 bg-muted/40">
+              <span className="text-xs font-medium text-foreground">Ditar Narrativa com Reconhecimento de Voz</span>
+              <kbd className="rounded border border-border bg-card px-2 py-0.5 font-mono text-[11px] font-semibold text-foreground">
+                Ícone Mic 🎙️
+              </kbd>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* ── Dialog: Criar Nova Petição (shadcn Dialog) ── */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
