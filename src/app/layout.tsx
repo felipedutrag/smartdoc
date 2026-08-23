@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans, Geist } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import { cn } from "@/lib/utils";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
-const sans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-sans",
-});
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "SmartDoc | Gerador de Petições Judiciais",
@@ -29,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={sans.variable} suppressHydrationWarning>
+    <html lang="pt-BR" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -63,7 +61,9 @@ export default function RootLayout({
             gtag('config', 'AW-18263949464');
           `}
         </Script>
-        {children}
+        <TooltipProvider>
+          {children}
+        </TooltipProvider>
       </body>
     </html>
   );

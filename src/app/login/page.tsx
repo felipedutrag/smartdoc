@@ -19,6 +19,13 @@ import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+
 export default function AuthPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -169,119 +176,40 @@ export default function AuthPage() {
   };
 
   return (
-    <main
-      style={{
-        width: "100%",
-        minHeight: "100vh",
-        background: "var(--bg)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "var(--font-sans), sans-serif",
-        color: "var(--text-primary)",
-        position: "relative",
-        overflowX: "hidden",
-        padding: isMobile ? "24px 16px" : "40px 24px",
-      }}
-    >
+    <main className="relative flex min-h-screen w-full items-center justify-center overflow-x-hidden p-4 sm:p-6 lg:p-10">
       {/* ── Ambient Background Glow & Grids ── */}
-      <div style={{
-        position: "fixed",
-        inset: 0,
-        backgroundImage: `
-          radial-gradient(circle, var(--grid-color) 1.2px, transparent 1.2px),
-          linear-gradient(to right, var(--grid-color) 0.8px, transparent 0.8px),
-          linear-gradient(to bottom, var(--grid-color) 0.8px, transparent 0.8px)
-        `,
-        backgroundSize: "36px 36px, 72px 72px, 72px 72px",
-        pointerEvents: "none",
-        zIndex: 0,
-        opacity: 0.35,
-      }} />
+      <div
+        className="pointer-events-none fixed inset-0 z-0 opacity-30"
+        style={{
+          backgroundImage: `
+            radial-gradient(circle, var(--grid-color) 1.2px, transparent 1.2px),
+            linear-gradient(to right, var(--grid-color) 0.8px, transparent 0.8px),
+            linear-gradient(to bottom, var(--grid-color) 0.8px, transparent 0.8px)
+          `,
+          backgroundSize: "36px 36px, 72px 72px, 72px 72px",
+        }}
+      />
 
-      <div style={{
-        position: "fixed",
-        top: "-15%",
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: "700px",
-        height: "350px",
-        background: "radial-gradient(ellipse at 50% 30%, rgba(217, 119, 6, 0.15), transparent 70%)",
-        filter: "blur(80px)",
-        pointerEvents: "none",
-        zIndex: 0,
-      }} />
+      <div className="pointer-events-none fixed -top-24 left-1/2 z-0 h-80 w-[700px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_50%_30%,rgba(217,119,6,0.15),transparent_70%)] blur-3xl" />
 
       {/* ── Main Container (Card + Showcase) ── */}
-      <div
-        style={{
-          width: "100%",
-          maxWidth: isMobile ? "440px" : "960px",
-          background: "var(--surface)",
-          border: "1px solid var(--border)",
-          borderRadius: "24px",
-          overflow: "hidden",
-          boxShadow: "0 24px 64px rgba(0, 0, 0, 0.25), 0 0 0 1px var(--border)",
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "1.1fr 0.9fr",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
+      <Card className="relative z-10 grid w-full max-w-4xl grid-cols-1 overflow-hidden border-border/80 p-0 shadow-2xl md:grid-cols-12 rounded-2xl">
         {/* Left Side: Auth Form */}
-        <div
-          style={{
-            padding: isMobile ? "32px 20px" : "48px 44px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          }}
-        >
+        <div className="flex flex-col justify-center p-6 sm:p-10 md:col-span-7">
           {/* Logo Header */}
-          <div style={{ marginBottom: "28px" }}>
-            <a
-              href="/"
-              style={{
-                fontSize: 19,
-                display: "inline-flex",
-                alignItems: "center",
-                textDecoration: "none",
-                color: "inherit",
-                position: "relative",
-              }}
-            >
-              <span style={{ fontWeight: 600, letterSpacing: "-0.04em" }}>SMART</span>
-              <span style={{ fontWeight: 900, color: "#d97706", letterSpacing: "-0.04em", marginLeft: 2 }}>DOC</span>
-              <span
-                style={{
-                  position: "absolute",
-                  top: -6,
-                  right: -24,
-                  background: "rgba(217, 119, 6, 0.12)",
-                  border: "1px solid rgba(217, 119, 6, 0.3)",
-                  color: "#d97706",
-                  fontSize: 8,
-                  fontWeight: 900,
-                  padding: "1px 5px",
-                  borderRadius: "4px",
-                }}
-              >
+          <div className="mb-6">
+            <a href="/" className="inline-flex items-center text-xl font-bold tracking-tight">
+              <span className="tracking-tight">SMART</span>
+              <span className="ml-0.5 text-amber-600 dark:text-amber-500">DOC</span>
+              <Badge variant="outline" className="ml-2 border-amber-500/30 bg-amber-500/10 text-[10px] font-extrabold text-amber-600 dark:text-amber-500">
                 PRO
-              </span>
+              </Badge>
             </a>
 
-            <h1
-              style={{
-                fontSize: "24px",
-                fontWeight: 700,
-                letterSpacing: "-0.03em",
-                marginTop: "16px",
-                marginBottom: "6px",
-              }}
-            >
+            <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground">
               {mode === "login" ? "Bem-vindo de volta" : "Crie sua conta profissional"}
             </h1>
-            <p style={{ color: "var(--text-secondary)", fontSize: "14px", lineHeight: 1.5 }}>
+            <p className="mt-1 text-sm text-muted-foreground">
               {mode === "login"
                 ? "Acesse suas petições salvas e gerencie seus documentos."
                 : "Junte-se a advogados que aceleram a redação com o SmartDoc."}
@@ -289,156 +217,71 @@ export default function AuthPage() {
           </div>
 
           {/* Mode Switcher Tabs */}
-          <div
-            style={{
-              display: "flex",
-              background: "var(--bg)",
-              padding: "4px",
-              borderRadius: "12px",
-              border: "1px solid var(--border)",
-              marginBottom: "24px",
+          <Tabs
+            value={mode}
+            onValueChange={(val) => {
+              setMode(val as "login" | "register");
+              setErrorMessage("");
+              setSuccessMessage("");
             }}
+            className="mb-6 w-full"
           >
-            <button
-              type="button"
-              onClick={() => { setMode("login"); setErrorMessage(""); setSuccessMessage(""); }}
-              style={{
-                flex: 1,
-                padding: "8px",
-                borderRadius: "8px",
-                border: "none",
-                background: mode === "login" ? "var(--surface)" : "transparent",
-                color: mode === "login" ? "var(--text-primary)" : "var(--text-muted)",
-                fontWeight: mode === "login" ? 600 : 500,
-                fontSize: "13px",
-                cursor: "pointer",
-                boxShadow: mode === "login" ? "0 2px 8px rgba(0,0,0,0.08)" : "none",
-                transition: "all 0.2s",
-              }}
-            >
-              Entrar
-            </button>
-            <button
-              type="button"
-              onClick={() => { setMode("register"); setErrorMessage(""); setSuccessMessage(""); }}
-              style={{
-                flex: 1,
-                padding: "8px",
-                borderRadius: "8px",
-                border: "none",
-                background: mode === "register" ? "var(--surface)" : "transparent",
-                color: mode === "register" ? "var(--text-primary)" : "var(--text-muted)",
-                fontWeight: mode === "register" ? 600 : 500,
-                fontSize: "13px",
-                cursor: "pointer",
-                boxShadow: mode === "register" ? "0 2px 8px rgba(0,0,0,0.08)" : "none",
-                transition: "all 0.2s",
-              }}
-            >
-              Criar Conta
-            </button>
-          </div>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">Entrar</TabsTrigger>
+              <TabsTrigger value="register">Criar Conta</TabsTrigger>
+            </TabsList>
+          </Tabs>
 
           {/* Error & Success Alerts */}
           {errorMessage && (
-            <div
-              style={{
-                padding: "10px 14px",
-                borderRadius: "10px",
-                background: "rgba(239, 68, 68, 0.1)",
-                border: "1px solid rgba(239, 68, 68, 0.25)",
-                color: "#ef4444",
-                fontSize: "13px",
-                marginBottom: "18px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
-              <AlertCircle size={16} />
+            <div className="mb-4 flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-xs font-medium text-destructive">
+              <AlertCircle className="size-4 shrink-0" />
               <span>{errorMessage}</span>
             </div>
           )}
 
           {successMessage && (
-            <div
-              style={{
-                padding: "10px 14px",
-                borderRadius: "10px",
-                background: "rgba(16, 185, 129, 0.1)",
-                border: "1px solid rgba(16, 185, 129, 0.25)",
-                color: "#10b981",
-                fontSize: "13px",
-                marginBottom: "18px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
-              <CheckCircle2 size={16} />
+            <div className="mb-4 flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="size-4 shrink-0" />
               <span>{successMessage}</span>
             </div>
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {mode === "register" && (
               <>
                 {/* Nome Completo */}
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "6px" }}>
-                    Nome Completo *
-                  </label>
-                  <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                    <User size={16} style={{ position: "absolute", left: "14px", color: "var(--text-muted)", pointerEvents: "none" }} />
-                    <input
+                <div className="space-y-1.5">
+                  <Label htmlFor="name">Nome Completo *</Label>
+                  <div className="relative flex items-center">
+                    <User className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
+                    <Input
+                      id="name"
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Dr. Carlos Eduardo da Silva"
                       required={mode === "register"}
-                      style={{
-                        width: "100%",
-                        padding: "10px 14px 10px 38px",
-                        borderRadius: "10px",
-                        background: "var(--bg)",
-                        border: "1px solid var(--border)",
-                        color: "var(--text-primary)",
-                        fontSize: "14px",
-                        outline: "none",
-                        transition: "border-color 0.2s",
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = "#d97706"}
-                      onBlur={(e) => e.target.style.borderColor = "var(--border)"}
+                      className="pl-9"
                     />
                   </div>
                 </div>
 
                 {/* Número da OAB */}
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "6px" }}>
-                    OAB / Estado <span style={{ fontWeight: 400, color: "var(--text-muted)" }}>(Opcional)</span>
-                  </label>
-                  <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                    <Briefcase size={16} style={{ position: "absolute", left: "14px", color: "var(--text-muted)", pointerEvents: "none" }} />
-                    <input
+                <div className="space-y-1.5">
+                  <Label htmlFor="oab">
+                    OAB / Estado <span className="font-normal text-muted-foreground">(Opcional)</span>
+                  </Label>
+                  <div className="relative flex items-center">
+                    <Briefcase className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
+                    <Input
+                      id="oab"
                       type="text"
                       value={oab}
                       onChange={(e) => setOab(e.target.value)}
                       placeholder="Ex: OAB/SP 123.456"
-                      style={{
-                        width: "100%",
-                        padding: "10px 14px 10px 38px",
-                        borderRadius: "10px",
-                        background: "var(--bg)",
-                        border: "1px solid var(--border)",
-                        color: "var(--text-primary)",
-                        fontSize: "14px",
-                        outline: "none",
-                        transition: "border-color 0.2s",
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = "#d97706"}
-                      onBlur={(e) => e.target.style.borderColor = "var(--border)"}
+                      className="pl-9"
                     />
                   </div>
                 </div>
@@ -446,280 +289,132 @@ export default function AuthPage() {
             )}
 
             {/* Email */}
-            <div>
-              <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "6px" }}>
-                E-mail Profissional *
-              </label>
-              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                <Mail size={16} style={{ position: "absolute", left: "14px", color: "var(--text-muted)", pointerEvents: "none" }} />
-                <input
+            <div className="space-y-1.5">
+              <Label htmlFor="email">E-mail Profissional *</Label>
+              <div className="relative flex items-center">
+                <Mail className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
+                <Input
+                  id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="contato@escritorio.adv.br"
                   required
-                  style={{
-                    width: "100%",
-                    padding: "10px 14px 10px 38px",
-                    borderRadius: "10px",
-                    background: "var(--bg)",
-                    border: "1px solid var(--border)",
-                    color: "var(--text-primary)",
-                    fontSize: "14px",
-                    outline: "none",
-                    transition: "border-color 0.2s",
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = "#d97706"}
-                  onBlur={(e) => e.target.style.borderColor = "var(--border)"}
+                  className="pl-9"
                 />
               </div>
             </div>
 
             {/* Senha */}
-            <div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                <label style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-secondary)" }}>
-                  Senha *
-                </label>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Senha *</Label>
                 {mode === "login" && (
                   <button
                     type="button"
                     onClick={handleForgotPassword}
-                    style={{ fontSize: "12px", color: "#d97706", textDecoration: "none", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                    className="text-xs text-amber-600 hover:underline dark:text-amber-500"
                   >
                     Esqueceu a senha?
                   </button>
                 )}
               </div>
-              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                <Lock size={16} style={{ position: "absolute", left: "14px", color: "var(--text-muted)", pointerEvents: "none" }} />
-                <input
+              <div className="relative flex items-center">
+                <Lock className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
+                <Input
+                  id="password"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  style={{
-                    width: "100%",
-                    padding: "10px 38px 10px 38px",
-                    borderRadius: "10px",
-                    background: "var(--bg)",
-                    border: "1px solid var(--border)",
-                    color: "var(--text-primary)",
-                    fontSize: "14px",
-                    outline: "none",
-                    transition: "border-color 0.2s",
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = "#d97706"}
-                  onBlur={(e) => e.target.style.borderColor = "var(--border)"}
+                  className="px-9"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: "absolute",
-                    right: "12px",
-                    background: "transparent",
-                    border: "none",
-                    color: "var(--text-muted)",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
+                  className="absolute right-3 text-muted-foreground hover:text-foreground"
                 >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </div>
             </div>
 
             {mode === "register" && (
-              <div>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "6px" }}>
-                  Confirmar Senha *
-                </label>
-                <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                  <Shield size={16} style={{ position: "absolute", left: "14px", color: "var(--text-muted)", pointerEvents: "none" }} />
-                  <input
+              <div className="space-y-1.5">
+                <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
+                <div className="relative flex items-center">
+                  <Shield className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    id="confirmPassword"
                     type={showPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    style={{
-                      width: "100%",
-                      padding: "10px 14px 10px 38px",
-                      borderRadius: "10px",
-                      background: "var(--bg)",
-                      border: "1px solid var(--border)",
-                      color: "var(--text-primary)",
-                      fontSize: "14px",
-                      outline: "none",
-                      transition: "border-color 0.2s",
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = "#d97706"}
-                    onBlur={(e) => e.target.style.borderColor = "var(--border)"}
+                    className="pl-9"
                   />
                 </div>
               </div>
             )}
 
             {/* Submit Button */}
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              style={{
-                marginTop: "10px",
-                width: "100%",
-                padding: "12px",
-                borderRadius: "12px",
-                background: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
-                color: "#ffffff",
-                border: "1px solid rgba(255, 255, 255, 0.15)",
-                fontSize: "14px",
-                fontWeight: 600,
-                cursor: loading ? "not-allowed" : "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                boxShadow: "0 4px 14px rgba(217, 119, 6, 0.3)",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => !loading && (e.currentTarget.style.filter = "brightness(1.08)")}
-              onMouseLeave={(e) => !loading && (e.currentTarget.style.filter = "brightness(1)")}
+              className="mt-2 h-11 w-full bg-amber-600 text-white hover:bg-amber-700 font-semibold shadow-md shadow-amber-600/20"
             >
               {loading ? (
                 <>
-                  <Loader2 size={16} className="animate-spin" />
+                  <Loader2 className="size-4 animate-spin" />
                   <span>Processando...</span>
                 </>
               ) : (
                 <>
                   <span>{mode === "login" ? "Acessar Plataforma" : "Criar Minha Conta"}</span>
-                  <ArrowRight size={16} />
+                  <ArrowRight className="size-4" />
                 </>
               )}
-            </button>
+            </Button>
           </form>
 
           {/* Terms info */}
-          <p
-            style={{
-              marginTop: "24px",
-              textAlign: "center",
-              fontSize: "11px",
-              color: "var(--text-muted)",
-              lineHeight: 1.5,
-            }}
-          >
+          <p className="mt-6 text-center text-xs text-muted-foreground">
             Ao continuar, você concorda com nossos Termos de Uso e Política de Privacidade de Dados.
           </p>
         </div>
 
         {/* Right Side: Showcase Testimonial Panel (Desktop Only) */}
         {!isMobile && (
-          <div
-            style={{
-              background: "linear-gradient(145deg, rgba(217, 119, 6, 0.08) 0%, rgba(0, 0, 0, 0.4) 100%)",
-              borderLeft: "1px solid var(--border)",
-              padding: "48px 40px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            {/* Ambient subtle glow */}
-            <div style={{
-              position: "absolute",
-              bottom: "-50px",
-              right: "-50px",
-              width: "250px",
-              height: "250px",
-              background: "radial-gradient(circle, rgba(217, 119, 6, 0.2), transparent 70%)",
-              filter: "blur(50px)",
-              pointerEvents: "none",
-            }} />
-
+          <div className="relative flex flex-col justify-between border-l border-border/80 bg-muted/40 p-8 md:col-span-5">
             <div>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "5px 12px",
-                  borderRadius: "999px",
-                  background: "rgba(217, 119, 6, 0.15)",
-                  border: "1px solid rgba(217, 119, 6, 0.3)",
-                  color: "#d97706",
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.06em",
-                  marginBottom: "24px",
-                }}
-              >
-                <Scale size={13} />
+              <div className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-600 dark:text-amber-500">
+                <Scale className="size-3.5" />
                 <span>Alta Eficiência Jurídica</span>
               </div>
 
-              <h2
-                style={{
-                  fontSize: "22px",
-                  fontWeight: 700,
-                  letterSpacing: "-0.03em",
-                  lineHeight: 1.35,
-                  marginBottom: "20px",
-                  color: "var(--text-primary)",
-                }}
-              >
+              <h2 className="text-xl font-bold tracking-tight text-foreground leading-snug">
                 &ldquo;Reduzimos o tempo de elaboração da petição inicial de 4 horas para menos de 10 minutos com o SmartDoc.&rdquo;
               </h2>
 
-              <p style={{ color: "var(--text-secondary)", fontSize: "14px", lineHeight: 1.6 }}>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
                 Com fundamentação jurídica sólida, formatação visual moderna e pedidos detalhados, o SmartDoc se tornou a ferramenta indispensável para escritórios de advocacia que buscam escala e excelência.
               </p>
             </div>
 
             {/* Lawyer Persona Card */}
-            <div
-              style={{
-                marginTop: "32px",
-                padding: "16px 20px",
-                borderRadius: "16px",
-                background: "var(--surface-elevated)",
-                border: "1px solid var(--border)",
-                display: "flex",
-                alignItems: "center",
-                gap: "14px",
-              }}
-            >
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: "50%",
-                  background: "linear-gradient(135deg, #d97706, #92400e)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#ffffff",
-                  fontWeight: 700,
-                  fontSize: "16px",
-                  flexShrink: 0,
-                }}
-              >
+            <div className="mt-8 flex items-center gap-3 rounded-xl border border-border/60 bg-card p-3 shadow-sm">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-amber-700 font-bold text-white text-sm">
                 DM
               </div>
               <div>
-                <div style={{ fontWeight: 700, fontSize: "14px" }}>Dr. Daniel Martins</div>
-                <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>Sócio Fundador • Martins & Associados</div>
+                <div className="text-sm font-semibold text-foreground">Dr. Daniel Martins</div>
+                <div className="text-xs text-muted-foreground">Sócio Fundador • Martins & Associados</div>
               </div>
             </div>
           </div>
         )}
-      </div>
+      </Card>
     </main>
   );
 }
