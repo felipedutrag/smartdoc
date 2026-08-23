@@ -27,12 +27,16 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // IMPORTANT: Avoid writing any logic between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
+    user = authUser;
+  } catch (error) {
+    // Silencia erros de token inválido/expirado (ex: refresh_token_not_found)
+    user = null;
+  }
 
   const isAuthPage = request.nextUrl.pathname.startsWith("/login") || request.nextUrl.pathname.startsWith("/register");
   const isDashboardPage = request.nextUrl.pathname.startsWith("/dashboard");
