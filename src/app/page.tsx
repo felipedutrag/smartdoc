@@ -129,7 +129,7 @@ export default function Home() {
         transform: "translateX(-50%)",
         width: "800px",
         height: "400px",
-        background: "radial-gradient(ellipse at 50% 30%, rgba(217, 119, 6, 0.15), rgba(217, 119, 6, 0.02) 60%, transparent 80%)",
+        background: "radial-gradient(ellipse at 50% 30%, rgba(62, 207, 142, 0.15), rgba(62, 207, 142, 0.02) 60%, transparent 80%)",
         filter: "blur(70px)",
         pointerEvents: "none",
         zIndex: 0,
@@ -179,15 +179,15 @@ export default function Home() {
             }}
           >
             <span style={{ fontWeight: 600, letterSpacing: "-0.04em" }}>SMART</span>
-            <span style={{ fontWeight: 900, color: "#d97706", letterSpacing: "-0.04em", marginLeft: 2 }}>DOC</span>
+            <span style={{ fontWeight: 900, color: "var(--primary)", letterSpacing: "-0.04em", marginLeft: 2 }}>DOC</span>
             <span
               style={{
                 position: "absolute",
                 top: -6,
                 right: -24,
-                background: "rgba(217, 119, 6, 0.12)",
-                border: "1px solid rgba(217, 119, 6, 0.3)",
-                color: "#d97706",
+                background: "rgba(62, 207, 142, 0.12)",
+                border: "1px solid rgba(62, 207, 142, 0.3)",
+                color: "var(--primary)",
                 fontSize: 8,
                 fontWeight: 900,
                 padding: "1px 5px",
@@ -288,14 +288,14 @@ export default function Home() {
               gap: "8px",
               padding: "6px 14px",
               borderRadius: "999px",
-              background: "rgba(217, 119, 6, 0.08)",
-              border: "1px solid rgba(217, 119, 6, 0.25)",
-              color: "#d97706",
+              background: "rgba(62, 207, 142, 0.08)",
+              border: "1px solid rgba(62, 207, 142, 0.25)",
+              color: "var(--primary)",
               fontSize: "12px",
               fontWeight: 600,
               letterSpacing: "0.02em",
               marginBottom: "20px",
-              boxShadow: "0 2px 10px rgba(217, 119, 6, 0.05)",
+              boxShadow: "0 2px 10px rgba(62, 207, 142, 0.05)",
             }}
           >
             <Zap size={14} />
@@ -315,7 +315,7 @@ export default function Home() {
           >
             Petições Judiciais completas, <br />
             <span style={{
-              background: "linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #fbbf24 100%)",
+              background: "linear-gradient(135deg, var(--primary) 0%, var(--primary) 50%, var(--primary) 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               fontWeight: 800
@@ -350,7 +350,7 @@ export default function Home() {
             <a
               href="/register"
               style={{
-                background: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
+                background: "linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%)",
                 color: "#ffffff",
                 border: "1px solid rgba(255, 255, 255, 0.15)",
                 padding: "14px 32px",
@@ -361,7 +361,7 @@ export default function Home() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "8px",
-                boxShadow: "0 8px 24px rgba(217, 119, 6, 0.35)",
+                boxShadow: "0 8px 24px rgba(62, 207, 142, 0.35)",
                 transition: "all 0.2s",
               }}
               onMouseEnter={(e) => {
@@ -394,7 +394,7 @@ export default function Home() {
                 transition: "all 0.2s",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "#d97706";
+                e.currentTarget.style.borderColor = "var(--primary)";
                 e.currentTarget.style.transform = "translateY(-1px)";
               }}
               onMouseLeave={(e) => {
@@ -466,7 +466,7 @@ export default function Home() {
           >
             <div style={{ display: "flex", gap: "6px" }}>
               <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ef4444" }} />
-              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#f59e0b" }} />
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--primary)" }} />
               <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#10b981" }} />
             </div>
             <div style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "monospace" }}>
@@ -497,7 +497,7 @@ export default function Home() {
             <p style={{ textAlign: "justify", marginBottom: "16px" }}>
               <strong>[NOME DO AUTOR]</strong>, brasileiro, solteiro, empresário, inscrito no CPF sob o nº [Número], residente em [Endereço Completo], por seu advogado que esta subscreve, vem propor a presente
             </p>
-            <h3 style={{ textAlign: "center", textTransform: "uppercase", fontSize: "15px", margin: "22px 0", letterSpacing: "0.02em", color: "#d97706" }}>
+            <h3 style={{ textAlign: "center", textTransform: "uppercase", fontSize: "15px", margin: "22px 0", letterSpacing: "0.02em", color: "var(--primary)" }}>
               AÇÃO DE RESCISÃO CONTRATUAL C/C INDENIZATÓRIA
             </h3>
             <p style={{ textAlign: "justify", marginBottom: "18px" }}>
@@ -506,8 +506,8 @@ export default function Home() {
             <div style={{
               margin: "24px 0 6px",
               padding: "14px 20px",
-              background: "rgba(217, 119, 6, 0.06)",
-              borderLeft: "3px solid #d97706",
+              background: "rgba(62, 207, 142, 0.06)",
+              borderLeft: "3px solid var(--primary)",
               borderRadius: "0 10px 10px 0",
               fontSize: "13px",
               fontStyle: "italic",
@@ -532,7 +532,7 @@ export default function Home() {
         }}
       >
         <div style={{ textAlign: "center", marginBottom: "48px" }}>
-          <span style={{ fontSize: "12px", fontWeight: 700, color: "#d97706", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--primary)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
             Arquitetura Jurídica
           </span>
           <h2 style={{ fontSize: "clamp(26px, 4vw, 38px)", fontWeight: 700, letterSpacing: "-0.03em", marginTop: "8px" }}>
@@ -564,7 +564,7 @@ export default function Home() {
             }}
           >
             <div>
-              <div style={{ width: 40, height: 40, borderRadius: "10px", background: "rgba(217, 119, 6, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#d97706", marginBottom: "16px" }}>
+              <div style={{ width: 40, height: 40, borderRadius: "10px", background: "rgba(62, 207, 142, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--primary)", marginBottom: "16px" }}>
                 <Scale size={20} />
               </div>
               <h3 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "10px" }}>
@@ -644,7 +644,7 @@ export default function Home() {
               padding: "32px",
             }}
           >
-            <div style={{ width: 40, height: 40, borderRadius: "10px", background: "rgba(245, 158, 11, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#f59e0b", marginBottom: "16px" }}>
+            <div style={{ width: 40, height: 40, borderRadius: "10px", background: "rgba(245, 158, 11, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--primary)", marginBottom: "16px" }}>
               <FileText size={20} />
             </div>
             <h3 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "10px" }}>
@@ -692,7 +692,7 @@ export default function Home() {
       >
         <div style={{ maxWidth: "1160px", margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "56px" }}>
-            <span style={{ fontSize: "12px", fontWeight: 700, color: "#d97706", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--primary)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
               Fluxo Otimizado
             </span>
             <h2 style={{ fontSize: "clamp(26px, 4vw, 36px)", fontWeight: 700, letterSpacing: "-0.03em", marginTop: "8px" }}>
@@ -712,19 +712,19 @@ export default function Home() {
                 step: "01",
                 title: "Narre o Caso",
                 desc: "Digite ou fale ao microfone os fatos relatados pelo cliente. Não precisa se preocupar com formalismos nessa etapa.",
-                icon: <Mic size={22} style={{ color: "#d97706" }} />
+                icon: <Mic size={22} style={{ color: "var(--primary)" }} />
               },
               {
                 step: "02",
                 title: "IA Estrutura a Peça",
                 desc: "O motor processual gera o cabeçalho, qualificação, fatos, teses de direito e pedidos em alíneas (a, b, c).",
-                icon: <Sparkles size={22} style={{ color: "#d97706" }} />
+                icon: <Sparkles size={22} style={{ color: "var(--primary)" }} />
               },
               {
                 step: "03",
                 title: "Edite e Exporte",
                 desc: "Refine os pontos que desejar diretamente no editor ou peça comandos à IA. Baixe em DOCX com 1 clique.",
-                icon: <FileText size={22} style={{ color: "#d97706" }} />
+                icon: <FileText size={22} style={{ color: "var(--primary)" }} />
               },
             ].map((item, idx) => (
               <div
@@ -738,7 +738,7 @@ export default function Home() {
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
-                  <div style={{ width: 44, height: 44, borderRadius: "12px", background: "rgba(217, 119, 6, 0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: 44, height: 44, borderRadius: "12px", background: "rgba(62, 207, 142, 0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {item.icon}
                   </div>
                   <span style={{ fontSize: "28px", fontWeight: 900, color: "var(--text-muted)", opacity: 0.3, fontFamily: "monospace" }}>
@@ -766,7 +766,7 @@ export default function Home() {
         }}
       >
         <div style={{ textAlign: "center", marginBottom: "48px" }}>
-          <span style={{ fontSize: "12px", fontWeight: 700, color: "#d97706", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--primary)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
             Tire suas dúvidas
           </span>
           <h2 style={{ fontSize: "clamp(26px, 4vw, 36px)", fontWeight: 700, letterSpacing: "-0.03em", marginTop: "8px" }}>
