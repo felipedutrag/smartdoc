@@ -54,9 +54,12 @@ export function renderPeticaoJsonToHtml(data: PeticaoDocumentJson): string {
   // 1. Endereçamento (Juízo)
   if (cabecalho?.enderecamento) {
     htmlParts.push(
-      `<p style="text-align: justify; font-weight: bold; text-transform: uppercase; font-size: 1.05em; line-height: 1.4; margin-bottom: 0.75rem;">${cabecalho.enderecamento}</p>`
+      `<p style="text-align: justify; font-weight: bold; text-transform: uppercase; font-size: 1.05em; line-height: 1.4; margin-bottom: 0;">${cabecalho.enderecamento}</p>`
     );
   }
+
+  // 1 linha de respiro forense
+  htmlParts.push("<p><br></p>");
 
   // 2. Preâmbulo / Qualificação das Partes
   const autorNome = partes?.autor?.nome || "[NOME DO AUTOR]";
