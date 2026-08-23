@@ -343,20 +343,20 @@ export default function DashboardPage() {
         {/* Metric Cards */}
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
           {/* Total */}
-          <Card className="flex items-center justify-between p-5 border-border shadow-sm">
+          <div className="flex items-center justify-between rounded-xl border border-border bg-card p-5 shadow-sm">
             <div>
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Total de Peças
               </div>
-              <div className="mt-1 text-2xl font-bold">{totalDocuments}</div>
+              <div className="mt-1 text-2xl font-bold text-foreground">{totalDocuments}</div>
             </div>
             <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <FileText className="size-5" />
             </div>
-          </Card>
+          </div>
 
           {/* Completed */}
-          <Card className="flex items-center justify-between p-5 border-border shadow-sm">
+          <div className="flex items-center justify-between rounded-xl border border-border bg-card p-5 shadow-sm">
             <div>
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Prontas / Finalizadas
@@ -366,10 +366,10 @@ export default function DashboardPage() {
             <div className="flex size-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-500">
               <CheckCircle2 className="size-5" />
             </div>
-          </Card>
+          </div>
 
           {/* Drafts */}
-          <Card className="flex items-center justify-between p-5 border-border shadow-sm">
+          <div className="flex items-center justify-between rounded-xl border border-border bg-card p-5 shadow-sm">
             <div>
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Em Rascunho / Edição
@@ -379,7 +379,7 @@ export default function DashboardPage() {
             <div className="flex size-11 items-center justify-center rounded-xl bg-muted text-muted-foreground">
               <Clock className="size-5" />
             </div>
-          </Card>
+          </div>
         </div>
 
         {/* Section Header & Filters */}
