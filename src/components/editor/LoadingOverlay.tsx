@@ -50,10 +50,10 @@ export function LoadingOverlay({
 
       <div className="text-center max-w-md space-y-1.5">
         <h3 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
-          Elaborando sua petição judicial...
+          Sua IA está redigindo a petição...
         </h3>
         <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-normal">
-          Sua petição inicial está sendo redigida com fundamentação técnica e precisão.
+          Fundamentação jurídica, artigos de lei e jurisprudência sendo estruturados com precisão.
         </p>
       </div>
     </div>

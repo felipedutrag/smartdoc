@@ -152,21 +152,21 @@ export default function Home() {
             <span className="flex size-1.5 rounded-full bg-primary animate-pulse" />
             <span className="text-foreground font-semibold">SmartDoc 2.0</span>
             <span className="text-muted-foreground/40">•</span>
-            <span>Inteligência Jurídica</span>
+            <span>IA de Voz Jurídica</span>
             <ChevronRight className="size-3 text-muted-foreground" />
           </div>
 
           {/* Main Title Objective & High Contrast */}
           <h1 className="mb-4 text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15]">
-            Gerador de Petições Judiciais <br className="hidden sm:inline" />
+            Sua Assistente Jurídica <br className="hidden sm:inline" />
             <span className="text-primary font-black">
-              Estruturadas com IA
+              com IA de Voz
             </span>
           </h1>
 
           {/* Subtitle Objective */}
           <p className="mb-4 max-w-xl text-xs sm:text-sm leading-relaxed text-muted-foreground font-normal">
-            Elabore petições iniciais completas com fundamentação legal, doutrina e jurisprudência prontas para o PJe em segundos.
+            Converse naturalmente com a IA para redigir, alterar e aperfeiçoar petições inteiras — por voz ou texto. Pronta para protocolo no PJe em minutos.
           </p>
 
           {/* CTA Buttons */}
@@ -176,7 +176,7 @@ export default function Home() {
               className={cn(buttonVariants({ size: "default" }), "h-10 px-6 text-xs font-bold bg-primary text-primary-foreground rounded-xl shadow-md hover:opacity-90 gap-1.5")}
             >
               <Sparkles className="size-3.5" />
-              <span>Gerar Petição Grátis</span>
+              <span>Experimentar Grátis</span>
               <ArrowRight className="size-3.5" />
             </Link>
 
@@ -184,7 +184,7 @@ export default function Home() {
               href="/login"
               className={cn(buttonVariants({ variant: "outline", size: "default" }), "h-10 px-5 text-xs font-semibold border-border/80 rounded-xl bg-card/60 backdrop-blur-md")}
             >
-              <span>Acessar Painel</span>
+              <span>Acessar Meu Painel</span>
             </Link>
           </div>
 
@@ -192,15 +192,15 @@ export default function Home() {
           <div className="mt-8 flex flex-wrap justify-center gap-6 text-[11px] text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="size-3.5 text-emerald-500" />
+              <span>Assistente de voz com IA generativa</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="size-3.5 text-emerald-500" />
+              <span>Alteração por conversa natural</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="size-3.5 text-emerald-500" />
               <span>Exportação .docx nativa</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="size-3.5 text-emerald-500" />
-              <span>Ditado por voz</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="size-3.5 text-emerald-500" />
-              <span>Visual Law integrado</span>
             </div>
           </div>
         </div>
@@ -262,7 +262,7 @@ export default function Home() {
             <div className="lg:col-span-4 p-4 bg-muted/10 flex flex-col justify-between space-y-3 font-sans">
               <div className="space-y-2.5">
                 <div className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                  Engenharia Forense
+                  Painel de Inteligência
                 </div>
 
                 <div className="rounded-xl border border-border/80 bg-card p-2.5 space-y-1.5">
@@ -283,10 +283,10 @@ export default function Home() {
                 <div className="rounded-xl border border-border/80 bg-card p-2.5 space-y-1">
                   <div className="text-[11px] font-semibold text-foreground flex items-center gap-1">
                     <Bot className="size-3 text-primary" />
-                    <span>IA Flutuante Cirúrgica</span>
+                    <span>Assistente de Voz Ativo</span>
                   </div>
                   <p className="text-[10px] text-muted-foreground leading-relaxed">
-                    Selecione trechos no editor para reescrever argumentos e enriquecer teses em tempo real.
+                    Converse com a IA para reescrever argumentos, adicionar pedidos ou alterar teses — tudo por voz, em tempo real.
                   </p>
                 </div>
               </div>
@@ -296,7 +296,7 @@ export default function Home() {
                   href="/register"
                   className={cn(buttonVariants({ size: "sm" }), "w-full text-xs font-semibold bg-primary text-primary-foreground rounded-lg shadow-xs h-8")}
                 >
-                  Criar Conta e Usar
+                  Começar Agora — É Grátis
                 </Link>
               </div>
             </div>
@@ -310,13 +310,13 @@ export default function Home() {
           {/* Section Heading */}
           <div className="mb-6 text-center max-w-xl mx-auto">
             <div className="mb-1 text-xs font-mono font-bold uppercase tracking-widest text-primary">
-              Recursos
+              Tecnologia
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-              Projetado para a rotina forense
+              Ferramentas que advogados precisam
             </h2>
             <p className="mt-1.5 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              Elimine o trabalho braçal de busca de modelos defasados.
+              Cada recurso foi projetado por quem entende a rotina de um escritório de advocacia.
             </p>
           </div>
 
@@ -329,15 +329,15 @@ export default function Home() {
               </div>
               <div className="space-y-1">
                 <h3 className="text-xs sm:text-sm font-bold text-foreground tracking-tight">
-                  Ditado por Voz Nativo
+                  Assistente de Voz com IA Generativa
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Fale os fatos do cliente com naturalidade. O reconhecimento de fala transcreve seus relatos diretamente na sua área de trabalho.
+                  Converse naturalmente com a IA durante a reunião com seu cliente. Ela ouve, identifica artigos de lei aplicáveis e sugere estratégias processuais em tempo real na sua tela.
                 </p>
                 <div className="pt-0.5">
                   <span className="inline-flex items-center gap-1.5 rounded border border-border/80 bg-muted/40 px-2 py-0.5 font-mono text-[9px] text-muted-foreground">
                     <span className="flex size-1.5 rounded-full bg-emerald-500" />
-                    <span>Web Speech API nativa • Zero latência</span>
+                    <span>Gemini Live • Conversa Bidirecional</span>
                   </span>
                 </div>
               </div>
@@ -350,14 +350,14 @@ export default function Home() {
               </div>
               <div className="space-y-1">
                 <h3 className="text-xs sm:text-sm font-bold text-foreground tracking-tight">
-                  Exportação Word (.docx)
+                  Exportação Word Forense
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Baixe a peça formatada nos padrões forenses, com tipografia e margens limpas.
+                  Baixe a peça com tipografia, margens e formatação nos padrões do PJe. Pronta para protocolo.
                 </p>
                 <div className="pt-0.5">
                   <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
-                    <span>Download em 1 clique</span>
+                    <span>1 clique para .docx</span>
                     <ChevronRight className="size-3" />
                   </span>
                 </div>
@@ -371,10 +371,10 @@ export default function Home() {
               </div>
               <div className="space-y-1">
                 <h3 className="text-xs sm:text-sm font-bold text-foreground tracking-tight">
-                  Reescrita Cirúrgica
+                  Edição por Voz ou Texto
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Aperfeiçoe qualquer argumento selecionando o parágrafo no editor.
+                  Selecione qualquer trecho e peça à IA para reescrever, fortalecer a tese ou adicionar fundamentação. Por voz ou digitando.
                 </p>
                 <div className="pt-0.5">
                   <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
@@ -392,15 +392,16 @@ export default function Home() {
               </div>
               <div className="space-y-1">
                 <h3 className="text-xs sm:text-sm font-bold text-foreground tracking-tight">
-                  Sigilo Profissional e Privacidade
+                  Sigilo Profissional Absoluto
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Estruturado para respeitar o sigilo das informações e a privacidade do advogado. Seus documentos pertencem exclusivamente a você.
+                  Seus documentos e dados de clientes são isolados, criptografados e nunca compartilhados. Conformidade total com a LGPD e o dever de sigilo da advocacia.
                 </p>
                 <div className="flex flex-wrap gap-1 font-mono text-[9px] text-muted-foreground pt-0.5">
                   <span className="rounded border border-border bg-muted/40 px-1.5 py-0.2">TLS 1.3</span>
                   <span className="rounded border border-border bg-muted/40 px-1.5 py-0.2">Isolamento de Dados</span>
                   <span className="rounded border border-border bg-muted/40 px-1.5 py-0.2">LGPD</span>
+                  <span className="rounded border border-border bg-muted/40 px-1.5 py-0.2">Art. 7º EOAB</span>
                 </div>
               </div>
             </Card>
@@ -413,35 +414,35 @@ export default function Home() {
         <div className="w-full max-w-4xl">
           <div className="mb-6 text-center max-w-xl mx-auto">
             <div className="mb-1 text-xs font-mono font-bold uppercase tracking-widest text-primary">
-              Fluxo
+              Como Funciona
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-              Em 3 passos simples
+              Da reunião ao protocolo em 3 etapas
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative rounded-xl border border-border/80 bg-card p-4 shadow-xs">
-              <div className="font-mono text-[10px] font-extrabold text-primary mb-2">01 / INGESTÃO</div>
-              <h4 className="text-sm font-bold text-foreground">Narre os Fatos</h4>
+              <div className="font-mono text-[10px] font-extrabold text-primary mb-2">01 / REUNIÃO</div>
+              <h4 className="text-sm font-bold text-foreground">Converse com seu cliente</h4>
               <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                Descreva os fatos relatados pelo cliente na dashboard usando voz ou texto.
+                Ative o modo assistente durante a reunião. A IA acompanha a conversa e já identifica teses, artigos e estratégias aplicáveis.
               </p>
             </div>
 
             <div className="relative rounded-xl border border-border/80 bg-card p-4 shadow-xs">
-              <div className="font-mono text-[10px] font-extrabold text-primary mb-2">02 / ESTRUTURAÇÃO</div>
-              <h4 className="text-sm font-bold text-foreground">Geração da Peça</h4>
+              <div className="font-mono text-[10px] font-extrabold text-primary mb-2">02 / GERAÇÃO</div>
+              <h4 className="text-sm font-bold text-foreground">A IA redige a peça completa</h4>
               <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                A IA constrói endereçamento, qualificação, fatos, direito e pedidos.
+                Com base nos fatos narrados, a IA estrutura endereçamento, qualificação, fundamentação jurídica, pedidos e valor da causa.
               </p>
             </div>
 
             <div className="relative rounded-xl border border-border/80 bg-card p-4 shadow-xs">
-              <div className="font-mono text-[10px] font-extrabold text-primary mb-2">03 / EXPORTAÇÃO</div>
-              <h4 className="text-sm font-bold text-foreground">Revise e Baixe</h4>
+              <div className="font-mono text-[10px] font-extrabold text-primary mb-2">03 / REFINAMENTO</div>
+              <h4 className="text-sm font-bold text-foreground">Refine por voz e protocole</h4>
               <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                Faça ajustes finais e baixe o arquivo .docx pronto para protocolo no PJe.
+                Converse com a IA para ajustar qualquer trecho. Exporte o .docx formatado e protocole no PJe.
               </p>
             </div>
           </div>
@@ -453,30 +454,30 @@ export default function Home() {
         <div className="w-full max-w-3xl">
           <div className="mb-6 text-center">
             <h2 className="text-2xl font-extrabold tracking-tight text-foreground">
-              Perguntas Frequentes
+              Dúvidas Frequentes
             </h2>
             <p className="mt-1 text-xs text-muted-foreground">
-              Dúvidas comuns sobre o funcionamento do SmartDoc.
+              O que advogados perguntam antes de começar.
             </p>
           </div>
 
           <div className="space-y-2.5">
             {[
               {
-                q: "A petição gerada já vem pronta para protocolo no PJe?",
-                a: "Sim. A peça é redigida com estrutura jurídica completa: endereçamento, qualificação das partes, exposição fática, fundamentação de direito (com indicação legal e jurisprudencial), pedidos detalhados e valor da causa."
+                q: "Como funciona a IA de voz durante a reunião?",
+                a: "Você ativa o assistente de voz e a IA acompanha a conversa em tempo real. Enquanto seu cliente narra os fatos, ela identifica artigos de lei, jurisprudência aplicável e estratégias processuais — tudo aparecendo na sua tela, sem interromper a reunião."
               },
               {
-                q: "Como funciona a exportação para o Word (.docx)?",
-                a: "Com um clique no editor, o SmartDoc gera um documento DOCX nativo perfeitamente formatado, pronto para edição adicional ou impressão e assinatura digital."
+                q: "Posso alterar a petição apenas conversando?",
+                a: 'Sim. Após a geração da peça, você conversa naturalmente com a IA: "adicione um pedido de dano moral de R$ 15.000" ou "reforce a fundamentação no CDC". A IA localiza o trecho correto e aplica a alteração cirurgicamente.'
               },
               {
-                q: "Posso utilizar o recurso de voz em qualquer computador?",
-                a: "Sim! O reconhecimento de voz funciona diretamente no navegador através da Web Speech API nos navegadores modernos (Google Chrome, Microsoft Edge, Brave, etc)."
+                q: "A petição gerada já vem pronta para o PJe?",
+                a: "Sim. A peça é gerada com estrutura jurídica completa — endereçamento, qualificação, fatos, fundamentação com artigos e jurisprudência, pedidos detalhados e valor da causa. Você exporta o .docx formatado e protocola."
               },
               {
-                q: "Existe limite de alterações no documento após a geração?",
-                a: "Nenhum. O editor conta com ferramentas de formatação completas e a IA flutuante permite que você refatore qualquer parágrafo quantas vezes quiser."
+                q: "Meus dados e os de meus clientes estão seguros?",
+                a: "Absolutamente. Utilizamos criptografia TLS 1.3, isolamento total de dados por usuário e conformidade com a LGPD. Nenhum dado é compartilhado ou utilizado para treinar modelos. O sigilo profissional do advogado é preservado integralmente."
               }
             ].map((faq, i) => (
               <div
@@ -505,13 +506,13 @@ export default function Home() {
       <section className="relative z-10 flex w-full flex-col items-center px-4 py-20 text-center bg-card/60 border-y border-border/70 backdrop-blur-md">
         <div className="flex max-w-2xl flex-col items-center">
           <div className="mb-2 text-xs font-mono font-bold uppercase tracking-widest text-primary">
-            Acelere sua Advocacia
+            Pare de perder horas com trabalho repetitivo
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            Comece a gerar petições agora
+            Comece a advogar com IA agora
           </h2>
           <p className="mt-2 text-xs sm:text-sm text-muted-foreground">
-            Crie sua conta e acelere a produção jurídica do seu escritório com inteligência forense.
+            Crie sua conta gratuita e descubra como a IA de voz transforma a rotina do seu escritório.
           </p>
 
           <div className="mt-6 flex items-center gap-3">
@@ -530,7 +531,7 @@ export default function Home() {
         <div className="flex items-center gap-2">
           <Scale className="size-3.5 text-primary" />
           <span className="font-semibold text-foreground">SmartDoc</span>
-          <span>© {new Date().getFullYear()} — Todos os direitos reservados.</span>
+          <span>© {new Date().getFullYear()} — Tecnologia Jurídica com IA. Todos os direitos reservados.</span>
         </div>
       </footer>
     </main>

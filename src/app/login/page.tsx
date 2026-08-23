@@ -213,12 +213,12 @@ export default function AuthPage() {
             </a>
 
             <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground">
-              {mode === "login" ? "Bem-vindo de volta" : "Crie sua conta profissional"}
+              {mode === "login" ? "Acesse seu escritório digital" : "Crie sua conta e comece a advogar com IA"}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
               {mode === "login"
-                ? "Acesse suas petições salvas e gerencie seus documentos."
-                : "Junte-se a advogados que aceleram a redação com o SmartDoc."}
+                ? "Suas petições, assistente de voz e documentos aguardam você."
+                : "Milhares de advogados já utilizam IA para redigir petições em minutos, não horas."}
             </p>
           </div>
 
@@ -377,7 +377,7 @@ export default function AuthPage() {
                 </>
               ) : (
                 <>
-                  <span>{mode === "login" ? "Acessar Plataforma" : "Criar Minha Conta"}</span>
+                  <span>{mode === "login" ? "Acessar Meu Painel" : "Criar Minha Conta Grátis"}</span>
                   <ArrowRight className="size-4" />
                 </>
               )}
@@ -396,26 +396,22 @@ export default function AuthPage() {
             <div>
               <div className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                 <Scale className="size-3.5" />
-                <span>Alta Eficiência Jurídica</span>
+                <span>IA de Voz Jurídica</span>
               </div>
 
               <h2 className="text-xl font-bold tracking-tight text-foreground leading-snug">
-                &ldquo;Reduzimos o tempo de elaboração da petição inicial de 4 horas para menos de 10 minutos com o SmartDoc.&rdquo;
+                &ldquo;Eu ativo o assistente durante a reunião com o cliente. Quando termino, a petição já está praticamente pronta. Economizo horas todos os dias.&rdquo;
               </h2>
-
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                Com fundamentação jurídica sólida, formatação visual moderna e pedidos detalhados, o SmartDoc se tornou a ferramenta indispensável para escritórios de advocacia que buscam escala e excelência.
-              </p>
             </div>
 
             {/* Lawyer Persona Card */}
             <div className="mt-8 flex items-center gap-3 rounded-xl border border-border/60 bg-card p-3 shadow-sm">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-sm">
-                DM
+                MC
               </div>
               <div>
-                <div className="text-sm font-semibold text-foreground">Dr. Daniel Martins</div>
-                <div className="text-xs text-muted-foreground">Sócio Fundador • Martins & Associados</div>
+                <div className="text-sm font-semibold text-foreground">Dra. Marina Cardoso</div>
+                <div className="text-xs text-muted-foreground">Sócia • Cardoso & Vasconcelos Advogados</div>
               </div>
             </div>
           </div>
