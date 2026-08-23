@@ -54,11 +54,9 @@ export function renderPeticaoJsonToHtml(data: PeticaoDocumentJson): string {
   // 1. Endereçamento (Juízo)
   if (cabecalho?.enderecamento) {
     htmlParts.push(
-      `<p style="text-align: justify; font-weight: bold; text-transform: uppercase;">${cabecalho.enderecamento}</p>`
+      `<p style="text-align: justify; font-weight: bold; text-transform: uppercase; font-size: 1.08em; line-height: 1.5; margin-bottom: 1.25rem;">${cabecalho.enderecamento}</p>`
     );
   }
-
-  htmlParts.push("<br/>");
 
   // 2. Preâmbulo / Qualificação das Partes
   const autorNome = partes?.autor?.nome || "[NOME DO AUTOR]";
@@ -68,15 +66,15 @@ export function renderPeticaoJsonToHtml(data: PeticaoDocumentJson): string {
   const reuQualif = partes?.reu?.qualificacao || "[nacionalidade/tipo], inscrito no CPF/CNPJ nº [Número], com endereço em [Endereço]";
 
   htmlParts.push(
-    `<p style="text-align: justify;"><strong>${autorNome}</strong>, ${autorQualif}, por seu advogado que esta subscreve, vem, mui respeitosamente, perante Vossa Excelência, propor a presente</p>`
+    `<p style="text-align: justify; margin-top: 0.5rem;"><strong>${autorNome}</strong>, ${autorQualif}, por seu advogado que esta subscreve, vem, mui respeitosamente, perante Vossa Excelência, propor a presente</p>`
   );
 
   htmlParts.push(
-    `<h2 style="text-align: center; text-transform: uppercase; margin: 1.5rem 0;">${tipoAcao}</h2>`
+    `<h2 style="text-align: center; text-transform: uppercase; margin: 1.25rem 0; font-family: inherit; font-size: 1.15em;">${tipoAcao}</h2>`
   );
 
   htmlParts.push(
-    `<p style="text-align: justify;">em face de <strong>${reuNome}</strong>, ${reuQualif}, pelos fatos e fundamentos jurídicos que passa a expor:</p>`
+    `<p style="text-align: justify; margin-bottom: 1.25rem;">em face de <strong>${reuNome}</strong>, ${reuQualif}, pelos fatos e fundamentos jurídicos que passa a expor:</p>`
   );
 
   htmlParts.push("<hr/>");
