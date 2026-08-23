@@ -160,7 +160,7 @@ export default function Home() {
           <h1 className="mb-4 text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15]">
             Gerador de Petições Judiciais <br className="hidden sm:inline" />
             <span className="text-primary font-black">
-              Estruturadas com Inteligência Artificial
+              Estruturadas com IA
             </span>
           </h1>
 
