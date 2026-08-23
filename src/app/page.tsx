@@ -324,7 +324,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Bento Card 1: Voz */}
             <Card className="md:col-span-2 border-border/80 bg-card/70 px-4 py-4.5 backdrop-blur-md flex flex-col justify-center">
-              <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20 mb-[5px]">
+              <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20 mb-1">
                 <Mic className="size-3.5" />
               </div>
               <div className="space-y-1.5">
@@ -345,7 +345,7 @@ export default function Home() {
 
             {/* Bento Card 2: Visual Law & DOCX */}
             <Card className="border-border/80 bg-card/70 px-4 py-4.5 backdrop-blur-md flex flex-col justify-center">
-              <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20 mb-[5px]">
+              <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20 mb-1">
                 <Download className="size-3.5" />
               </div>
               <div className="space-y-1.5">
@@ -366,7 +366,7 @@ export default function Home() {
 
             {/* Bento Card 3: IA Flutuante */}
             <Card className="border-border/80 bg-card/70 px-4 py-4.5 backdrop-blur-md flex flex-col justify-center">
-              <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20 mb-[5px]">
+              <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20 mb-1">
                 <Zap className="size-3.5" />
               </div>
               <div className="space-y-1.5">
@@ -387,7 +387,7 @@ export default function Home() {
 
             {/* Bento Card 4: Segurança e Sigilo */}
             <Card className="md:col-span-2 border-border/80 bg-card/70 px-4 py-4.5 backdrop-blur-md flex flex-col justify-center">
-              <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20 mb-[5px]">
+              <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20 mb-1">
                 <ShieldCheck className="size-3.5" />
               </div>
               <div className="space-y-1.5">
