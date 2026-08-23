@@ -1102,3 +1102,34 @@ body {
     @apply font-sans;
   }
 }
+/* Fix Chrome / Edge / Safari autofill background turning white */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #242220 inset !important;
+  box-shadow: 0 0 0 1000px #242220 inset !important;
+  -webkit-text-fill-color: #f3f4f6 !important;
+  caret-color: #f3f4f6 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #252220 inset !important;
+  box-shadow: 0 0 0 1000px #252220 inset !important;
+  -webkit-text-fill-color: #f3f4f6 !important;
+  caret-color: #f3f4f6 !important;
+}
+
+html:not(.dark) input:-webkit-autofill,
+html:not(.dark) input:-webkit-autofill:hover,
+html:not(.dark) input:-webkit-autofill:focus,
+html:not(.dark) input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #1f2937 !important;
+  caret-color: #1f2937 !important;
+}
