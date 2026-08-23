@@ -190,7 +190,12 @@ export default function AuthPage() {
         }}
       />
 
-      <div className="pointer-events-none fixed -top-24 left-1/2 z-0 h-80 w-[700px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_50%_30%,rgba(217,119,6,0.15),transparent_70%)] blur-3xl" />
+      <div
+        className="pointer-events-none fixed -top-24 left-1/2 z-0 h-80 w-[700px] -translate-x-1/2 blur-3xl opacity-50"
+        style={{
+          background: "radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--primary) 25%, transparent), transparent 70%)"
+        }}
+      />
 
       {/* ── Main Container (Card + Showcase) ── */}
       <Card className="relative z-10 grid w-full max-w-4xl grid-cols-1 overflow-hidden border-border/80 p-0 shadow-2xl md:grid-cols-12 rounded-2xl">

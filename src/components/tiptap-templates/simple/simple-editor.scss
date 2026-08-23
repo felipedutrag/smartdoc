@@ -134,20 +134,20 @@ body,
   }
 
   blockquote {
-    border-left: 1px solid #d97706; /* Accent color for Visual Law box (Gold) */
-    background: rgba(217, 119, 6, 0.03);
-    padding: 0.75rem 1.25rem; /* Thinner padding */
-    margin: 1rem 0; /* Compact margins */
-    border-radius: 0 6px 6px 0;
+    border-left: 3px solid var(--primary);
+    padding-left: 1.25rem;
+    margin: 1.5rem 0;
     font-style: italic;
+    color: var(--text-secondary);
+    background: color-mix(in srgb, var(--primary) 4%, transparent);
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-radius: 0 8px 8px 0;
 
-    p {
-      margin-bottom: 0;
-    }
-    
     .dark & {
-      background: rgba(217, 119, 6, 0.06);
-      border-left-color: #d97706;
+      color: #a1a1aa;
+      background: color-mix(in srgb, var(--primary) 8%, transparent);
+      border-left-color: var(--primary);
     }
   }
 
@@ -188,9 +188,9 @@ body,
   min-height: 1200px; /* A4 aspect ratio height (~1.414 * width) */
   display: flex;
   flex-direction: column;
-  background: var(--surface);
+  background: var(--card);
   border: 1px solid var(--border);
-  border-top: 2px solid rgba(217, 119, 6, 0.6); /* Gold top line — subtle */
+  border-top: 2px solid var(--primary); /* Dynamic theme top line */
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.01);
 
@@ -208,9 +208,9 @@ body,
   }
 
   .dark & {
-    background: #000000 !important; /* Match page background */
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    border-top: 2px solid rgba(217, 119, 6, 0.5); /* Gold top line — subtle */
+    background: var(--card) !important;
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--primary); /* Dynamic theme top line */
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   }
 }
