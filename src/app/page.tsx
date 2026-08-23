@@ -20,6 +20,12 @@ import {
 } from "lucide-react";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+
 export default function Home() {
   const [isDark, setIsDark] = useState<boolean | null>(null);
   const [textInput, setTextInput] = useState("");
@@ -86,144 +92,50 @@ export default function Home() {
     }
   };
 
-  const scrollToGenerator = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    const textarea = document.querySelector(".home-textarea") as HTMLTextAreaElement;
-    if (textarea) textarea.focus();
-  };
-
   return (
-    <main
-      style={{
-        width: "100%",
-        minHeight: "100vh",
-        background: "var(--bg)",
-        display: "flex",
-        flexDirection: "column",
-        fontFamily: "var(--font-sans), sans-serif",
-        color: "var(--text-primary)",
-        position: "relative",
-        overflowX: "hidden",
-      }}
-    >
+    <main className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background text-foreground">
       {/* ── Ambient Linear Background Glows & Grids ── */}
-      <div style={{
-        position: "fixed",
-        inset: 0,
-        backgroundImage: `
-          radial-gradient(circle, var(--grid-color) 1.2px, transparent 1.2px),
-          linear-gradient(to right, var(--grid-color) 0.8px, transparent 0.8px),
-          linear-gradient(to bottom, var(--grid-color) 0.8px, transparent 0.8px)
-        `,
-        backgroundSize: "36px 36px, 72px 72px, 72px 72px",
-        pointerEvents: "none",
-        zIndex: 0,
-        opacity: 0.35,
-      }} />
+      <div
+        className="pointer-events-none fixed inset-0 z-0 opacity-30"
+        style={{
+          backgroundImage: `
+            radial-gradient(circle, var(--grid-color) 1.2px, transparent 1.2px),
+            linear-gradient(to right, var(--grid-color) 0.8px, transparent 0.8px),
+            linear-gradient(to bottom, var(--grid-color) 0.8px, transparent 0.8px)
+          `,
+          backgroundSize: "36px 36px, 72px 72px, 72px 72px",
+        }}
+      />
 
       {/* Glow Orbs */}
-      <div style={{
-        position: "absolute",
-        top: "-100px",
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: "800px",
-        height: "400px",
-        background: "radial-gradient(ellipse at 50% 30%, rgba(62, 207, 142, 0.15), rgba(62, 207, 142, 0.02) 60%, transparent 80%)",
-        filter: "blur(70px)",
-        pointerEvents: "none",
-        zIndex: 0,
-      }} />
+      <div className="pointer-events-none absolute -top-24 left-1/2 z-0 h-96 w-[800px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_50%_30%,var(--primary),transparent_70%)] opacity-20 blur-3xl" />
 
-      {/* ── Navigation Bar (Linear Style) ── */}
-      <nav
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "16px 20px 0",
-          zIndex: 50,
-          position: "sticky",
-          top: 0,
-          width: "100%",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "10px 24px",
-            width: "100%",
-            maxWidth: "1160px",
-            background: "var(--header-pill-bg)",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
-            borderRadius: "16px",
-            border: "var(--header-pill-border)",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
-            position: "relative",
-          }}
-        >
+      {/* ── Navigation Bar (Shadcn style) ── */}
+      <nav className="sticky top-0 z-50 flex w-full items-center justify-center p-4">
+        <div className="flex w-full max-w-6xl items-center justify-between rounded-2xl border border-border/80 bg-background/80 px-6 py-2.5 shadow-sm backdrop-blur-md">
           {/* Logo */}
-          <a
-            href="/"
-            style={{
-              fontSize: 18,
-              display: "flex",
-              alignItems: "center",
-              textDecoration: "none",
-              color: "inherit",
-              position: "relative",
-              fontFamily: "var(--font-sans), sans-serif",
-            }}
-          >
-            <span style={{ fontWeight: 600, letterSpacing: "-0.04em" }}>SMART</span>
-            <span style={{ fontWeight: 900, color: "var(--primary)", letterSpacing: "-0.04em", marginLeft: 2 }}>DOC</span>
-            <span
-              style={{
-                position: "absolute",
-                top: -6,
-                right: -24,
-                background: "rgba(62, 207, 142, 0.12)",
-                border: "1px solid rgba(62, 207, 142, 0.3)",
-                color: "var(--primary)",
-                fontSize: 8,
-                fontWeight: 900,
-                padding: "1px 5px",
-                borderRadius: "4px",
-              }}
-            >
+          <Link href="/" className="relative flex items-center text-lg font-bold tracking-tight">
+            <span>SMART</span>
+            <span className="ml-0.5 text-primary">DOC</span>
+            <Badge variant="outline" className="ml-2 border-primary/30 bg-primary/10 text-[10px] font-extrabold text-primary">
               PRO
-            </span>
-          </a>
+            </Badge>
+          </Link>
 
-          {/* Center Links (Desktop only) - ABSOLUTELY CENTERED */}
+          {/* Center Links (Desktop only) */}
           {!isMobile && (
-            <div
-              style={{
-                position: "absolute",
-                left: "50%",
-                top: "50%",
-                transform: "translate(-50%, -50%)",
-                display: "flex",
-                alignItems: "center",
-                gap: "28px",
-                fontSize: "13px",
-                fontWeight: 500,
-                color: "var(--text-secondary)",
-                pointerEvents: "auto",
-              }}
-            >
-              <a href="#recursos" style={{ color: "inherit", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--text-primary)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}>Recursos</a>
-              <a href="#como-funciona" style={{ color: "inherit", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--text-primary)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}>Como Funciona</a>
-              <a href="#faq" style={{ color: "inherit", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--text-primary)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}>Dúvidas</a>
+            <div className="flex items-center gap-7 text-xs font-medium text-muted-foreground">
+              <a href="#recursos" className="transition-colors hover:text-foreground">Recursos</a>
+              <a href="#como-funciona" className="transition-colors hover:text-foreground">Como Funciona</a>
+              <a href="#faq" className="transition-colors hover:text-foreground">Dúvidas</a>
             </div>
           )}
 
-          {/* Right Actions: Theme Toggle */}
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <button
+          {/* Right Actions: Theme Toggle & Login */}
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="icon"
               onClick={() => {
                 const newTheme = !isDark;
                 setIsDark(newTheme);
@@ -238,543 +150,277 @@ export default function Home() {
                 }
               }}
               aria-label="Alternar tema"
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: "50%",
-                background: "var(--theme-btn-bg)",
-                border: "none",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "var(--text-primary)",
-                transition: "all 0.2s",
-              }}
+              className="size-8 rounded-lg"
             >
               {isDark ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
                 </svg>
               ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                 </svg>
               )}
-            </button>
+            </Button>
+
+            <Link
+              href="/login"
+              className={cn(buttonVariants({ size: "sm" }), "hidden sm:inline-flex bg-primary text-primary-foreground font-semibold shadow-sm")}
+            >
+              Acessar
+            </Link>
           </div>
         </div>
       </nav>
 
       {/* ── HERO SECTION ── */}
-      <section
-        style={{
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: isMobile ? "60px 16px 60px" : "100px 24px 80px",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <div style={{ maxWidth: "860px", width: "100%", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
-          
+      <section className="relative z-10 flex w-full flex-col items-center px-4 py-16 sm:py-24 text-center">
+        <div className="flex max-w-3xl flex-col items-center">
           {/* Release Pill Badge */}
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "6px 14px",
-              borderRadius: "999px",
-              background: "rgba(62, 207, 142, 0.08)",
-              border: "1px solid rgba(62, 207, 142, 0.25)",
-              color: "var(--primary)",
-              fontSize: "12px",
-              fontWeight: 600,
-              letterSpacing: "0.02em",
-              marginBottom: "20px",
-              boxShadow: "0 2px 10px rgba(62, 207, 142, 0.05)",
-            }}
-          >
-            <Zap size={14} />
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1.5 text-xs font-semibold text-primary shadow-sm">
+            <Zap className="size-3.5" />
             <span>Motor Jurídico de Alta Velocidade para Advogados</span>
           </div>
 
           {/* Main Title */}
-          <h1
-            style={{
-              fontSize: "clamp(34px, 5.5vw, 56px)",
-              fontWeight: 600,
-              letterSpacing: "-0.04em",
-              lineHeight: 1.08,
-              color: "var(--text-primary)",
-              marginBottom: "20px",
-            }}
-          >
+          <h1 className="mb-5 text-4xl font-bold tracking-tight text-foreground sm:text-6xl leading-[1.1]">
             Petições Judiciais completas, <br />
-            <span style={{
-              background: "linear-gradient(135deg, var(--primary) 0%, var(--primary) 50%, var(--primary) 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              fontWeight: 800
-            }}>
+            <span className="bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent">
               redigidas em poucos segundos.
             </span>
           </h1>
 
-          <p
-            style={{
-              fontSize: "clamp(15px, 2vw, 18px)",
-              color: "var(--text-secondary)",
-              lineHeight: 1.6,
-              maxWidth: "680px",
-              marginBottom: "32px",
-            }}
-          >
+          <p className="mb-8 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
             Narre os fatos do seu cliente por texto ou voz. Nossa IA estruturada elabora a petição inicial com fundamentação legal, doutrina, jurisprudência e formatação pronta para o PJe.
           </p>
 
           {/* ── Hero Call to Action Buttons ── */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexWrap: "wrap",
-              gap: "14px",
-              marginBottom: "36px",
-            }}
-          >
-            <a
+          <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
+            <Link
               href="/register"
-              style={{
-                background: "linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%)",
-                color: "#ffffff",
-                border: "1px solid rgba(255, 255, 255, 0.15)",
-                padding: "14px 32px",
-                borderRadius: "14px",
-                fontSize: "15px",
-                fontWeight: 700,
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                boxShadow: "0 8px 24px rgba(62, 207, 142, 0.35)",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.filter = "brightness(1.1)";
-                e.currentTarget.style.transform = "translateY(-1px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.filter = "brightness(1)";
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
+              className={cn(buttonVariants({ size: "lg" }), "h-12 gap-2 bg-primary text-primary-foreground px-7 font-bold shadow-md hover:opacity-90")}
             >
               <span>Criar Conta Gratuita</span>
-              <ArrowRight size={18} />
-            </a>
+              <ArrowRight className="size-4" />
+            </Link>
 
-            <a
+            <Link
               href="/login"
-              style={{
-                background: "var(--surface)",
-                color: "var(--text-primary)",
-                border: "1px solid var(--border)",
-                padding: "14px 28px",
-                borderRadius: "14px",
-                fontSize: "15px",
-                fontWeight: 600,
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "var(--primary)";
-                e.currentTarget.style.transform = "translateY(-1px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "var(--border)";
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
+              className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-12 border-border px-6 font-semibold")}
             >
               <span>Acessar Painel</span>
-            </a>
+            </Link>
           </div>
 
           {/* Sub Hero Micro Badges */}
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              gap: "24px",
-              marginTop: "4px",
-              color: "var(--text-muted)",
-              fontSize: "13px",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <CheckCircle2 size={15} style={{ color: "#10b981" }} />
+          <div className="flex flex-wrap justify-center gap-5 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="size-4 text-emerald-500" />
               <span>Exportação nativa em .docx (Word)</span>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <CheckCircle2 size={15} style={{ color: "#10b981" }} />
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="size-4 text-emerald-500" />
               <span>Edição em tempo real com IA cirúrgica</span>
             </div>
           </div>
-
         </div>
       </section>
 
-      {/* ── PRODUCT PREVIEW (Linear-style Mockup Window) ── */}
-      <section
-        style={{
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          padding: "0 20px 80px",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "780px",
-            borderRadius: "20px",
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            boxShadow: "0 24px 60px rgba(0, 0, 0, 0.3)",
-            overflow: "hidden",
-          }}
-        >
+      {/* ── PRODUCT PREVIEW (Mockup Window) ── */}
+      <section className="relative z-10 flex w-full justify-center px-4 pb-20">
+        <Card className="w-full max-w-3xl overflow-hidden border-border/80 p-0 shadow-2xl">
           {/* Mockup Header */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "12px 20px",
-              borderBottom: "1px solid var(--border)",
-              background: "var(--header-pill-bg)",
-            }}
-          >
-            <div style={{ display: "flex", gap: "6px" }}>
-              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ef4444" }} />
-              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--primary)" }} />
-              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#10b981" }} />
+          <div className="flex items-center justify-between border-b border-border/80 bg-muted/40 px-5 py-3">
+            <div className="flex gap-1.5">
+              <div className="size-2.5 rounded-full bg-rose-500" />
+              <div className="size-2.5 rounded-full bg-amber-500" />
+              <div className="size-2.5 rounded-full bg-emerald-500" />
             </div>
-            <div style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "monospace" }}>
+            <div className="font-mono text-xs text-muted-foreground">
               editor.smartdoc.work — peticao_inicial.docx
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ fontSize: "11px", color: "#10b981", background: "rgba(16, 185, 129, 0.1)", padding: "2px 8px", borderRadius: "6px", fontWeight: 600 }}>
+            <div>
+              <Badge variant="outline" className="border-emerald-500/20 bg-emerald-500/10 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
                 IA Ativa
-              </span>
+              </Badge>
             </div>
           </div>
 
           {/* Mockup Document Body */}
-          <div
-            style={{
-              padding: isMobile ? "24px 20px" : "44px 72px",
-              background: "var(--bg)",
-              fontFamily: "'Georgia', serif",
-              lineHeight: 1.75,
-              fontSize: "14px",
-              color: "var(--text-primary)",
-              opacity: 0.95,
-            }}
-          >
-            <p style={{ textAlign: "justify", fontWeight: "bold", textTransform: "uppercase", marginBottom: "20px", fontSize: "13.5px" }}>
+          <div className="bg-card p-6 sm:p-12 font-serif text-sm leading-relaxed text-foreground opacity-95">
+            <p className="mb-4 text-justify font-bold uppercase text-xs">
               EXCELENTÍSSIMO(A) SENHOR(A) DOUTOR(A) JUIZ(A) DE DIREITO DA ___ VARA CÍVEL DA COMARCA DE SÃO PAULO/SP
             </p>
-            <p style={{ textAlign: "justify", marginBottom: "16px" }}>
+            <p className="mb-4 text-justify">
               <strong>[NOME DO AUTOR]</strong>, brasileiro, solteiro, empresário, inscrito no CPF sob o nº [Número], residente em [Endereço Completo], por seu advogado que esta subscreve, vem propor a presente
             </p>
-            <h3 style={{ textAlign: "center", textTransform: "uppercase", fontSize: "15px", margin: "22px 0", letterSpacing: "0.02em", color: "var(--primary)" }}>
+            <h3 className="my-5 text-center font-sans font-bold uppercase text-primary tracking-wide">
               AÇÃO DE RESCISÃO CONTRATUAL C/C INDENIZATÓRIA
             </h3>
-            <p style={{ textAlign: "justify", marginBottom: "18px" }}>
+            <p className="mb-4 text-justify">
               em face de <strong>[NOME DO RÉU]</strong>, pelos fatos e fundamentos a seguir aduzidos.
             </p>
-            <div style={{
-              margin: "24px 0 6px",
-              padding: "14px 20px",
-              background: "rgba(62, 207, 142, 0.06)",
-              borderLeft: "3px solid var(--primary)",
-              borderRadius: "0 10px 10px 0",
-              fontSize: "13px",
-              fontStyle: "italic",
-              fontFamily: "var(--font-sans), sans-serif",
-            }}>
+            <div className="mt-6 rounded-r-xl border-l-4 border-primary bg-primary/5 p-4 font-sans text-xs italic text-muted-foreground">
               💡 <strong>Visual Law Integrado:</strong> A petição já é gerada estruturada em tópicos claros, sem marcadores confusos e com pedidos em alíneas precisas (a, b, c).
             </div>
           </div>
-        </div>
+        </Card>
       </section>
 
-      {/* ── BENTO GRID: RECURSOS PROJETADOS PARA ALTA PERFORMANCE ── */}
-      <section
-        id="recursos"
-        style={{
-          width: "100%",
-          maxWidth: "1160px",
-          margin: "0 auto",
-          padding: "40px 20px 80px",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <div style={{ textAlign: "center", marginBottom: "48px" }}>
-          <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--primary)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+      {/* ── BENTO GRID: RECURSOS ── */}
+      <section id="recursos" className="relative z-10 mx-auto w-full max-w-6xl px-4 py-16">
+        <div className="mb-12 text-center">
+          <span className="text-xs font-bold uppercase tracking-wider text-primary">
             Arquitetura Jurídica
           </span>
-          <h2 style={{ fontSize: "clamp(26px, 4vw, 38px)", fontWeight: 700, letterSpacing: "-0.03em", marginTop: "8px" }}>
+          <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-4xl">
             Tudo o que seu escritório precisa para produzir mais rápido.
           </h2>
         </div>
 
-        {/* Bento Grid Layout */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
-            gap: "20px",
-          }}
-        >
-          {/* Card 1 (Span 2 cols on Desktop) */}
-          <div
-            style={{
-              gridColumn: isMobile ? "1" : "span 2",
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "20px",
-              padding: "32px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
+        {/* Bento Grid */}
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+          {/* Card 1 */}
+          <Card className="flex flex-col justify-between p-7 md:col-span-2 border-border/80">
             <div>
-              <div style={{ width: 40, height: 40, borderRadius: "10px", background: "rgba(62, 207, 142, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--primary)", marginBottom: "16px" }}>
-                <Scale size={20} />
+              <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Scale className="size-5" />
               </div>
-              <h3 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "10px" }}>
+              <h3 className="mb-2 text-lg font-bold text-foreground">
                 Fundamentação Técnica e Jurisprudência Coerente
               </h3>
-              <p style={{ color: "var(--text-secondary)", fontSize: "14.5px", lineHeight: 1.6, maxWidth: "560px" }}>
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 Chega de modelos genéricos ou petições vazias. Nosso modelo foi instruído para citar artigos pertinentes da legislação brasileira (CPC, CC, CDC, CLT) e construir teses jurídicas sólidas com base estrita no caso narrado.
               </p>
             </div>
-            <div style={{ marginTop: "24px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
-              <span style={{ fontSize: "12px", background: "var(--surface-elevated)", padding: "4px 10px", borderRadius: "6px", border: "1px solid var(--border)" }}>
-                ⚖️ Código de Processo Civil
-              </span>
-              <span style={{ fontSize: "12px", background: "var(--surface-elevated)", padding: "4px 10px", borderRadius: "6px", border: "1px solid var(--border)" }}>
-                🛡️ Código de Defesa do Consumidor
-              </span>
-              <span style={{ fontSize: "12px", background: "var(--surface-elevated)", padding: "4px 10px", borderRadius: "6px", border: "1px solid var(--border)" }}>
-                📜 Código Civil Brasileiro
-              </span>
+            <div className="mt-6 flex flex-wrap gap-2 text-xs">
+              <Badge variant="outline" className="bg-muted/50 border-border">⚖️ Código de Processo Civil</Badge>
+              <Badge variant="outline" className="bg-muted/50 border-border">🛡️ Código de Defesa do Consumidor</Badge>
+              <Badge variant="outline" className="bg-muted/50 border-border">📜 Código Civil Brasileiro</Badge>
             </div>
-          </div>
+          </Card>
 
           {/* Card 2 */}
-          <div
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "20px",
-              padding: "32px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-            }}
-          >
+          <Card className="flex flex-col justify-between p-7 border-border/80">
             <div>
-              <div style={{ width: 40, height: 40, borderRadius: "10px", background: "rgba(16, 185, 129, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#10b981", marginBottom: "16px" }}>
-                <Cpu size={20} />
+              <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
+                <Cpu className="size-5" />
               </div>
-              <h3 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "10px" }}>
+              <h3 className="mb-2 text-lg font-bold text-foreground">
                 Motor Groq de Baixa Latência
               </h3>
-              <p style={{ color: "var(--text-secondary)", fontSize: "14.5px", lineHeight: 1.6 }}>
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 Geração em streaming ultra veloz com até 8.192 tokens de saída, gerando peças longas e exaustivas sem truncamento.
               </p>
             </div>
-            <div style={{ marginTop: "20px", fontSize: "12px", color: "#10b981", fontWeight: 600 }}>
+            <div className="mt-4 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
               ⚡ Tempo médio: ~2.8s
             </div>
-          </div>
+          </Card>
 
           {/* Card 3 */}
-          <div
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "20px",
-              padding: "32px",
-            }}
-          >
-            <div style={{ width: 40, height: 40, borderRadius: "10px", background: "rgba(59, 130, 246, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#3b82f6", marginBottom: "16px" }}>
-              <FileCode2 size={20} />
+          <Card className="p-7 border-border/80">
+            <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+              <FileCode2 className="size-5" />
             </div>
-            <h3 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "10px" }}>
+            <h3 className="mb-2 text-lg font-bold text-foreground">
               Edição com IA Cirúrgica
             </h3>
-            <p style={{ color: "var(--text-secondary)", fontSize: "14.5px", lineHeight: 1.6 }}>
-              Dite ou digite qualquer ajuste na barra flutuante (&quot;mude o valor para R$ 10.000&quot; ou &quot;adicione dano moral&quot;) e veja os parágrafos se atualizarem com destaque visual de diff.
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              Dite ou digite qualquer ajuste na barra flutuante (&quot;mude o valor para R$ 10.000&quot;) e veja os parágrafos se atualizarem com diff visual.
             </p>
-          </div>
+          </Card>
 
           {/* Card 4 */}
-          <div
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "20px",
-              padding: "32px",
-            }}
-          >
-            <div style={{ width: 40, height: 40, borderRadius: "10px", background: "rgba(245, 158, 11, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--primary)", marginBottom: "16px" }}>
-              <FileText size={20} />
+          <Card className="p-7 border-border/80">
+            <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <FileText className="size-5" />
             </div>
-            <h3 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "10px" }}>
+            <h3 className="mb-2 text-lg font-bold text-foreground">
               Exportação Word (.docx)
             </h3>
-            <p style={{ color: "var(--text-secondary)", fontSize: "14.5px", lineHeight: 1.6 }}>
-              Gere o documento final em formato Microsoft Word perfeitamente estruturado, pronto para revisão final e protocolo direto nos tribunais (PJe, e-SAJ, Projudi).
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              Gere o documento final em formato Microsoft Word perfeitamente estruturado, pronto para revisão e protocolo direto nos tribunais (PJe, e-SAJ, Projudi).
             </p>
-          </div>
+          </Card>
 
           {/* Card 5 */}
-          <div
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "20px",
-              padding: "32px",
-            }}
-          >
-            <div style={{ width: 40, height: 40, borderRadius: "10px", background: "rgba(168, 85, 247, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#a855f7", marginBottom: "16px" }}>
-              <ShieldCheck size={20} />
+          <Card className="p-7 border-border/80">
+            <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-purple-500/10 text-purple-500">
+              <ShieldCheck className="size-5" />
             </div>
-            <h3 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "10px" }}>
+            <h3 className="mb-2 text-lg font-bold text-foreground">
               Zero Alucinação de Dados
             </h3>
-            <p style={{ color: "var(--text-secondary)", fontSize: "14.5px", lineHeight: 1.6 }}>
-              Informações não fornecidas recebem marcadores inteligentes como <code>[NOME DO AUTOR]</code> e <code>[CPF]</code>, garantindo total segurança contra invenções acidentais.
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              Informações não fornecidas recebem marcadores inteligentes como <code>[NOME DO AUTOR]</code> e <code>[CPF]</code>, garantindo total segurança jurídica.
             </p>
-          </div>
+          </Card>
         </div>
       </section>
 
-      {/* ── HOW IT WORKS: WORKFLOW SECTION ── */}
-      <section
-        id="como-funciona"
-        style={{
-          width: "100%",
-          background: "var(--surface)",
-          borderTop: "1px solid var(--border)",
-          borderBottom: "1px solid var(--border)",
-          padding: "80px 20px",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <div style={{ maxWidth: "1160px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "56px" }}>
-            <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--primary)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+      {/* ── HOW IT WORKS ── */}
+      <section id="como-funciona" className="relative z-10 w-full border-y border-border/80 bg-muted/20 py-20 px-4">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-14 text-center">
+            <span className="text-xs font-bold uppercase tracking-wider text-primary">
               Fluxo Otimizado
             </span>
-            <h2 style={{ fontSize: "clamp(26px, 4vw, 36px)", fontWeight: 700, letterSpacing: "-0.03em", marginTop: "8px" }}>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-4xl">
               Do relato do cliente à petição pronta em 3 etapas.
             </h2>
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
-              gap: "32px",
-            }}
-          >
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
             {[
               {
                 step: "01",
                 title: "Narre o Caso",
-                desc: "Digite ou fale ao microfone os fatos relatados pelo cliente. Não precisa se preocupar com formalismos nessa etapa.",
-                icon: <Mic size={22} style={{ color: "var(--primary)" }} />
+                desc: "Digite ou fale ao microfone os fatos relatados pelo cliente sem se preocupar com formalismos.",
+                icon: <Mic className="size-5 text-primary" />
               },
               {
                 step: "02",
                 title: "IA Estrutura a Peça",
-                desc: "O motor processual gera o cabeçalho, qualificação, fatos, teses de direito e pedidos em alíneas (a, b, c).",
-                icon: <Sparkles size={22} style={{ color: "var(--primary)" }} />
+                desc: "O motor processual gera qualificação, fatos, teses de direito e pedidos em alíneas precisas.",
+                icon: <Sparkles className="size-5 text-primary" />
               },
               {
                 step: "03",
                 title: "Edite e Exporte",
-                desc: "Refine os pontos que desejar diretamente no editor ou peça comandos à IA. Baixe em DOCX com 1 clique.",
-                icon: <FileText size={22} style={{ color: "var(--primary)" }} />
+                desc: "Refine os pontos que desejar diretamente no editor ou via IA. Baixe em DOCX com 1 clique.",
+                icon: <FileText className="size-5 text-primary" />
               },
             ].map((item, idx) => (
-              <div
-                key={idx}
-                style={{
-                  background: "var(--bg)",
-                  border: "1px solid var(--border)",
-                  borderRadius: "16px",
-                  padding: "28px",
-                  position: "relative",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
-                  <div style={{ width: 44, height: 44, borderRadius: "12px", background: "rgba(62, 207, 142, 0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Card key={idx} className="p-6 border-border/80 bg-card">
+                <div className="mb-5 flex items-center justify-between">
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10">
                     {item.icon}
                   </div>
-                  <span style={{ fontSize: "28px", fontWeight: 900, color: "var(--text-muted)", opacity: 0.3, fontFamily: "monospace" }}>
+                  <span className="font-mono text-2xl font-black text-muted-foreground/30">
                     {item.step}
                   </span>
                 </div>
-                <h3 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "10px" }}>{item.title}</h3>
-                <p style={{ color: "var(--text-secondary)", fontSize: "14px", lineHeight: 1.6 }}>{item.desc}</p>
-              </div>
+                <h3 className="mb-2 text-base font-bold text-foreground">{item.title}</h3>
+                <p className="text-xs leading-relaxed text-muted-foreground">{item.desc}</p>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── FAQ SECTION (ACCORDION) ── */}
-      <section
-        id="faq"
-        style={{
-          width: "100%",
-          maxWidth: "860px",
-          margin: "0 auto",
-          padding: "80px 20px",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <div style={{ textAlign: "center", marginBottom: "48px" }}>
-          <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--primary)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+      {/* ── FAQ SECTION ── */}
+      <section id="faq" className="relative z-10 mx-auto w-full max-w-3xl px-4 py-20">
+        <div className="mb-12 text-center">
+          <span className="text-xs font-bold uppercase tracking-wider text-primary">
             Tire suas dúvidas
           </span>
-          <h2 style={{ fontSize: "clamp(26px, 4vw, 36px)", fontWeight: 700, letterSpacing: "-0.03em", marginTop: "8px" }}>
+          <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-4xl">
             Perguntas Frequentes
           </h2>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <div className="flex flex-col gap-3">
           {[
             {
               q: "As petições geradas são compatíveis com os tribunais brasileiros?",
@@ -782,7 +428,7 @@ export default function Home() {
             },
             {
               q: "Posso editar o documento antes de baixar?",
-              a: "Sim, o editor é totalmente livre e desbloqueado. Você pode alterar qualquer texto manualmente ou usar a barra de inteligência artificial por áudio e texto para fazer edições cirúrgicas em tempo real."
+              a: "Sim, o editor é totalmente livre e desbloqueado. Você pode alterar qualquer texto manualmente ou usar a barra de inteligência artificial para fazer edições cirúrgicas em tempo real."
             },
             {
               q: "O arquivo exportado abre normalmente no Microsoft Word?",
@@ -793,73 +439,39 @@ export default function Home() {
               a: "Nosso sistema é configurado com travas rigorosas contra alucinação de dados. Quando um dado não for fornecido nos fatos (como número de RG ou CPF), a IA insere colchetes [PREENCHER RG] para que você finalize com segurança."
             },
           ].map((faq, idx) => (
-            <div
+            <Card
               key={idx}
               onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-              style={{
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                borderRadius: "14px",
-                padding: "20px 24px",
-                cursor: "pointer",
-                transition: "all 0.2s",
-              }}
+              className="cursor-pointer p-5 transition-colors hover:border-primary/50"
             >
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "15px", fontWeight: 600 }}>{faq.q}</span>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-foreground">{faq.q}</span>
                 <ChevronDown
-                  size={18}
-                  style={{
-                    color: "var(--text-muted)",
-                    transform: openFaq === idx ? "rotate(180deg)" : "rotate(0deg)",
-                    transition: "transform 0.2s ease",
-                  }}
+                  className={`size-4 text-muted-foreground transition-transform ${
+                    openFaq === idx ? "rotate-180 text-primary" : ""
+                  }`}
                 />
               </div>
               {openFaq === idx && (
-                <p style={{ marginTop: "12px", color: "var(--text-secondary)", fontSize: "14px", lineHeight: 1.6 }}>
+                <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
                   {faq.a}
                 </p>
               )}
-            </div>
+            </Card>
           ))}
         </div>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer
-        style={{
-          padding: "32px 20px",
-          borderTop: "1px solid var(--border)",
-          marginTop: "auto",
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          background: "var(--surface)",
-          position: "relative",
-          zIndex: 10,
-        }}
-      >
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "1160px",
-            display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "16px",
-            fontSize: "13px",
-            color: "var(--text-muted)",
-          }}
-        >
+      <footer className="relative z-10 w-full border-t border-border/80 bg-card py-8 px-4">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-xs text-muted-foreground sm:flex-row">
           <div>
             © {new Date().getFullYear()} SmartDoc. Ferramenta de inteligência artificial para advogados.
           </div>
-          <div style={{ display: "flex", gap: "20px" }}>
-            <a href="#recursos" style={{ color: "inherit", textDecoration: "none" }}>Recursos</a>
-            <a href="#como-funciona" style={{ color: "inherit", textDecoration: "none" }}>Como Funciona</a>
-            <a href="#faq" style={{ color: "inherit", textDecoration: "none" }}>Dúvidas</a>
+          <div className="flex gap-5">
+            <a href="#recursos" className="hover:text-foreground transition-colors">Recursos</a>
+            <a href="#como-funciona" className="hover:text-foreground transition-colors">Como Funciona</a>
+            <a href="#faq" className="hover:text-foreground transition-colors">Dúvidas</a>
           </div>
         </div>
       </footer>
