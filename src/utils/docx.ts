@@ -35,12 +35,13 @@ export function compileWordHtml(title: string, rawHtml: string): string {
       <title>${title || 'Documento SmartDoc'}</title>
       <style>
         body {
-          font-family: 'Georgia', 'Times New Roman', serif;
+          font-family: 'Cambria', 'Times New Roman', serif;
           font-size: 11.5pt;
           line-height: 1.5;
           color: #1a1a1a;
         }
         h1 {
+          font-family: 'Cambria', 'Times New Roman', serif;
           font-size: 12.0pt;
           font-weight: bold;
           text-align: justify;
@@ -50,6 +51,7 @@ export function compileWordHtml(title: string, rawHtml: string): string {
           color: #000000;
         }
         h2 {
+          font-family: 'Cambria', 'Times New Roman', serif;
           font-size: 13.0pt;
           font-weight: bold;
           margin-top: 18.0pt;
@@ -57,7 +59,7 @@ export function compileWordHtml(title: string, rawHtml: string): string {
           color: #111827;
         }
         p {
-          font-family: 'Georgia', serif;
+          font-family: 'Cambria', 'Times New Roman', serif;
           text-align: justify;
           margin-bottom: 8.0pt;
           line-height: 1.5;
@@ -73,6 +75,7 @@ export function compileWordHtml(title: string, rawHtml: string): string {
           padding: 8.0pt 12.0pt;
           margin: 12.0pt 0.0pt;
           font-style: italic;
+          font-family: 'Cambria', 'Times New Roman', serif;
         }
         blockquote p {
           text-indent: 0.0pt !important;
@@ -109,7 +112,7 @@ export async function getWordBuffer(title: string, rawHtml: string): Promise<Buf
   
   const fileBuffer = await HTMLtoDOCX(cleanHtml, null, {
     title: title || 'Documento SmartDoc',
-    font: 'Georgia',
+    font: 'Cambria',
     margins: {
       top: 1440,
       right: 1440,

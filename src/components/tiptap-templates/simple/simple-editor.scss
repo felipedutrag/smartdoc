@@ -44,7 +44,7 @@ body,
 }
 
 .tiptap.ProseMirror {
-  font-family: "Lora", "Georgia", serif;
+  font-family: "Cambria", "Times New Roman", "Lora", serif;
   text-align: justify;
   line-height: 1.65;
   font-size: var(--editor-font-size, 17px);
@@ -55,6 +55,7 @@ body,
   }
 
   p, li {
+    font-family: inherit;
     font-size: inherit !important;
   }
 
