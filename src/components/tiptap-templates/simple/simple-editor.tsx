@@ -125,23 +125,23 @@ const MainToolbarContent = ({
       <div style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
         {/* Left side: Logo */}
         <Link href="/" style={{ display: "flex", alignItems: "center", flexShrink: 0, textDecoration: "none" }}>
-          <div style={{ 
-            display: 'flex', 
+          <div style={{
+            display: 'flex',
             alignItems: 'center',
             gap: 4
           }}>
             <span style={{ fontSize: 16, fontFamily: "var(--font-sans), sans-serif", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: 0, textTransform: "none", position: "relative" }}>
               <span style={{ fontWeight: 600, letterSpacing: "-0.04em" }}>SMART</span>
               <span style={{ fontWeight: 900, color: "var(--primary)", letterSpacing: "-0.04em", marginLeft: 2 }}>DOC</span>
-              <span style={{ 
+              <span style={{
                 position: "absolute",
                 top: -5,
                 right: -18,
-                background: "color-mix(in srgb, var(--primary) 12%, transparent)", 
+                background: "color-mix(in srgb, var(--primary) 12%, transparent)",
                 border: "1px solid color-mix(in srgb, var(--primary) 30%, transparent)",
-                color: "var(--primary)", 
-                fontSize: 7, 
-                fontWeight: 900, 
+                color: "var(--primary)",
+                fontSize: 7,
+                fontWeight: 900,
                 padding: "0.2px 2px",
                 borderRadius: "2px",
                 textTransform: "uppercase",
@@ -210,11 +210,11 @@ const MainToolbarContent = ({
 
   return (
     <>
-      <div style={{ 
-        display: "flex", 
-        width: "100%", 
-        alignItems: "center", 
-        position: "relative" 
+      <div style={{
+        display: "flex",
+        width: "100%",
+        alignItems: "center",
+        position: "relative"
       }}>
         {/* Left side: History, Headings, Lists, Text formatting */}
         <div style={{ display: "flex", alignItems: "center", flexShrink: 0, gap: "8px" }}>
@@ -234,7 +234,7 @@ const MainToolbarContent = ({
                   types={["bulletList", "orderedList", "taskList"]}
                 />
               </ToolbarGroup>
-              
+
               <ToolbarSeparator />
               <ToolbarGroup style={{ ... (disabled ? { pointerEvents: "none", opacity: 0.55 } : {}), flexShrink: 0 }}>
                 <MarkButton type="bold" />
@@ -246,13 +246,13 @@ const MainToolbarContent = ({
         </div>
 
         {/* Center: Logo - PERFECTLY CENTERED */}
-        <Link 
+        <Link
           href="/dashboard"
-          style={{ 
+          style={{
             position: "absolute",
             left: "50%",
             transform: "translateX(-50%)",
-            display: 'flex', 
+            display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: 6,
@@ -262,15 +262,15 @@ const MainToolbarContent = ({
           <span style={{ fontSize: 17, fontFamily: "var(--font-sans), sans-serif", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: 0, textTransform: "none", position: "relative" }}>
             <span style={{ fontWeight: 600, letterSpacing: "-0.04em" }}>SMART</span>
             <span style={{ fontWeight: 900, color: "var(--primary)", letterSpacing: "-0.04em", marginLeft: 2 }}>DOC</span>
-            <span style={{ 
+            <span style={{
               position: "absolute",
               top: -2,
               right: -22,
-              background: "color-mix(in srgb, var(--primary) 12%, transparent)", 
+              background: "color-mix(in srgb, var(--primary) 12%, transparent)",
               border: "1px solid color-mix(in srgb, var(--primary) 30%, transparent)",
-              color: "var(--primary)", 
-              fontSize: 8, 
-              fontWeight: 900, 
+              color: "var(--primary)",
+              fontSize: 8,
+              fontWeight: 900,
               padding: "0.5px 3.5px",
               borderRadius: "3px",
               textTransform: "uppercase",
@@ -417,7 +417,7 @@ const cleanMarkdownBold = (html: string): string => {
   return cleaned;
 };
 
-export const SimpleEditor = forwardRef<SimpleEditorRef, { 
+export const SimpleEditor = forwardRef<SimpleEditorRef, {
   children?: React.ReactNode,
   leftContent?: React.ReactNode,
   rightContent?: React.ReactNode,
@@ -431,7 +431,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
   setIsRewriting?: (isRewriting: boolean) => void,
   isPaid?: boolean,
   onActiveEditChange?: (active: boolean) => void
-}>(({ 
+}>(({
   children,
   leftContent,
   rightContent,
@@ -453,7 +453,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
     "main"
   )
   const toolbarRef = useRef<HTMLDivElement>(null)
-  const [fontSize, setFontSize] = useState(17)
+  const [fontSize, setFontSize] = useState(21)
   const [contentVersion, setContentVersion] = useState(0)
   const [preAiEditContent, setPreAiEditContent] = useState<string | null>(null)
 
@@ -473,11 +473,11 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
 
 
   const increaseFontSize = () => {
-    setFontSize(prev => Math.min(prev + 1, 24))
+    setFontSize(prev => Math.min(prev + 1, 32))
   }
 
   const decreaseFontSize = () => {
-    setFontSize(prev => Math.max(prev - 1, 9))
+    setFontSize(prev => Math.max(prev - 1, 10))
   }
 
   const editor = useEditor({
@@ -549,11 +549,11 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
     };
 
     calculateLockHeight();
-    
+
     if (!isPaid && !isGenerating) {
-       const observer = new ResizeObserver(calculateLockHeight);
-       observer.observe(editor.view.dom);
-       return () => observer.disconnect();
+      const observer = new ResizeObserver(calculateLockHeight);
+      observer.observe(editor.view.dom);
+      return () => observer.disconnect();
     }
   }, [isPaid, isGenerating, editor, contentVersion]);
 
@@ -656,7 +656,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
 
   const handleOrbiRewrite = async (externalInstruction?: string) => {
     if (!editor) return;
-    
+
     // Sempre pegamos o documento todo para garantir que a IA localize o contexto certo e aplique o diff mark
     const contextText = editor.getHTML();
     setPreAiEditContent(contextText);
@@ -673,8 +673,8 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
       const response = await fetch("/api/gemini/rewrite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          text: contextText, 
+        body: JSON.stringify({
+          text: contextText,
           instruction,
           selectedText
         }),
@@ -703,16 +703,16 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
         const parser = new DOMParser();
         const responseDoc = parser.parseFromString(cleaned, "text/html");
         const updates = Array.from(responseDoc.querySelectorAll('update'));
-        
+
         if (updates.length > 0) {
           const currentHtml = editor.getHTML();
           const currentDoc = parser.parseFromString(currentHtml, "text/html");
-          
+
           let modified = false;
           updates.forEach(updateTag => {
             const id = updateTag.getAttribute('id');
             if (!id) return;
-            
+
             const targetNode = currentDoc.querySelector(`[id="${id}"]`);
             if (targetNode) {
               if (updateTag.firstElementChild && updateTag.firstElementChild.getAttribute('id') === id) {
@@ -723,7 +723,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
               modified = true;
             }
           });
-          
+
           if (modified) {
             const finalHtml = currentDoc.body.innerHTML;
             editor.commands.setContent(finalHtml);
@@ -766,10 +766,10 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
   }));
 
   return (
-    <div className="simple-editor-wrapper" style={{ 
-      position: "relative", 
-      opacity: lockHeight === "350vh" ? 0 : 1, 
-      transition: "opacity 0.3s ease-in" 
+    <div className="simple-editor-wrapper" style={{
+      position: "relative",
+      opacity: lockHeight === "350vh" ? 0 : 1,
+      transition: "opacity 0.3s ease-in"
     }}>
 
       <EditorContext.Provider value={{ editor }}>
@@ -843,7 +843,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
               </svg>
               <span style={{ color: "var(--text-secondary)", fontSize: "11px", fontWeight: 600 }}>Revisão da IA:</span>
             </div>
@@ -877,7 +877,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
                 Descartar
               </button>
             )}
-            
+
             <button
               onClick={clearHighlights}
               style={{
@@ -908,9 +908,9 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
           </div>
         )}
 
-        <div 
-          className="simple-editor-content" 
-          style={{ 
+        <div
+          className="simple-editor-content"
+          style={{
             position: "relative",
             ["--editor-font-size" as keyof React.CSSProperties]: `${fontSize}px`,
             userSelect: editable ? "text" : "none",

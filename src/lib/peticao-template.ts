@@ -54,7 +54,7 @@ export function renderPeticaoJsonToHtml(data: PeticaoDocumentJson): string {
   // 1. Endereçamento (Juízo)
   if (cabecalho?.enderecamento) {
     htmlParts.push(
-      `<p style="text-align: justify; font-weight: bold; text-transform: uppercase; font-size: 1.05em; line-height: 1.4; margin-bottom: 0;">${cabecalho.enderecamento}</p>`
+      `<p style="text-align: justify; font-weight: bold; text-transform: uppercase; line-height: 1.5; margin-bottom: 0;">${cabecalho.enderecamento}</p>`
     );
   }
 
@@ -73,7 +73,7 @@ export function renderPeticaoJsonToHtml(data: PeticaoDocumentJson): string {
   );
 
   htmlParts.push(
-    `<h2 style="text-align: center; text-transform: uppercase; margin: 1.25rem 0; font-family: inherit; font-size: 1.15em;">${tipoAcao}</h2>`
+    `<h2 style="text-align: center; text-transform: uppercase; margin: 1.25rem 0; font-family: inherit;">${tipoAcao}</h2>`
   );
 
   htmlParts.push(
