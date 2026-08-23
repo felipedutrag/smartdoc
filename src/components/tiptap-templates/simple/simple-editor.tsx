@@ -131,15 +131,15 @@ const MainToolbarContent = ({
             gap: 4
           }}>
             <span style={{ fontSize: 16, fontFamily: "var(--font-sans), sans-serif", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: 0, textTransform: "none", position: "relative" }}>
-              <span style={{ fontWeight: 400, letterSpacing: "-0.05em" }}>SMART</span>
-              <span style={{ fontWeight: 900, color: "#d97706", letterSpacing: "-0.05em", marginLeft: 2 }}>DOC</span>
+              <span style={{ fontWeight: 600, letterSpacing: "-0.04em" }}>SMART</span>
+              <span style={{ fontWeight: 900, color: "var(--primary)", letterSpacing: "-0.04em", marginLeft: 2 }}>DOC</span>
               <span style={{ 
                 position: "absolute",
                 top: -5,
                 right: -18,
-                background: "rgba(217, 119, 6, 0.12)", 
-                border: "1px solid rgba(217, 119, 6, 0.25)",
-                color: "#d97706", 
+                background: "color-mix(in srgb, var(--primary) 12%, transparent)", 
+                border: "1px solid color-mix(in srgb, var(--primary) 30%, transparent)",
+                color: "var(--primary)", 
                 fontSize: 7, 
                 fontWeight: 900, 
                 padding: "0.2px 2px",
@@ -260,15 +260,15 @@ const MainToolbarContent = ({
           }}
         >
           <span style={{ fontSize: 17, fontFamily: "var(--font-sans), sans-serif", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: 0, textTransform: "none", position: "relative" }}>
-            <span style={{ fontWeight: 400, letterSpacing: "-0.05em" }}>SMART</span>
-            <span style={{ fontWeight: 900, color: "#d97706", letterSpacing: "-0.05em", marginLeft: 2 }}>DOC</span>
+            <span style={{ fontWeight: 600, letterSpacing: "-0.04em" }}>SMART</span>
+            <span style={{ fontWeight: 900, color: "var(--primary)", letterSpacing: "-0.04em", marginLeft: 2 }}>DOC</span>
             <span style={{ 
               position: "absolute",
               top: -2,
               right: -22,
-              background: "rgba(217, 119, 6, 0.12)", 
-              border: "1px solid rgba(217, 119, 6, 0.25)",
-              color: "#d97706", 
+              background: "color-mix(in srgb, var(--primary) 12%, transparent)", 
+              border: "1px solid color-mix(in srgb, var(--primary) 30%, transparent)",
+              color: "var(--primary)", 
               fontSize: 8, 
               fontWeight: 900, 
               padding: "0.5px 3.5px",
