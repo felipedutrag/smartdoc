@@ -344,24 +344,29 @@ export function useGeminiLive(
           console.log("[WS] Sessão retomada. Contexto omitido para economizar tokens.");
         }
 
-        ws.send(JSON.stringify({
+        const setupPayload: any = {
           setup: {
             model: "models/gemini-3.1-flash-live-preview",
             systemInstruction: { parts: systemInstructionParts },
             tools,
             generationConfig: {
               responseModalities,
-              speechConfig: {
-                voiceConfig: {
-                  prebuiltVoiceConfig: { voiceName: "Leda" },
-                },
-              },
             },
             inputAudioTranscription: {},
-            outputAudioTranscription: {},
             sessionResumption: resumptionHandleRef.current ? { handle: resumptionHandleRef.current } : {},
           },
-        }));
+        };
+
+        if (responseModalities.includes("AUDIO")) {
+          setupPayload.setup.generationConfig.speechConfig = {
+            voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: "Leda" },
+            },
+          };
+          setupPayload.setup.outputAudioTranscription = {};
+        }
+
+        ws.send(JSON.stringify(setupPayload));
       };
 
       ws.onmessage = async (event) => {
