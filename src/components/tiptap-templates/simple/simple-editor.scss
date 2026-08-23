@@ -212,7 +212,7 @@ body,
 
 .simple-editor-content .tiptap.ProseMirror.simple-editor {
   flex: 1;
-  padding: 3rem 3rem 4rem; /* Top padding harmonized */
+  padding: 3rem 4rem 4rem; /* Generous side padding for authentic document look */
 }
 
 @media screen and (max-width: 860px) {
@@ -226,7 +226,7 @@ body,
     padding: 2rem 1.5rem 0;
   }
   .simple-editor-content .tiptap.ProseMirror.simple-editor {
-    padding: 2.5rem 1.5rem 2.5rem;
+    padding: 2.5rem 2rem 2.5rem;
   }
 }
 
