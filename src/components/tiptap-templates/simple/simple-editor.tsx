@@ -72,6 +72,7 @@ import { TextAlignButton } from "@/components/tiptap-ui/text-align-button"
 import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button"
 
 // --- Icons ---
+import { Scale } from "lucide-react"
 import { ArrowLeftIcon } from "@/components/tiptap-icons/arrow-left-icon"
 import { HighlighterIcon } from "@/components/tiptap-icons/highlighter-icon"
 import { LinkIcon } from "@/components/tiptap-icons/link-icon"
@@ -123,32 +124,16 @@ const MainToolbarContent = ({
   if (isMobile === true) {
     return (
       <div style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-        {/* Left side: Logo */}
-        <Link href="/" style={{ display: "flex", alignItems: "center", flexShrink: 0, textDecoration: "none" }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4
-          }}>
-            <span style={{ fontSize: 16, fontFamily: "var(--font-sans), sans-serif", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: 0, textTransform: "none", position: "relative" }}>
-              <span style={{ fontWeight: 600, letterSpacing: "-0.04em" }}>SMART</span>
-              <span style={{ fontWeight: 900, color: "var(--primary)", letterSpacing: "-0.04em", marginLeft: 2 }}>DOC</span>
-              <span style={{
-                position: "absolute",
-                top: -5,
-                right: -18,
-                background: "color-mix(in srgb, var(--primary) 12%, transparent)",
-                border: "1px solid color-mix(in srgb, var(--primary) 30%, transparent)",
-                color: "var(--primary)",
-                fontSize: 7,
-                fontWeight: 900,
-                padding: "0.2px 2px",
-                borderRadius: "2px",
-                textTransform: "uppercase",
-                opacity: 1
-              }}>
-                IA
-              </span>
+        {/* Left side: Logo padronizado */}
+        <Link href="/" className="group flex items-center gap-2 no-underline">
+          <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 border border-primary/20 text-primary transition-transform group-hover:scale-105">
+            <Scale className="size-4" />
+          </div>
+          <div className="flex items-center text-sm font-bold tracking-tight text-foreground">
+            <span>SMART</span>
+            <span className="text-primary font-black ml-0.5">DOC</span>
+            <span className="ml-2 rounded border border-border/80 bg-muted/60 px-1.5 py-0.2 font-mono text-[9px] font-semibold text-muted-foreground uppercase tracking-widest">
+              2.0
             </span>
           </div>
         </Link>
@@ -245,9 +230,10 @@ const MainToolbarContent = ({
           )}
         </div>
 
-        {/* Center: Logo - PERFECTLY CENTERED */}
+        {/* Center: Logo padronizado da landing page */}
         <Link
           href="/dashboard"
+          className="group no-underline"
           style={{
             position: "absolute",
             left: "50%",
@@ -255,30 +241,19 @@ const MainToolbarContent = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 6,
-            textDecoration: "none"
+            gap: 8,
           }}
         >
-          <span style={{ fontSize: 17, fontFamily: "var(--font-sans), sans-serif", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: 0, textTransform: "none", position: "relative" }}>
-            <span style={{ fontWeight: 600, letterSpacing: "-0.04em" }}>SMART</span>
-            <span style={{ fontWeight: 900, color: "var(--primary)", letterSpacing: "-0.04em", marginLeft: 2 }}>DOC</span>
-            <span style={{
-              position: "absolute",
-              top: -2,
-              right: -22,
-              background: "color-mix(in srgb, var(--primary) 12%, transparent)",
-              border: "1px solid color-mix(in srgb, var(--primary) 30%, transparent)",
-              color: "var(--primary)",
-              fontSize: 8,
-              fontWeight: 900,
-              padding: "0.5px 3.5px",
-              borderRadius: "3px",
-              textTransform: "uppercase",
-              opacity: 1
-            }}>
-              IA
+          <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 border border-primary/20 text-primary transition-transform group-hover:scale-105">
+            <Scale className="size-4" />
+          </div>
+          <div className="flex items-center text-sm font-bold tracking-tight text-foreground">
+            <span>SMART</span>
+            <span className="text-primary font-black ml-0.5">DOC</span>
+            <span className="ml-2 rounded border border-border/80 bg-muted/60 px-1.5 py-0.2 font-mono text-[9px] font-semibold text-muted-foreground uppercase tracking-widest">
+              2.0
             </span>
-          </span>
+          </div>
         </Link>
 
         {isMobile === false && (
@@ -408,6 +383,7 @@ const MobileToolbarContent = ({
 
 export interface SimpleEditorRef {
   handleOrbiRewrite: (externalInstruction?: string) => Promise<void>;
+  applyToolbarFormat: (action: string, targetText: string) => boolean;
 }
 
 const cleanMarkdownBold = (html: string): string => {
@@ -761,8 +737,58 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
     setPreAiEditContent(null);
   };
 
+  const applyToolbarFormat = (action: string, targetText: string): boolean => {
+    if (!editor) return false;
+    
+    // Simplest approach: Tiptap doesn't have a native global text search API,
+    // but we can extract the text and find the position if it's unique enough.
+    const textContent = editor.state.doc.textContent;
+    const startIndex = textContent.indexOf(targetText);
+    
+    if (startIndex === -1) {
+      console.warn("[applyToolbarFormat] Texto não encontrado:", targetText);
+      return false;
+    }
+
+    // Resolvendo posições exatas no documento prosemirror (nodes)
+    // Uma aproximação rápida que funciona bem na maioria dos casos simples:
+    let found = false;
+    editor.state.doc.descendants((node, pos) => {
+      if (found) return false;
+      if (node.isText && node.text && node.text.includes(targetText)) {
+        const localIndex = node.text.indexOf(targetText);
+        const from = pos + localIndex;
+        const to = from + targetText.length;
+        
+        editor.commands.setTextSelection({ from, to });
+        
+        switch(action) {
+          case 'bold': editor.commands.setBold(); break;
+          case 'unbold': editor.commands.unsetBold(); break;
+          case 'italic': editor.commands.setItalic(); break;
+          case 'underline': editor.commands.setUnderline(); break;
+          case 'justifyCenter': editor.commands.setTextAlign('center'); break;
+          case 'justifyRight': editor.commands.setTextAlign('right'); break;
+          case 'justifyLeft': editor.commands.setTextAlign('left'); break;
+          case 'justifyFull': editor.commands.setTextAlign('justify'); break;
+        }
+        
+        // Deselecionar
+        editor.commands.setTextSelection(to);
+        found = true;
+        return false; // stop iteration
+      }
+    });
+
+    if (found) {
+      localStorage.setItem("extrajus_draft", editor.getHTML());
+    }
+    return found;
+  };
+
   useImperativeHandle(ref, () => ({
-    handleOrbiRewrite
+    handleOrbiRewrite,
+    applyToolbarFormat
   }));
 
   return (
@@ -779,18 +805,18 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
           style={{
             display: "flex",
             alignItems: "center",
-            background: "color-mix(in srgb, var(--surface) 85%, transparent)",
+            background: "color-mix(in srgb, var(--background) 90%, transparent)",
             borderBottom: "1px solid var(--border)",
-            paddingTop: "12px",
-            paddingBottom: "12px",
-            paddingLeft: isMobile === true ? "24px" : "24px",
-            paddingRight: isMobile === true ? "24px" : "24px",
+            paddingTop: "10px",
+            paddingBottom: "10px",
+            paddingLeft: isMobile === true ? "16px" : "24px",
+            paddingRight: isMobile === true ? "16px" : "24px",
             position: isMobile === true ? "fixed" : "sticky",
             top: 0,
             ...(isMobile === true ? { left: 0, right: 0 } : {}),
             zIndex: 100,
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
             boxSizing: "border-box",
             borderRadius: 0,
           }}

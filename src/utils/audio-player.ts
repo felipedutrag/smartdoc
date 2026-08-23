@@ -97,9 +97,14 @@ export class AudioStreamPlayer {
 
       const now = ctx.currentTime;
       
-      // Sincronização padrão bot: 350ms de lookahead inicial para evitar corte de áudio no warmup do hardware
+      // Sincronização: lookahead inicial para evitar cortes.
+      // Se houver lag de rede no meio (underrun), aplicamos um lookahead menor para não gerar grandes buracos.
       if (this.nextPlayTime < now) {
-        this.nextPlayTime = now + 0.35;
+        if (this.activeSources.length === 0) {
+          this.nextPlayTime = now + 0.15; // 150ms inicial
+        } else {
+          this.nextPlayTime = now + 0.05; // 50ms para lag de rede
+        }
       }
 
       // Rastreamento para interrupção (stop)

@@ -17,15 +17,20 @@ type SavedVoiceSession = {
   timestamp: number;
 };
 
+function getSessionKey(documentId?: string | null) {
+  return documentId ? `${SESSION_KEY}_${documentId}` : SESSION_KEY;
+}
+
 function saveVoiceSession(
   history: Message[],
   isActive: boolean,
   sessionId: string,
-  resumptionHandle?: string | null
+  resumptionHandle?: string | null,
+  documentId?: string | null
 ) {
   try {
     if (typeof window === 'undefined') return;
-    localStorage.setItem(SESSION_KEY, JSON.stringify({
+    localStorage.setItem(getSessionKey(documentId), JSON.stringify({
       history: history.slice(-20),
       isActive,
       sessionId,
@@ -35,10 +40,10 @@ function saveVoiceSession(
   } catch {}
 }
 
-function loadVoiceSession(): SavedVoiceSession | null {
+function loadVoiceSession(documentId?: string | null): SavedVoiceSession | null {
   try {
     if (typeof window === 'undefined') return null;
-    const raw = localStorage.getItem(SESSION_KEY);
+    const raw = localStorage.getItem(getSessionKey(documentId));
     if (!raw) return null;
     const data = JSON.parse(raw) as SavedVoiceSession;
     if (Date.now() - data.timestamp > 7200_000) {
@@ -54,7 +59,8 @@ export function useGeminiLive(
   onRedirect?: (facts: string) => void,
   setupEndpoint: string = '/api/config/gemini-live-setup',
   onToolCall?: (name: string, args: any) => void,
-  extraContext?: string
+  extraContext?: string,
+  documentId?: string | null
 ) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
@@ -67,12 +73,22 @@ export function useGeminiLive(
   const sessionIdRef = useRef(`extrajus_live_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`);
   const resumptionHandleRef = useRef<string | null>(null);
   const sessionRestoredRef = useRef(false);
+  const documentIdRef = useRef(documentId);
 
   useEffect(() => {
-    // Each voice session starts fresh from scratch.
+    documentIdRef.current = documentId;
+    const saved = loadVoiceSession(documentId);
+    if (saved) {
+      setMessages(saved.history || []);
+      if (saved.sessionId) sessionIdRef.current = saved.sessionId;
+      if (saved.resumptionHandle) resumptionHandleRef.current = saved.resumptionHandle;
+    } else {
+      setMessages([]);
+      sessionIdRef.current = `extrajus_live_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      resumptionHandleRef.current = null;
+    }
     sessionRestoredRef.current = true;
-    setMessages([]);
-  }, []);
+  }, [documentId]);
 
   useEffect(() => {
     setIsMuted(false);
@@ -149,7 +165,8 @@ export function useGeminiLive(
       messagesRef.current,
       isActive,
       sessionIdRef.current,
-      resumptionHandleRef.current
+      resumptionHandleRef.current,
+      documentIdRef.current
     );
   }, []);
 
@@ -301,20 +318,6 @@ export function useGeminiLive(
         setIsConnecting(false);
         retryCountRef.current = 0;
 
-        pingIntervalRef.current = window.setInterval(() => {
-          if (ws.readyState === WebSocket.OPEN) {
-            try {
-              ws.send(JSON.stringify({
-                realtimeInput: {
-                  audio: { data: "", mimeType: "audio/pcm;rate=16000" },
-                },
-              }));
-            } catch (e) {
-              console.error("[WS] Erro no heartbeat:", e);
-            }
-          }
-        }, 10000);
-
         const tools = [...(config.tools || [])];
         tools.push({
           functionDeclarations: [
@@ -330,8 +333,14 @@ export function useGeminiLive(
         });
 
         const systemInstructionParts = [{ text: config.systemInstruction }];
-        if (extraContextRef.current) {
+        
+        // Apenas envia a petição inteira como contexto na PRIMEIRA conexão (sem resume handle)
+        // Isso economiza milhares de tokens, pois nas conexões subsequentes a IA já lembrará do contexto nativamente.
+        if (extraContextRef.current && !resumptionHandleRef.current) {
           systemInstructionParts.push({ text: `\n\nCONTEXTO DO DOCUMENTO ATUAL:\n${extraContextRef.current}` });
+          console.log("[WS] Novo contexto injetado no system instruction.");
+        } else if (resumptionHandleRef.current) {
+          console.log("[WS] Sessão retomada. Contexto omitido para economizar tokens.");
         }
 
         ws.send(JSON.stringify({
@@ -349,6 +358,7 @@ export function useGeminiLive(
             },
             inputAudioTranscription: {},
             outputAudioTranscription: {},
+            sessionResumption: resumptionHandleRef.current ? { handle: resumptionHandleRef.current } : {},
           },
         }));
       };
@@ -408,7 +418,9 @@ export function useGeminiLive(
               }
               pendingDisconnectRef.current = true;
             } else if (onToolCallRef.current) {
-              await Promise.resolve(onToolCallRef.current(call.name, call.args));
+              // Executa a função em background sem pausar a IA (de forma síncrona para o WebSocket)
+              Promise.resolve(onToolCallRef.current(call.name, call.args)).catch(console.error);
+              
               if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
                 wsRef.current.send(JSON.stringify({
                   toolResponse: {
@@ -419,7 +431,7 @@ export function useGeminiLive(
                         response: {
                           output: {
                             success: true,
-                            message: "Edição aplicada com sucesso no editor."
+                            message: "A solicitação foi adicionada à fila de processamento assíncrono e será aplicada no documento em breve. Você pode continuar conversando normalmente com o usuário."
                           }
                         }
                       }
@@ -516,6 +528,11 @@ export function useGeminiLive(
       };
 
       ws.onclose = (event) => {
+        if (!setupComplete && resumptionHandleRef.current) {
+          console.warn("[WS] Falha ao retomar sessão. Descartando handle de resumo.");
+          resumptionHandleRef.current = null;
+        }
+
         isConnectingRef.current = false;
         setIsConnecting(false);
         setIsConnected(false);
@@ -541,6 +558,7 @@ export function useGeminiLive(
           setTimeout(() => {
             if (shouldReconnectRef.current) {
               wsRef.current = null;
+              // eslint-disable-next-line
               connect();
             }
           }, delay);
@@ -614,7 +632,7 @@ export function useGeminiLive(
     setMessages([]);
     resumptionHandleRef.current = null;
     sessionIdRef.current = `extrajus_live_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(getSessionKey(documentIdRef.current));
     localStorage.removeItem('extrajus_chat_history');
   }, []);
 

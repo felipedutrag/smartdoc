@@ -2,10 +2,10 @@
 
 export const dynamic = "force-dynamic";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
-import { useGeminiLive } from "@/hooks/use-gemini-live";
-import { FileDown, ArrowLeft } from "lucide-react";
+import { useDashboardVoice } from "@/hooks/use-dashboard-voice";
+import { FileDown, ArrowLeft, Mic, MicOff, Sparkles, Radio, Loader2 } from "lucide-react";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import { SimpleEditorRef } from "@/components/tiptap-templates/simple/simple-editor";
 import Link from "next/link";
@@ -29,6 +29,55 @@ export default function EditorPage() {
   const [recognition, setRecognition] = useState<any>(null);
   const [currentDocId, setCurrentDocId] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  const [editQueue, setEditQueue] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!isRewriting && editQueue.length > 0) {
+      const nextInstruction = editQueue[0];
+      setEditQueue((prev) => prev.slice(1));
+      if (editorRef.current?.handleOrbiRewrite) {
+        editorRef.current.handleOrbiRewrite(nextInstruction);
+      }
+    }
+  }, [isRewriting, editQueue]);
+
+  // Integração com Gemini Voice WebSocket para alterações em tempo real
+  const handleVoiceEditDocument = useCallback((instruction: string) => {
+    console.log("[Gemini Voice] Instrução adicionada à fila:", instruction);
+    setEditQueue((prev) => [...prev, instruction]);
+  }, []);
+
+  const handleVoiceFormatText = useCallback((action: string, targetText: string) => {
+    console.log("[Gemini Voice] Formatação solicitada:", action, targetText);
+    if (editorRef.current?.applyToolbarFormat) {
+      editorRef.current.applyToolbarFormat(action, targetText);
+    }
+  }, []);
+
+  const getDocumentText = () => {
+    if (typeof window === "undefined") return "";
+    const draft = localStorage.getItem("extrajus_draft");
+    if (!draft) return "";
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(draft, "text/html");
+    return doc.body.textContent || "";
+  };
+
+  const {
+    isVoiceActive,
+    isConnecting: isVoiceConnecting,
+    toggleVoice,
+    audioLevel,
+    isMuted,
+    toggleMute,
+    error: voiceError
+  } = useDashboardVoice({
+    onEditDocument: handleVoiceEditDocument,
+    onFormatText: handleVoiceFormatText,
+    documentId: currentDocId,
+    extraContext: getDocumentText(),
+  });
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -71,43 +120,6 @@ export default function EditorPage() {
       recognition.stop();
     } else {
       recognition.start();
-    }
-  };
-
-  const handleToolCall = React.useCallback(async (name: string, args: Record<string, unknown>) => {
-    if (name === "edit_document") {
-      const instruction = typeof args.instruction === 'string' ? args.instruction : "";
-      if (instruction) {
-        await editorRef.current?.handleOrbiRewrite(instruction);
-      }
-    }
-  }, []);
-
-  const [documentContext, setDocumentContext] = useState("");
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const facts = localStorage.getItem("extrajus_facts") || "";
-    const draft = localStorage.getItem("extrajus_draft") || "";
-    if (facts || draft) {
-      const newContext = `Fatos narrados: ${facts}\n\nRascunho atual do documento: ${draft.substring(0, 3000)}`;
-      setDocumentContext(prev => prev !== newContext ? newContext : prev);
-    }
-  }, []);
-
-  const {
-    sendMessage,
-    isConnected,
-    isRecording,
-    stopLiveDialog,
-    connect,
-  } = useGeminiLive(undefined, '/api/config/gemini-editor-setup', handleToolCall, documentContext);
-
-  const toggleVoiceCapture = () => {
-    if (isConnected || isRecording) {
-      stopLiveDialog();
-    } else {
-      connect();
     }
   };
 
@@ -338,7 +350,7 @@ export default function EditorPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="min-h-screen bg-background text-foreground relative">
       <div className="w-full pb-20">
         <SimpleEditor
           ref={editorRef}
@@ -407,6 +419,56 @@ export default function EditorPage() {
           toggleDictation={toggleDictation}
           hasActiveEdit={hasActiveEdit}
         />
+
+        {/* ── Botão Flutuante Gemini Voice (Beta) no Canto Inferior Direito ── */}
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+          {isVoiceActive && (
+            <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-background/95 px-3 py-1.5 text-xs shadow-lg backdrop-blur-md animate-in fade-in slide-in-from-bottom-2">
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+              </span>
+              <span className="font-medium text-foreground text-[11px]">
+                {audioLevel > 0.08 ? "IA falando..." : "Ouvindo você..."}
+              </span>
+              <button
+                onClick={toggleMute}
+                title={isMuted ? "Desmutar" : "Mutar áudio"}
+                className="ml-1 rounded p-1 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {isMuted ? <MicOff size={13} className="text-red-400" /> : <Mic size={13} />}
+              </button>
+            </div>
+          )}
+
+          <button
+            onClick={toggleVoice}
+            disabled={isVoiceConnecting}
+            title={isVoiceActive ? "Encerrar conversa por voz" : "Conversar por Voz em tempo real com a IA (Beta)"}
+            className={`group relative flex items-center gap-2.5 rounded-full px-4 py-2.5 text-xs font-semibold shadow-xl backdrop-blur-xl transition-all active:scale-95 cursor-pointer border ${
+              isVoiceActive
+                ? "bg-red-500/10 border-red-500/40 text-red-500 hover:bg-red-500/20 hover:border-red-500/60 ring-2 ring-red-500/20"
+                : "bg-card/90 hover:bg-card border-border/90 hover:border-primary/40 text-foreground hover:shadow-primary/5"
+            }`}
+          >
+            {isVoiceConnecting ? (
+              <Loader2 className="size-4 animate-spin text-primary" />
+            ) : isVoiceActive ? (
+              <Radio className="size-4 animate-pulse text-red-500" />
+            ) : (
+              <div className="flex size-5 items-center justify-center rounded-full bg-primary/10 text-primary group-hover:scale-110 transition-transform">
+                <Mic className="size-3" />
+              </div>
+            )}
+
+            <div className="flex items-center gap-1.5">
+              <span>{isVoiceConnecting ? "Conectando..." : isVoiceActive ? "Desconectar Voz" : "Voz em Tempo Real"}</span>
+              <span className="rounded bg-primary/15 px-1.5 py-0.5 font-mono text-[9px] font-bold text-primary uppercase tracking-wider">
+                BETA
+              </span>
+            </div>
+          </button>
+        </div>
       </div>
     </main>
   );

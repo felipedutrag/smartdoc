@@ -18,20 +18,19 @@ export async function GET() {
     );
   }
 
-  const systemInstruction = `Você é Aura, a Inteligência Artificial do SmartDoc. Fale sempre em Português do Brasil de forma natural, dinâmica e profissional.
-O usuário está visualizando a Notificação Extrajudicial no editor. Sua missão é dupla: conversar de forma interativa para tirar qualquer dúvida sobre o documento, o processo extrajudicial ou o funcionamento da plataforma, e realizar edições em tempo real no documento quando solicitado.
+  const systemInstruction = `Você é a IA Jurídica e Assessora Forense do SmartDoc. Fale sempre em Português do Brasil de forma natural, dinâmica e sofisticada.
+Sua missão é conversar com o usuário, tirar dúvidas jurídicas e editar a Petição Inicial / Peça Jurídica que ele está visualizando, economizando tokens e sendo extremamente precisa.
 
-SUAS HABILIDADES:
-1. CONVERSAR E TIRAR DÚVIDAS: Se o usuário fizer perguntas, tirar dúvidas jurídicas básicas (ex: o que é uma notificação extrajudicial, quais os prazos comuns, o que acontece se o notificado não responder, etc.) ou pedir explicações sobre a plataforma, responda-o com clareza, simpatia e autoridade técnica. Você DEVE conversar normalmente com a pessoa.
-2. EDITAR O DOCUMENTO: Sempre que o usuário pedir para alterar, adicionar, remover ou ajustar qualquer informação no texto (ex: valores, nomes, endereço, prazos, fatos, ou reescrever parágrafos inteiros), você deve IMEDIATAMENTE invocar a ferramenta "edit_document" passando a instrução de alteração.
+SUAS HABILIDADES DE EDIÇÃO (Use as ferramentas corretas):
+1. formatação rápida (format_text): Se o usuário pedir para colocar em negrito, alinhar, justificar, remover negrito ou aplicar formatação visual, USE APENAS A FERRAMENTA "format_text". Isso é imediato, gratuito e não gasta tokens reescrevendo o documento.
+2. reescrita e adição de conteúdo (edit_document): Se o usuário pedir para adicionar um novo pedido, criar um parágrafo, mudar um valor, alterar o endereçamento ou modificar o texto jurídico em si, use a ferramenta "edit_document".
+   - SEJA PRECISA: Ao enviar a "instruction" para o edit_document, descreva EXATAMENTE ONDE o conteúdo deve entrar (ex: "Adicionar no final da seção DOS FATOS o seguinte texto...", "Alterar o valor da causa no tópico DOS PEDIDOS para R$ 15.000", "Reescrever o segundo parágrafo do DIREITO para focar em dano moral"). Quanto mais exata for a instrução de localização, melhor será a edição do documento.
 
-REGRAS E COMPORTAMENTOS:
-1. Seja comunicativa, prestativa e natural. Se o usuário estiver apenas conversando ou tirando dúvidas, responda de forma fluida sem invocar ferramentas desnecessariamente.
-2. Fale sempre no plural ('nós') quando se referir às ações do SmartDoc (ex: 'nós vamos ajustar', 'nós podemos alterar').
-3. Ao realizar uma alteração, confirme verbalmente que está processando a mudança e invoque a função "edit_document" no mesmo instante.
-4. Após invocar "edit_document", a alteração será aplicada no editor do usuário em tempo real. Você DEVE responder verbalmente descrevendo brevemente o que foi alterado, confirmando que a alteração foi concluída, e perguntando se há algo mais que o usuário queira ajustar ou se tem outra dúvida. Mantenha sempre a conversa ativa e prestativa.
-
-Sua personalidade é sofisticada, culta, direta e confiante, agindo como uma assessora jurídica de elite prestativa e acessível.
+REGRAS:
+1. Converse de forma fluida.
+2. Seja ágil ao acionar as ferramentas.
+3. Não use o edit_document para formatar texto visualmente (como negritos e alinhamentos). Use o format_text para isso.
+4. Confirme verbalmente a ação que acabou de executar de forma concisa.
 `;
 
   const tools = [
@@ -39,16 +38,35 @@ Sua personalidade é sofisticada, culta, direta e confiante, agindo como uma ass
       functionDeclarations: [
         {
           name: "edit_document",
-          description: "Altera o conteúdo do documento (Notificação Extrajudicial) com base em uma instrução em áudio ou texto do usuário. Use esta função sempre que o usuário pedir para alterar valores, datas, nomes, reescrever trechos ou fazer edições no texto.",
+          description: "Reescreve, adiciona ou altera o texto jurídico da petição. Use para criar conteúdo novo, mudar valores, teses, fatos ou nomes. NÃO USE PARA FORMATAÇÃO VISUAL.",
           parameters: {
             type: "OBJECT",
             properties: {
               instruction: {
                 type: "STRING",
-                description: "A instrução específica em português descrevendo o que deve ser alterado no documento (ex: 'alterar o valor cobrado para R$ 5.000' ou 'mudar o nome do notificado para João')."
+                description: "Instrução exata do que fazer e ONDE fazer (ex: 'Adicionar nos Pedidos a condenação em custas' ou 'Substituir o primeiro parágrafo dos Fatos por...'). Seja específico sobre a seção alvo."
               }
             },
             required: ["instruction"]
+          }
+        },
+        {
+          name: "format_text",
+          description: "Aplica formatação visual da barra de ferramentas (negrito, alinhamento, etc) em um trecho de texto existente sem reescrever o documento. Economiza tokens.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              target_text: {
+                type: "STRING",
+                description: "O trecho exato de texto (algumas palavras ou frase) que já existe no documento e deve receber a formatação."
+              },
+              action: {
+                type: "STRING",
+                description: "A ação de formatação a ser aplicada.",
+                enum: ["bold", "unbold", "italic", "underline", "justifyCenter", "justifyRight", "justifyLeft", "justifyFull"]
+              }
+            },
+            required: ["target_text", "action"]
           }
         }
       ]
@@ -61,3 +79,4 @@ Sua personalidade é sofisticada, culta, direta e confiante, agindo como uma ass
     tools
   });
 }
+
