@@ -165,7 +165,7 @@ export default function Home() {
           </h1>
 
           {/* Subtitle Objective */}
-          <p className="mb-8 max-w-xl text-xs sm:text-sm leading-relaxed text-muted-foreground font-normal">
+          <p className="mb-4 max-w-xl text-xs sm:text-sm leading-relaxed text-muted-foreground font-normal">
             Elabore petições iniciais completas com fundamentação legal, doutrina e jurisprudência prontas para o PJe em segundos.
           </p>
 
