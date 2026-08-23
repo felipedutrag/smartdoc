@@ -15,18 +15,14 @@ import {
   ChevronLeft,
   Sparkles,
   ShieldCheck,
-  X,
   Mic,
   ArrowRight,
   Sun,
   Moon,
-  CreditCard,
   User,
   KeyRound,
   Mail,
   Shield,
-  Layers,
-  Settings,
   Menu,
   Crown,
   Check,
@@ -44,8 +40,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Separator } from "@/components/ui/separator";
 
 interface DocumentItem {
   id: string;
@@ -74,6 +71,7 @@ export default function DashboardPage() {
 
   // Layout & Navigation State
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"documents" | "plans" | "profile" | "security">("documents");
 
   // User & Data State
@@ -140,7 +138,6 @@ export default function DashboardPage() {
           return;
         }
 
-        // Buscar perfil
         const { data: profData } = await supabase
           .from("profiles")
           .select("*")
@@ -160,7 +157,6 @@ export default function DashboardPage() {
         setEditOab(currentProf.oab || "");
         setEditEmail(currentProf.email || "");
 
-        // Buscar documentos
         const { data: docsData, error: docsError } = await supabase
           .from("documents")
           .select("id, title, action_type, status, is_paid, word_count, created_at, updated_at")
@@ -179,7 +175,6 @@ export default function DashboardPage() {
 
     loadData();
 
-    // Configurar reconhecimento de fala
     if (typeof window !== "undefined") {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       if (SpeechRecognition) {
@@ -290,7 +285,6 @@ export default function DashboardPage() {
       });
       if (error) throw error;
 
-      // Update in profiles table if exists
       if (profile?.id) {
         await supabase
           .from("profiles")
@@ -333,7 +327,6 @@ export default function DashboardPage() {
     }
   };
 
-  // Filtros de Documentos
   const filteredDocuments = documents.filter((doc) => {
     const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (doc.action_type && doc.action_type.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -362,18 +355,13 @@ export default function DashboardPage() {
     }
   };
 
-  return (
-    <div className="flex min-h-screen bg-background text-foreground">
-      {/* ── Sidebar (Expandível / Colapsável) ── */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-40 flex flex-col border-r border-border bg-card transition-all duration-300 ${
-          sidebarOpen ? "w-64" : "w-16"
-        } ${isMobile && !sidebarOpen ? "-translate-x-full" : "translate-x-0"}`}
-      >
+  const renderSidebarNavigation = (isDrawer = false) => (
+    <div className="flex flex-col h-full justify-between">
+      <div>
         {/* Sidebar Header */}
         <div className="flex h-16 items-center justify-between border-b border-border px-4">
           <Link href="/" className="flex items-center gap-2 overflow-hidden text-lg font-bold tracking-tight">
-            {sidebarOpen ? (
+            {(sidebarOpen || isDrawer) ? (
               <>
                 <span className="tracking-tight">SMART</span>
                 <span className="text-primary">DOC</span>
@@ -386,7 +374,7 @@ export default function DashboardPage() {
             )}
           </Link>
 
-          {!isMobile && (
+          {!isMobile && !isDrawer && (
             <Button
               variant="ghost"
               size="icon-xs"
@@ -402,45 +390,52 @@ export default function DashboardPage() {
         {/* Action Button: Nova Petição */}
         <div className="p-3">
           <Button
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              if (isDrawer) setMobileDrawerOpen(false);
+              setIsModalOpen(true);
+            }}
             className={`w-full bg-primary text-primary-foreground font-semibold shadow-md hover:opacity-90 transition-all ${
-              sidebarOpen ? "justify-start gap-2 h-10 px-3" : "justify-center h-10 p-0"
+              (sidebarOpen || isDrawer) ? "justify-start gap-2 h-10 px-3" : "justify-center h-10 p-0"
             }`}
             title="Nova Petição"
           >
             <Plus className="size-4 shrink-0" />
-            {sidebarOpen && <span>Nova Petição</span>}
+            {(sidebarOpen || isDrawer) && <span>Nova Petição</span>}
           </Button>
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 space-y-1 px-3 py-2">
+        <nav className="space-y-1 px-3 py-2">
           {/* Petições */}
-          <button
-            onClick={() => setActiveTab("documents")}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-              activeTab === "documents"
-                ? "bg-primary/10 text-primary font-semibold"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-            } ${!sidebarOpen ? "justify-center px-0" : ""}`}
+          <Button
+            variant={activeTab === "documents" ? "secondary" : "ghost"}
+            onClick={() => {
+              setActiveTab("documents");
+              if (isDrawer) setMobileDrawerOpen(false);
+            }}
+            className={`w-full ${(sidebarOpen || isDrawer) ? "justify-start gap-3" : "justify-center px-0"} ${
+              activeTab === "documents" ? "bg-primary/10 text-primary hover:bg-primary/15 font-semibold" : "text-muted-foreground"
+            }`}
             title="Minhas Petições"
           >
-            <FileText className="size-4.5 shrink-0" />
-            {sidebarOpen && <span>Minhas Petições</span>}
-          </button>
+            <FileText className="size-4 shrink-0" />
+            {(sidebarOpen || isDrawer) && <span>Minhas Petições</span>}
+          </Button>
 
           {/* Planos de Assinatura */}
-          <button
-            onClick={() => setActiveTab("plans")}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-              activeTab === "plans"
-                ? "bg-primary/10 text-primary font-semibold"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-            } ${!sidebarOpen ? "justify-center px-0" : ""}`}
+          <Button
+            variant={activeTab === "plans" ? "secondary" : "ghost"}
+            onClick={() => {
+              setActiveTab("plans");
+              if (isDrawer) setMobileDrawerOpen(false);
+            }}
+            className={`w-full ${(sidebarOpen || isDrawer) ? "justify-start gap-3" : "justify-center px-0"} ${
+              activeTab === "plans" ? "bg-primary/10 text-primary hover:bg-primary/15 font-semibold" : "text-muted-foreground"
+            }`}
             title="Planos & Assinatura"
           >
-            <Crown className="size-4.5 shrink-0" />
-            {sidebarOpen && (
+            <Crown className="size-4 shrink-0" />
+            {(sidebarOpen || isDrawer) && (
               <div className="flex flex-1 items-center justify-between">
                 <span>Planos & Assinatura</span>
                 <Badge variant="outline" className="border-primary/40 bg-primary/10 text-[10px] text-primary">
@@ -448,92 +443,114 @@ export default function DashboardPage() {
                 </Badge>
               </div>
             )}
-          </button>
+          </Button>
 
           {/* Perfil & OAB */}
-          <button
-            onClick={() => setActiveTab("profile")}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-              activeTab === "profile"
-                ? "bg-primary/10 text-primary font-semibold"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-            } ${!sidebarOpen ? "justify-center px-0" : ""}`}
+          <Button
+            variant={activeTab === "profile" ? "secondary" : "ghost"}
+            onClick={() => {
+              setActiveTab("profile");
+              if (isDrawer) setMobileDrawerOpen(false);
+            }}
+            className={`w-full ${(sidebarOpen || isDrawer) ? "justify-start gap-3" : "justify-center px-0"} ${
+              activeTab === "profile" ? "bg-primary/10 text-primary hover:bg-primary/15 font-semibold" : "text-muted-foreground"
+            }`}
             title="Meu Perfil"
           >
-            <User className="size-4.5 shrink-0" />
-            {sidebarOpen && <span>Meu Perfil (OAB)</span>}
-          </button>
+            <User className="size-4 shrink-0" />
+            {(sidebarOpen || isDrawer) && <span>Meu Perfil (OAB)</span>}
+          </Button>
 
           {/* Segurança & Senha */}
-          <button
-            onClick={() => setActiveTab("security")}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-              activeTab === "security"
-                ? "bg-primary/10 text-primary font-semibold"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-            } ${!sidebarOpen ? "justify-center px-0" : ""}`}
+          <Button
+            variant={activeTab === "security" ? "secondary" : "ghost"}
+            onClick={() => {
+              setActiveTab("security");
+              if (isDrawer) setMobileDrawerOpen(false);
+            }}
+            className={`w-full ${(sidebarOpen || isDrawer) ? "justify-start gap-3" : "justify-center px-0"} ${
+              activeTab === "security" ? "bg-primary/10 text-primary hover:bg-primary/15 font-semibold" : "text-muted-foreground"
+            }`}
             title="Segurança & Senha"
           >
-            <ShieldCheck className="size-4.5 shrink-0" />
-            {sidebarOpen && <span>Segurança & Senha</span>}
-          </button>
+            <ShieldCheck className="size-4 shrink-0" />
+            {(sidebarOpen || isDrawer) && <span>Segurança & Senha</span>}
+          </Button>
         </nav>
+      </div>
 
-        {/* Sidebar Footer: Profile & Logout */}
-        <div className="border-t border-border p-3 space-y-2">
-          {/* User badge */}
-          <div className={`flex items-center gap-3 rounded-lg p-2 ${sidebarOpen ? "" : "justify-center"}`}>
-            <Avatar className="size-8 border border-border">
-              <AvatarFallback className="bg-primary text-primary-foreground font-bold text-xs">
-                {profile?.name?.slice(0, 2).toUpperCase() || "ADV"}
-              </AvatarFallback>
-            </Avatar>
-            {sidebarOpen && (
-              <div className="flex-1 overflow-hidden">
-                <div className="truncate text-xs font-semibold text-foreground">{profile?.name}</div>
-                <div className="truncate text-[11px] text-muted-foreground">{profile?.email}</div>
-              </div>
-            )}
-          </div>
-
-          {/* Theme & Logout */}
-          <div className={`flex items-center gap-1 ${sidebarOpen ? "justify-between" : "flex-col"}`}>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={toggleTheme}
-              className="text-muted-foreground hover:text-foreground"
-              title={isDark ? "Modo Claro" : "Modo Escuro"}
-            >
-              {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
-            </Button>
-
-            <Button
-              variant="ghost"
-              size={sidebarOpen ? "sm" : "icon-xs"}
-              onClick={handleSignOut}
-              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-xs"
-              title="Sair da Conta"
-            >
-              <LogOut className="size-4 shrink-0" />
-              {sidebarOpen && <span className="ml-1.5">Sair</span>}
-            </Button>
-          </div>
+      {/* Sidebar Footer */}
+      <div className="border-t border-border p-3 space-y-2">
+        <div className={`flex items-center gap-3 rounded-lg p-2 ${(sidebarOpen || isDrawer) ? "" : "justify-center"}`}>
+          <Avatar className="size-8 border border-border">
+            <AvatarFallback className="bg-primary text-primary-foreground font-bold text-xs">
+              {profile?.name?.slice(0, 2).toUpperCase() || "ADV"}
+            </AvatarFallback>
+          </Avatar>
+          {(sidebarOpen || isDrawer) && (
+            <div className="flex-1 overflow-hidden">
+              <div className="truncate text-xs font-semibold text-foreground">{profile?.name}</div>
+              <div className="truncate text-[11px] text-muted-foreground">{profile?.email}</div>
+            </div>
+          )}
         </div>
-      </aside>
 
-      {/* ── Main Content Area (com margem dinâmica para a sidebar) ── */}
-      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "md:ml-64" : "md:ml-16"}`}>
-        {/* Mobile Top Navbar */}
+        <div className={`flex items-center gap-1 ${(sidebarOpen || isDrawer) ? "justify-between" : "flex-col"}`}>
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={toggleTheme}
+            className="text-muted-foreground hover:text-foreground"
+            title={isDark ? "Modo Claro" : "Modo Escuro"}
+          >
+            {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size={(sidebarOpen || isDrawer) ? "sm" : "icon-xs"}
+            onClick={handleSignOut}
+            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-xs"
+            title="Sair da Conta"
+          >
+            <LogOut className="size-4 shrink-0" />
+            {(sidebarOpen || isDrawer) && <span className="ml-1.5">Sair</span>}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex min-h-screen bg-background text-foreground">
+      {/* ── Desktop Sidebar (Expandível / Colapsável via shadcn) ── */}
+      {!isMobile && (
+        <aside
+          className={`fixed inset-y-0 left-0 z-40 flex flex-col border-r border-border bg-card transition-all duration-300 ${
+            sidebarOpen ? "w-64" : "w-16"
+          }`}
+        >
+          {renderSidebarNavigation(false)}
+        </aside>
+      )}
+
+      {/* ── Main Content Area ── */}
+      <div className={`flex-1 transition-all duration-300 ${!isMobile && sidebarOpen ? "md:ml-64" : !isMobile ? "md:ml-16" : ""}`}>
+        {/* Mobile Top Navbar with shadcn Sheet Drawer */}
         {isMobile && (
           <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-card/80 px-4 backdrop-blur-md">
-            <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)}>
-              <Menu className="size-5" />
-            </Button>
+            <Sheet open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>
+              <SheetTrigger render={<Button variant="ghost" size="icon"><Menu className="size-5" /></Button>} />
+              <SheetContent side="left" className="w-64 p-0 bg-card border-r border-border">
+                {renderSidebarNavigation(true)}
+              </SheetContent>
+            </Sheet>
+
             <div className="font-bold text-sm">
               <span className="text-foreground">SMART</span>
               <span className="text-primary">DOC</span>
             </div>
+
             <Button variant="ghost" size="icon" onClick={toggleTheme}>
               {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
             </Button>
@@ -564,9 +581,9 @@ export default function DashboardPage() {
                 </Button>
               </div>
 
-              {/* Metric Cards */}
+              {/* Metric Cards com shadcn */}
               <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="flex items-center justify-between rounded-xl border border-border bg-card p-5 shadow-sm">
+                <Card className="flex flex-row items-center justify-between p-5 border-border bg-card shadow-sm">
                   <div>
                     <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Total de Peças
@@ -576,9 +593,9 @@ export default function DashboardPage() {
                   <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <FileText className="size-5" />
                   </div>
-                </div>
+                </Card>
 
-                <div className="flex items-center justify-between rounded-xl border border-border bg-card p-5 shadow-sm">
+                <Card className="flex flex-row items-center justify-between p-5 border-border bg-card shadow-sm">
                   <div>
                     <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Prontas / Finalizadas
@@ -588,9 +605,9 @@ export default function DashboardPage() {
                   <div className="flex size-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-500">
                     <CheckCircle2 className="size-5" />
                   </div>
-                </div>
+                </Card>
 
-                <div className="flex items-center justify-between rounded-xl border border-border bg-card p-5 shadow-sm">
+                <Card className="flex flex-row items-center justify-between p-5 border-border bg-card shadow-sm">
                   <div>
                     <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Em Rascunho / Edição
@@ -600,7 +617,7 @@ export default function DashboardPage() {
                   <div className="flex size-11 items-center justify-center rounded-xl bg-muted text-muted-foreground">
                     <Clock className="size-5" />
                   </div>
-                </div>
+                </Card>
               </div>
 
               {/* Section Header & Filters */}
@@ -627,36 +644,30 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="flex rounded-lg border border-border bg-card p-0.5">
-                    <button
+                    <Button
+                      variant={statusFilter === "all" ? "default" : "ghost"}
+                      size="sm"
                       onClick={() => setStatusFilter("all")}
-                      className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                        statusFilter === "all"
-                          ? "bg-primary text-primary-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
+                      className={`text-xs h-7 px-3 ${statusFilter === "all" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"}`}
                     >
                       Todas ({totalDocuments})
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant={statusFilter === "completed" ? "default" : "ghost"}
+                      size="sm"
                       onClick={() => setStatusFilter("completed")}
-                      className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                        statusFilter === "completed"
-                          ? "bg-primary text-primary-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
+                      className={`text-xs h-7 px-3 ${statusFilter === "completed" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"}`}
                     >
                       Prontas
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant={statusFilter === "draft" ? "default" : "ghost"}
+                      size="sm"
                       onClick={() => setStatusFilter("draft")}
-                      className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                        statusFilter === "draft"
-                          ? "bg-primary text-primary-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
+                      className={`text-xs h-7 px-3 ${statusFilter === "draft" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"}`}
                     >
                       Rascunhos
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -765,7 +776,7 @@ export default function DashboardPage() {
                 <Badge className="bg-primary text-primary-foreground font-bold">Ativo</Badge>
               </div>
 
-              {/* Grade de Planos */}
+              {/* Grade de Planos com shadcn Card */}
               <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                 {/* Individual */}
                 <Card className="flex flex-col justify-between border-border bg-card p-6">
@@ -984,7 +995,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Dialog: Criar Nova Petição ── */}
+      {/* ── Dialog: Criar Nova Petição (shadcn Dialog) ── */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-2xl border-border bg-card p-6 shadow-2xl rounded-2xl">
           <DialogHeader>
