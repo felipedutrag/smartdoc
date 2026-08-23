@@ -54,7 +54,7 @@ export function renderPeticaoJsonToHtml(data: PeticaoDocumentJson): string {
   // 1. Endereçamento (Juízo)
   if (cabecalho?.enderecamento) {
     htmlParts.push(
-      `<p style="text-align: justify; font-weight: bold; text-transform: uppercase; font-size: 1.08em; line-height: 1.5; margin-bottom: 1.25rem;">${cabecalho.enderecamento}</p>`
+      `<p style="text-align: justify; font-weight: bold; text-transform: uppercase; font-size: 1.05em; line-height: 1.4; margin-bottom: 0.75rem;">${cabecalho.enderecamento}</p>`
     );
   }
 
@@ -66,7 +66,7 @@ export function renderPeticaoJsonToHtml(data: PeticaoDocumentJson): string {
   const reuQualif = partes?.reu?.qualificacao || "[nacionalidade/tipo], inscrito no CPF/CNPJ nº [Número], com endereço em [Endereço]";
 
   htmlParts.push(
-    `<p style="text-align: justify; margin-top: 0.5rem;"><strong>${autorNome}</strong>, ${autorQualif}, por seu advogado que esta subscreve, vem, mui respeitosamente, perante Vossa Excelência, propor a presente</p>`
+    `<p style="text-align: justify; margin-top: 0;"><strong>${autorNome}</strong>, ${autorQualif}, por seu advogado que esta subscreve, vem, mui respeitosamente, perante Vossa Excelência, propor a presente</p>`
   );
 
   htmlParts.push(

@@ -83,26 +83,14 @@ body,
   }
 
   p {
-    margin-bottom: 1.2rem;
-  }
-
-  // Target the qualification paragraphs (Notificante & Notificado) immediately after the main H1 title
-  h1 + p, 
-  h1 + p + p, 
-  h1 + p + p + p, 
-  h1 + p + br + p,
-  h1 + p + p + br + p,
-  h1 + p + p + p + br + p,
-  h1 + p + br + br + p {
-    font-size: calc(var(--editor-font-size, 17px) + 2px) !important;
-    line-height: 1.7;
-    margin-bottom: 1.2rem;
+    margin-bottom: 1rem;
+    margin-top: 0;
   }
 
   h1, h2, h3, h4 {
     color: var(--text-primary);
     font-weight: 700;
-    margin-top: 1.75rem;
+    margin-top: 1.5rem;
     margin-bottom: 0.5rem;
     text-align: left;
   }
@@ -224,7 +212,7 @@ body,
 
 .simple-editor-content .tiptap.ProseMirror.simple-editor {
   flex: 1;
-  padding: 5rem 3rem 5rem; /* Reduced bottom padding to avoid massive space under signature */
+  padding: 3rem 3rem 4rem; /* Top padding harmonized */
 }
 
 @media screen and (max-width: 860px) {
@@ -238,7 +226,7 @@ body,
     padding: 2rem 1.5rem 0;
   }
   .simple-editor-content .tiptap.ProseMirror.simple-editor {
-    padding: 5rem 1.5rem 3rem;
+    padding: 2.5rem 1.5rem 2.5rem;
   }
 }
 
