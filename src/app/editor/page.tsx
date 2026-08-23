@@ -330,22 +330,12 @@ export default function EditorPage() {
   };
 
   if (!mounted) {
-    return <main style={{ minHeight: "100vh", background: "var(--bg)" }} />;
+    return <main className="min-h-screen bg-background" />;
   }
 
   return (
-    <main style={{
-      minHeight: "100vh",
-      fontFamily: "var(--font-sans), sans-serif",
-      color: "var(--text-primary)"
-    }}>
-      <div style={{
-        background: "transparent",
-        padding: "0 0 80px 0",
-        width: "100%",
-        boxSizing: "border-box"
-      }}>
-
+    <main className="min-h-screen bg-background text-foreground">
+      <div className="w-full pb-20">
         <SimpleEditor
           ref={editorRef}
           editable={true}
@@ -357,20 +347,7 @@ export default function EditorPage() {
           leftContent={
             <Link
               href="/dashboard"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "6px 10px",
-                borderRadius: "8px",
-                background: "var(--bg)",
-                border: "1px solid var(--border)",
-                color: "var(--text-secondary)",
-                fontSize: "12px",
-                fontWeight: 600,
-                textDecoration: "none",
-                transition: "all 0.2s",
-              }}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft size={14} />
               <span>Painel</span>
@@ -384,25 +361,12 @@ export default function EditorPage() {
           />
 
           {!isGenerating && (
-            <div style={{
-              width: "100%",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              textAlign: "center",
-              padding: isMobile ? "24px 16px" : "32px 32px",
-              background: "var(--surface)",
-              borderTop: "1px solid var(--border)",
-              borderRadius: "0 0 16px 16px",
-              boxSizing: "border-box",
-              gap: "18px",
-            }}>
+            <div className="flex w-full flex-col items-center justify-center gap-4 rounded-b-2xl border-t border-border bg-card p-6 sm:p-8 text-center">
               <div>
-                <h3 style={{ fontSize: "17px", fontWeight: 700, margin: "0 0 6px 0", color: "var(--text-primary)" }}>
+                <h3 className="text-base font-bold text-foreground">
                   Petição Pronta para Uso
                 </h3>
-                <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0, maxWidth: "480px", lineHeight: 1.5 }}>
+                <p className="mt-1 max-w-md text-xs text-muted-foreground leading-relaxed">
                   Você pode editar o texto livremente no editor acima ou fazer o download do arquivo Word (.docx).
                 </p>
               </div>
@@ -410,31 +374,7 @@ export default function EditorPage() {
               <button
                 onClick={handleDownloadDocx}
                 disabled={isDownloading}
-                style={{
-                  background: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
-                  color: "white",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  padding: isMobile ? "12px 24px" : "14px 32px",
-                  borderRadius: "12px",
-                  fontSize: "14px",
-                  fontWeight: 700,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px",
-                  cursor: "pointer",
-                  boxShadow: "0 4px 14px rgba(217, 119, 6, 0.3)",
-                  transition: "all 0.2s ease",
-                  width: isMobile ? "100%" : "auto"
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.filter = "brightness(1.1)";
-                  e.currentTarget.style.transform = "translateY(-1px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.filter = "brightness(1)";
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-primary px-7 py-3 text-sm font-bold text-primary-foreground shadow-md transition-all hover:opacity-90 active:scale-95 disabled:pointer-events-none disabled:opacity-50 cursor-pointer"
               >
                 {isDownloading ? (
                   <span className="animate-pulse">Exportando...</span>

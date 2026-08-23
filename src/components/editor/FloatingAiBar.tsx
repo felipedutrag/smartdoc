@@ -45,7 +45,7 @@ export function FloatingAiBar({
       borderRadius: "24px",
       overflow: "hidden",
       boxShadow: isFocused 
-        ? "0 10px 30px rgba(217, 119, 6, 0.12)" 
+        ? "0 10px 30px color-mix(in srgb, var(--primary) 20%, transparent)" 
         : "0 8px 32px rgba(0, 0, 0, 0.12)",
       transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
     }}>
@@ -53,7 +53,7 @@ export function FloatingAiBar({
       <div style={{
         position: "absolute",
         inset: 0,
-        background: "linear-gradient(135deg, rgba(217, 119, 6, 0.35) 0%, rgba(251, 191, 36, 0.15) 100%)",
+        background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 35%, transparent) 0%, color-mix(in srgb, var(--primary) 15%, transparent) 100%)",
         zIndex: 0,
         opacity: showAccelerator ? 1 : 0,
         transition: "opacity 0.3s ease",
@@ -63,7 +63,7 @@ export function FloatingAiBar({
       <div style={{
         position: "absolute",
         inset: 0,
-        background: "linear-gradient(135deg, #d97706 0%, #fbbf24 100%)",
+        background: "linear-gradient(135deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 70%, white) 100%)",
         zIndex: 0,
         opacity: isFocused ? 1 : 0,
         transition: "opacity 0.3s ease",
@@ -76,7 +76,7 @@ export function FloatingAiBar({
         justifyContent: "center",
         gap: "8px",
         width: "100%",
-        background: "var(--surface)",
+        background: "var(--card)",
         padding: "8px 12px",
         borderRadius: "23px",
         backdropFilter: "blur(10px)",
