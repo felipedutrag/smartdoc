@@ -54,7 +54,7 @@ export function renderPeticaoJsonToHtml(data: PeticaoDocumentJson): string {
   // 1. Endereçamento (Juízo)
   if (cabecalho?.enderecamento) {
     htmlParts.push(
-      `<p style="text-align: justify; font-weight: bold; text-transform: uppercase; line-height: 1.5; margin-bottom: 0;">${cabecalho.enderecamento}</p>`
+      `<p style="text-align: justify; line-height: 1.5; margin-bottom: 0;"><strong>${cabecalho.enderecamento}</strong></p>`
     );
   }
 
