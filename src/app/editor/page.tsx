@@ -12,13 +12,7 @@ import Link from "next/link";
 
 import { LoadingOverlay } from "@/components/editor/LoadingOverlay";
 import { FloatingAiBar } from "@/components/editor/FloatingAiBar";
-
-const cleanMarkdownBold = (html: string): string => {
-  if (!html) return "";
-  let cleaned = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-  cleaned = cleaned.replace(/__(.*?)__/g, "<strong>$1</strong>");
-  return cleaned;
-};
+import { renderPeticaoJsonToHtml, PeticaoDocumentJson } from "@/lib/peticao-template";
 
 export default function EditorPage() {
   const isMobileRaw = useIsBreakpoint("max", 860);
@@ -157,10 +151,10 @@ export default function EditorPage() {
     }
 
     let retryCount = 0;
-    let fullHtml = "";
+    let fullJsonText = "";
     let isComplete = false;
 
-    while (retryCount <= 4 && !isComplete) {
+    while (retryCount <= 3 && !isComplete) {
       if (retryCount > 0) {
         await new Promise(resolve => setTimeout(resolve, retryCount * 2000));
       }
@@ -169,7 +163,7 @@ export default function EditorPage() {
         const response = await fetch("/api/gemini/document", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ facts, continueFrom: fullHtml, attempt: retryCount }),
+          body: JSON.stringify({ facts, attempt: retryCount }),
         });
 
         if (!response.ok) {
@@ -187,34 +181,44 @@ export default function EditorPage() {
               const { done, value } = await reader.read();
               if (done) break;
               const chunk = decoder.decode(value);
-              fullHtml += chunk;
-
+              fullJsonText += chunk;
               setStreamStarted(true);
-              const cleaned = cleanMarkdownBold(fullHtml);
-              localStorage.setItem("extrajus_draft", cleaned);
-              window.dispatchEvent(new Event("storage_extrajus_draft"));
             }
           } catch (streamError) {
             const streamMsg = streamError instanceof Error ? streamError.message : String(streamError);
             console.warn(`Stream interrompido na tentativa ${retryCount + 1}: ${streamMsg}`);
           }
 
-          if (fullHtml.toLowerCase().includes("deferimento") || fullHtml.toLowerCase().includes("advogado")) {
+          // Parse JSON e renderiza template HTML
+          try {
+            // Remove possíveis marcadores de código caso o LLM os adicione
+            let cleanJsonStr = fullJsonText.trim();
+            if (cleanJsonStr.startsWith("```json")) {
+              cleanJsonStr = cleanJsonStr.replace(/^```json/, "").replace(/```$/, "").trim();
+            } else if (cleanJsonStr.startsWith("```")) {
+              cleanJsonStr = cleanJsonStr.replace(/^```/, "").replace(/```$/, "").trim();
+            }
+
+            const parsedJson: PeticaoDocumentJson = JSON.parse(cleanJsonStr);
+            const renderedHtml = renderPeticaoJsonToHtml(parsedJson);
+
+            localStorage.setItem("extrajus_draft", renderedHtml);
+            window.dispatchEvent(new Event("storage_extrajus_draft"));
             isComplete = true;
-            
-            // Salva o conteúdo final no banco mantendo como rascunho até que o advogado finalize/baixe
+
+            // Salva no banco de dados
             if (docId) {
               fetch(`/api/documents/${docId}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  content_html: cleanMarkdownBold(fullHtml),
+                  content_html: renderedHtml,
                   status: "draft",
                 })
               }).catch(console.error);
             }
-          } else {
-            console.warn(`Documento incompleto na tentativa ${retryCount + 1}. Tentando continuar...`);
+          } catch (jsonErr) {
+            console.warn("JSON ainda incompleto ou inválido na tentativa:", retryCount + 1, jsonErr);
             retryCount++;
           }
         } else {

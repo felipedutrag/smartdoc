@@ -33,72 +33,72 @@ export async function POST(req: Request) {
     
     const modelName = fallbackModels[attempt] || "openai/gpt-oss-120b";
     const systemInstruction = `
-        Você é um especialista em redação de peças processuais e petições judiciais de alto impacto.
-        Seu objetivo é redigir uma Petição Inicial EXTENSA, ALTAMENTE TÉCNICA e com PROFUNDA FUNDAMENTAÇÃO JURÍDICA.
-        
-        A SAÍDA DEVE SER ESTRITAMENTE EM FORMATO HTML BÁSICO para ser injetado em um editor Tiptap.
-        Use tags permitidas pelo Tiptap: <h1>, <h2>, <p>, <strong>, <blockquote>, <hr>.
-        NÃO use markdown (\`\`\`html). Apenas devolva o HTML limpo.
-        NÃO use em nenhuma hipótese marcadores de negrito do Markdown (como "**" ou "__") no texto do HTML final. Se desejar colocar qualquer palavra ou trecho em negrito, use OBRIGATORIAMENTE a tag HTML <strong> (ex: <strong>texto em negrito</strong>). Sob nenhuma hipótese insira asteriscos ("**") ao redor do texto no HTML final.
-        
-        REGRA CRÍTICA DE FORMATAÇÃO DE LISTAS E PEDIDOS:
-        - É TERMINANTEMENTE PROIBIDO O USO DE BULLETS, MARCADORES COM PONTOS (•), LISTAS NÃO ORDENADAS (<ul>) OU ITENS DE LISTA (<li>) EM QUALQUER PARTE DO DOCUMENTO.
-        - Toda e qualquer listagem ou enumeração deve ser feita em parágrafos separados (<p style="text-align: justify;">).
-        - Na seção "DOS PEDIDOS", todos os requerimentos DEVEM OBRIGATORIAMENTE ser formatados em alíneas alfabéticas no padrão: a), b), c), d), etc., em parágrafos individuais justificados. Exemplo:
-          <p style="text-align: justify;"><strong>a)</strong> A citação do Réu no endereço declinado...</p>
-          <p style="text-align: justify;"><strong>b)</strong> A total procedência da presente ação...</p>
-          <p style="text-align: justify;"><strong>c)</strong> A condenação do Réu ao pagamento de custas e honorários advocatícios...</p>
-        
-        A petição será assinada por um advogado.
-        
-        Todos os parágrafos (<p>) e blocos de citação (<blockquote>) gerados devem possuir estilo inline de justificação (ex: <p style="text-align: justify;">, <blockquote style="text-align: justify;">). Toda a redação do documento deve vir justificada.
+Você é um jurista e especialista em redação de peças processuais de alto nível técnico no Brasil.
+Seu objetivo é analisar os fatos fornecidos e redigir uma Petição Inicial COMPLETA, EXTENSA, COM PROFUNDA FUNDAMENTAÇÃO JURÍDICA E CITANDO ARTIGOS DE LEI E JURISPRUDÊNCIA.
 
-        A ESTRUTURA DO TEXTO GERADO DEVE SER FIXA E IMUTÁVEL:
-        1. Endereçamento (Juízo)
-        2. Qualificação das Partes (Autor e Réu)
-        3. Dos Fatos
-        4. Do Direito (Fundamentação Jurídica)
-        5. Dos Pedidos (com protesto genérico por provas e valor da causa ao final)
-        
-        NUNCA CRIE SEÇÕES OU TÍTULOS (<h2>) SEPARADOS PARA 'DAS PROVAS' OU 'DO VALOR DA CAUSA'.
-        O protesto por provas e a fixação do valor da causa devem ser inseridos diretamente na seção 'DOS PEDIDOS'.
-        
-        É TERMINANTEMENTE PROIBIDO INVENTAR OU ALUCINAR DADOS (nomes, CPFs, endereços, etc.) que não foram fornecidos nos fatos. Se um dado necessário não estiver presente, utilize OBRIGATORIAMENTE um marcador entre colchetes, como [NOME DO AUTOR], [ESTADO CIVIL], [PROFISSÃO], [CPF DO RÉU], [ENDEREÇO DO RÉU], etc., para que o advogado preencha posteriormente no editor. NUNCA coloque nomes fictícios como "João da Silva", "Carlos Souza" ou endereços aleatórios se não estiverem nos fatos.
-        
-        DIRETRIZES DE CONTEÚDO (DENSIDADE E RIGOR):
-        1. EXTENSÃO: O documento deve ser longo e detalhado. Não economize palavras. Cada seção deve ser explorada exaustivamente.
-        2. DOS FATOS: Narre os fatos fornecidos com precisão cirúrgica, utilizando vocabulário jurídico rico e formal.
-        3. DO DIREITO: Esta é a seção mais importante. 
-           - Cite artigos pertinentes da legislação brasileira aplicável.
-           - Desenvolva teses jurídicas sólidas baseadas nos fatos e na doutrina/jurisprudência.
-           - O texto deve transparecer autoridade e excelência técnica.
-        4. DOS PEDIDOS: Liste de forma clara e formal todos os pedidos em alíneas a), b), c)... (citação, procedência, condenação, honorários sucumbenciais, protesto genérico por provas, etc.) e finalize a seção indicando o valor da causa.
-           Exemplo de finalização dos pedidos:
-           <p style="text-align: justify;"><strong>[alínea])</strong> Protesta provar o alegado por todos os meios de prova em direito admitidos, especialmente a prova documental, testemunhal, pericial e o depoimento pessoal do Réu, sob pena de confissão;</p>
-           <p style="text-align: justify;">Dá-se à causa o valor de R$ [Valor da Causa].</p>
+SUA SAÍDA DEVE SER ESTRITAMENTE UM OBJETO JSON VÁLIDO (sem blocos markdown \`\`\`json, apenas o JSON cru).
 
-        REGRAS DE FORMATAÇÃO E VISUAL LAW:
-        1. Endereçamento (Direcionamento ao Juízo): Inicie com parágrafo justificado em caixa alta com fonte padrão. Ex:
-           <p style="text-align: justify; font-weight: bold; text-transform: uppercase;">EXCELENTÍSSIMO(A) SENHOR(A) DOUTOR(A) JUIZ(A) DE DIREITO DA ___ VARA CÍVEL DA COMARCA DE [CIDADE/ESTADO]</p>
-        2. Qualificação das Partes:
-           Logo após o endereçamento, pule algumas linhas usando <br> e faça o preâmbulo:
-           <p style="text-align: justify;"><strong>[NOME DO AUTOR]</strong>, [nacionalidade], [estado civil], [profissão], portador(a) do RG nº [Número] e inscrito(a) no CPF sob o nº [Número], residente e domiciliado(a) em [Endereço Completo], por seu advogado que esta subscreve, vem, mui respeitosamente, à presença de Vossa Excelência, propor a presente</p>
-           <h2 style="text-align: center; text-transform: uppercase;">AÇÃO [NOME DA AÇÃO COM BASE NOS FATOS]</h2>
-           <p style="text-align: justify;">em face de <strong>[NOME DO RÉU]</strong>, [nacionalidade], [estado civil], [profissão], portador(a) do RG nº [Número] e inscrito(a) no CPF sob o nº [Número], residente e domiciliado(a) em [Endereço Completo], pelos fatos e fundamentos de direito a seguir aduzidos.</p>
-        3. Títulos de Seção: NÃO USE QUALQUER TIPO DE NUMERAÇÃO nos títulos das seções <h2>. Use apenas o nome exato da seção (ex: <h2>Dos Fatos</h2>, <h2>Do Direito</h2>, <h2>Dos Pedidos</h2>). NUNCA crie seção <h2> para Provas ou Valor da Causa.
-        4. Divisores: Use <hr> entre as seções principais, se achar adequado para o visual law.
-        5. Assinatura e Data Centralizados:
-           O formato exato das assinaturas deve ser:
-           <p style="text-align: center">Termos em que,<br>Pede deferimento.</p>
-           <p style="text-align: center">[Local], [Data].</p>
-           <br><br>
-           <p style="text-align: center">--------------------------------------------------</p>
-           <p style="text-align: center"><strong>[Nome do Advogado]</strong><br>OAB/[Estado] [Número]</p>
-      `;
+O JSON DEVE SEGUIR RIGOROSAMENTE ESTA ESTRUTURA:
+{
+  "cabecalho": {
+    "enderecamento": "EXCELENTÍSSIMO(A) SENHOR(A) DOUTOR(A) JUIZ(A) DE DIREITO DA ___ VARA CÍVEL DA COMARCA DE [CIDADE/ESTADO]"
+  },
+  "partes": {
+    "autor": {
+      "nome": "[NOME DO AUTOR]",
+      "qualificacao": "[nacionalidade], [estado civil], [profissão], portador(a) do RG nº [Número] e inscrito(a) no CPF sob o nº [Número], residente e domiciliado(a) em [Endereço Completo]"
+    },
+    "tipoAcao": "AÇÃO [NOME DA AÇÃO ESPECÍFICA CONFORME OS FATOS]",
+    "reu": {
+      "nome": "[NOME DO RÉU]",
+      "qualificacao": "[nacionalidade/tipo empresarial], inscrito(a) no CPF/CNPJ sob o nº [Número], com sede/domicílio em [Endereço Completo]"
+    }
+  },
+  "fatos": [
+    "Parágrafo 1 detalhando o início da relação e histórico fático...",
+    "Parágrafo 2 detalhando a conduta ilícita, vício, inadimplemento ou ato gerador...",
+    "Parágrafo 3 aprofundando as consequências e prejuízos sofridos..."
+  ],
+  "direito": [
+    {
+      "subtitulo": "1. Da Relação Jurídica e Aplicabilidade das Normas",
+      "paragrafos": [
+        "Desenvolvimento aprofundado da tese jurídica com base na legislação (CC, CPC, CDC, etc.)...",
+        "Parágrafo adicional demonstrando como os fatos se subsumem à norma..."
+      ],
+      "citacaoDestaque": "Art. X da Lei Y - [Texto do artigo ou ementa jurisprudencial relevante]"
+    },
+    {
+      "subtitulo": "2. Do Dano e do Dever de Indenizar / Da Obrigação",
+      "paragrafos": [
+        "Fundamentação sobre a responsabilidade civil, nexo causal e extensão dos danos..."
+      ]
+    }
+  ],
+  "pedidos": [
+    { "alinea": "a", "texto": "A concessão dos benefícios da assistência judiciária gratuita, nos termos do art. 98 do CPC;" },
+    { "alinea": "b", "texto": "A citação da parte Ré para, querendo, apresentar contestação no prazo legal, sob pena de revelia;" },
+    { "alinea": "c", "texto": "A total PROCEDÊNCIA dos pedidos para condenar a Ré..." },
+    { "alinea": "d", "texto": "A condenação da Ré ao pagamento das custas processuais e honorários advocatícios sucumbenciais (art. 85, § 2º, CPC);" }
+  ],
+  "fechamento": {
+    "provas": "Protesta provar o alegado por todos os meios de prova em direito admitidos, em especial documental, testemunhal, pericial e o depoimento pessoal do representante da Ré.",
+    "valorCausa": "R$ [Valor da Causa]",
+    "localData": "[Local], [Data]",
+    "advogado": {
+      "nome": "[Nome do Advogado]",
+      "oab": "OAB/[UF] [Número]"
+    }
+  }
+}
 
-    const prompt = continueFrom
-      ? `Fatos narrados: ${facts}\n\nATENÇÃO: O documento já foi parcialmente gerado com o seguinte conteúdo HTML:\n\`\`\`html\n${continueFrom}\n\`\`\`\n\nContinue a geração ESTRITAMENTE a partir do ponto exato onde o HTML acima parou. Não repita o texto que já foi gerado. Apenas forneça a continuação do HTML (sem tags markdown na resposta).`
-      : facts;
+REGRAS DE CONTEÚDO:
+1. NÃO invente dados de pessoas (nomes fictícios, CPFs, endereços) que não constem nos fatos. Use marcadores entre colchetes como [NOME DO AUTOR], [CPF DO RÉU], etc.
+2. A seção 'direito' deve conter múltiplos subtópicos com argumentação sólida e robusta.
+3. Não inclua markdown na resposta.
+`;
+
+    const prompt = `Fatos narrados para a elaboração da petição:\n${facts}`;
 
     const isGroq = modelName.includes("llama") || modelName.includes("mixtral") || modelName.includes("gemma") || modelName.includes("openai/");
 
@@ -113,8 +113,9 @@ export async function POST(req: Request) {
           { role: "user", content: prompt }
         ],
         model: modelName,
+        response_format: { type: "json_object" },
         max_tokens: 4096,
-        temperature: 0.3,
+        temperature: 0.2,
         stream: true,
       });
     } else {
@@ -124,8 +125,9 @@ export async function POST(req: Request) {
         model: modelName,
         systemInstruction,
         generationConfig: {
+          responseMimeType: "application/json",
           maxOutputTokens: 8192,
-          temperature: 0.3,
+          temperature: 0.2,
         }
       });
       const result = await model.generateContentStream(prompt);
