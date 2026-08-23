@@ -60,7 +60,8 @@ export function useGeminiLive(
   setupEndpoint: string = '/api/config/gemini-live-setup',
   onToolCall?: (name: string, args: any) => void,
   extraContext?: string,
-  documentId?: string | null
+  documentId?: string | null,
+  responseModalities: ("TEXT" | "AUDIO" | "IMAGE")[] = ["AUDIO"]
 ) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
@@ -349,7 +350,7 @@ export function useGeminiLive(
             systemInstruction: { parts: systemInstructionParts },
             tools,
             generationConfig: {
-              responseModalities: ["AUDIO"],
+              responseModalities,
               speechConfig: {
                 voiceConfig: {
                   prebuiltVoiceConfig: { voiceName: "Leda" },

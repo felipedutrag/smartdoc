@@ -33,12 +33,16 @@ import {
   Command,
   HelpCircle,
   ExternalLink,
-  Scale
+  Scale,
+  Video,
+  FileSignature,
+  Activity
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { VideoconferenciaTab } from "@/components/dashboard/VideoconferenciaTab";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -88,7 +92,7 @@ export default function DashboardPage() {
   // Layout & Navigation State
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"documents" | "plans" | "profile">("documents");
+  const [activeTab, setActiveTab] = useState<"documents" | "plans" | "profile" | "meeting">("documents");
 
   // User & Data State
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -203,13 +207,15 @@ export default function DashboardPage() {
         setIsShortcutsModalOpen(prev => !prev);
       }
 
-      // Navegar para Minhas Petições: tecla 'g' seguida de 'p' ou atalhos numéricos 1, 2, 3
+      // Navegar para Minhas Petições: tecla 'g' seguida de 'p' ou atalhos numéricos 1, 2, 3, 4
       if (e.key === "1") {
         setActiveTab("documents");
       } else if (e.key === "2") {
         setActiveTab("plans");
       } else if (e.key === "3") {
         setActiveTab("profile");
+      } else if (e.key === "4") {
+        setActiveTab("meeting");
       }
     };
 
@@ -527,6 +533,95 @@ export default function DashboardPage() {
             {(sidebarOpen || isDrawer) && <span>Minhas Petições</span>}
           </Button>
 
+          {/* Videoconferências */}
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setActiveTab("meeting");
+              if (isDrawer) setMobileDrawerOpen(false);
+            }}
+            className={`w-full text-xs h-8.5 rounded-lg transition-colors ${(sidebarOpen || isDrawer) ? "justify-start gap-2.5 px-2.5" : "justify-center px-0"} ${
+              activeTab === "meeting"
+                ? "bg-muted/80 text-foreground font-semibold border border-border/60"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/40 font-normal"
+            }`}
+            title="Videoconferências"
+          >
+            <Video className="size-3.5 shrink-0 text-primary" />
+            {(sidebarOpen || isDrawer) && (
+              <div className="flex flex-1 items-center justify-between">
+                <span>Videoconferências</span>
+                <span className="font-mono text-[9px] text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full">
+                  Novo
+                </span>
+              </div>
+            )}
+          </Button>
+
+          {/* Criador de Contratos */}
+          <div
+            className={`flex items-center w-full text-xs h-8.5 rounded-lg opacity-50 cursor-not-allowed ${(sidebarOpen || isDrawer) ? "justify-start gap-2.5 px-2.5" : "justify-center px-0"} text-muted-foreground`}
+            title="Criador de Contratos (Em Breve)"
+          >
+            <FileText className="size-3.5 shrink-0" />
+            {(sidebarOpen || isDrawer) && (
+              <div className="flex flex-1 items-center justify-between">
+                <span>Criador de Contratos</span>
+                <span className="font-mono text-[9px] bg-muted border border-border/60 px-1.5 py-0.2 rounded-full">
+                  Em Breve
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Notificação Extrajudicial */}
+          <div
+            className={`flex items-center w-full text-xs h-8.5 rounded-lg opacity-50 cursor-not-allowed ${(sidebarOpen || isDrawer) ? "justify-start gap-2.5 px-2.5" : "justify-center px-0"} text-muted-foreground`}
+            title="Notificação Extrajudicial (Em Breve)"
+          >
+            <AlertCircle className="size-3.5 shrink-0" />
+            {(sidebarOpen || isDrawer) && (
+              <div className="flex flex-1 items-center justify-between">
+                <span className="truncate max-w-[130px]">Notificação Extrajudicial</span>
+                <span className="font-mono text-[9px] bg-muted border border-border/60 px-1.5 py-0.2 rounded-full shrink-0">
+                  Em Breve
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Assinatura Digital */}
+          <div
+            className={`flex items-center w-full text-xs h-8.5 rounded-lg opacity-50 cursor-not-allowed ${(sidebarOpen || isDrawer) ? "justify-start gap-2.5 px-2.5" : "justify-center px-0"} text-muted-foreground`}
+            title="Assinatura Digital (Em Breve)"
+          >
+            <FileSignature className="size-3.5 shrink-0" />
+            {(sidebarOpen || isDrawer) && (
+              <div className="flex flex-1 items-center justify-between">
+                <span>Assinatura Digital</span>
+                <span className="font-mono text-[9px] bg-muted border border-border/60 px-1.5 py-0.2 rounded-full">
+                  Em Breve
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Acompanhamento Processual */}
+          <div
+            className={`flex items-center w-full text-xs h-8.5 rounded-lg opacity-50 cursor-not-allowed ${(sidebarOpen || isDrawer) ? "justify-start gap-2.5 px-2.5" : "justify-center px-0"} text-muted-foreground`}
+            title="Acompanhamento Processual (Em Breve)"
+          >
+            <Activity className="size-3.5 shrink-0" />
+            {(sidebarOpen || isDrawer) && (
+              <div className="flex flex-1 items-center justify-between">
+                <span className="truncate max-w-[125px]">Acomp. Processual</span>
+                <span className="font-mono text-[9px] bg-muted border border-border/60 px-1.5 py-0.2 rounded-full shrink-0">
+                  Em Breve
+                </span>
+              </div>
+            )}
+          </div>
+
           {/* Planos de Assinatura */}
           <Button
             variant="ghost"
@@ -650,6 +745,7 @@ export default function DashboardPage() {
               <span className="text-muted-foreground/40">/</span>
               <span className="text-foreground font-semibold">
                 {activeTab === "documents" && "peticoes"}
+                {activeTab === "meeting" && "videoconferencia"}
                 {activeTab === "plans" && "planos"}
                 {activeTab === "profile" && "perfil"}
               </span>
@@ -944,6 +1040,9 @@ export default function DashboardPage() {
             </div>
           )}
 
+          {/* ──── TAB: VIDEOCONFERÊNCIA ──── */}
+          {activeTab === "meeting" && <VideoconferenciaTab />}
+
           {/* ════ TAB 2: PLANOS DE ASSINATURA ════ */}
           {activeTab === "plans" && (
             <div className="space-y-6">
@@ -1198,7 +1297,7 @@ export default function DashboardPage() {
       {/* ── Dialog: Teclas de Atalho (shadcn Dialog) ── */}
       <Dialog open={isShortcutsModalOpen} onOpenChange={setIsShortcutsModalOpen}>
         <DialogContent className="max-w-sm border-border/80 bg-card/95 p-5 shadow-2xl rounded-2xl backdrop-blur-xl">
-          <DialogHeader className="space-y-1">
+          <DialogHeader className="space-y-0.5">
             <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
               <Keyboard className="size-3" />
               <span>Produtividade Forense</span>
@@ -1211,7 +1310,7 @@ export default function DashboardPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="mt-3 space-y-2">
+          <div className="mt-1.5 space-y-2">
             <div className="flex items-center justify-between rounded-lg border border-border/70 p-2 bg-muted/30">
               <span className="text-xs font-medium text-foreground">Criar Nova Petição</span>
               <div className="flex items-center gap-1">
@@ -1279,7 +1378,8 @@ export default function DashboardPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="mt-4 space-y-3">
+          <div className="mt-2 space-y-1">
+            <Label className="text-xs font-semibold text-foreground ml-1">Fatos Brutos</Label>
             <div className="relative">
               <textarea
                 rows={9}
