@@ -323,18 +323,18 @@ export default function Home() {
           {/* Bento Grid Container (Subtle Balanced Spacing) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Bento Card 1: Voz */}
-            <Card className="md:col-span-2 border-border/80 bg-card/70 px-4 py-4.5 backdrop-blur-md flex flex-col justify-center">
-              <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20 mb-1">
+            <Card className="md:col-span-2 border-border/80 bg-card/70 px-4 py-4.5 backdrop-blur-md flex flex-col justify-center gap-2">
+              <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20">
                 <Mic className="size-3.5" />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <h3 className="text-xs sm:text-sm font-bold text-foreground tracking-tight">
                   Ditado por Voz Nativo
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   Fale os fatos do cliente com naturalidade. O reconhecimento de fala transcreve seus relatos diretamente na sua área de trabalho.
                 </p>
-                <div>
+                <div className="pt-0.5">
                   <span className="inline-flex items-center gap-1.5 rounded border border-border/80 bg-muted/40 px-2 py-0.5 font-mono text-[9px] text-muted-foreground">
                     <span className="flex size-1.5 rounded-full bg-emerald-500" />
                     <span>Web Speech API nativa • Zero latência</span>
@@ -344,18 +344,18 @@ export default function Home() {
             </Card>
 
             {/* Bento Card 2: Visual Law & DOCX */}
-            <Card className="border-border/80 bg-card/70 px-4 py-4.5 backdrop-blur-md flex flex-col justify-center">
-              <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20 mb-1">
+            <Card className="border-border/80 bg-card/70 px-4 py-4.5 backdrop-blur-md flex flex-col justify-center gap-2">
+              <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20">
                 <Download className="size-3.5" />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <h3 className="text-xs sm:text-sm font-bold text-foreground tracking-tight">
                   Exportação Word (.docx)
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   Baixe a peça formatada nos padrões forenses, com tipografia e margens limpas.
                 </p>
-                <div>
+                <div className="pt-0.5">
                   <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
                     <span>Download em 1 clique</span>
                     <ChevronRight className="size-3" />
@@ -365,18 +365,18 @@ export default function Home() {
             </Card>
 
             {/* Bento Card 3: IA Flutuante */}
-            <Card className="border-border/80 bg-card/70 px-4 py-4.5 backdrop-blur-md flex flex-col justify-center">
-              <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20 mb-1">
+            <Card className="border-border/80 bg-card/70 px-4 py-4.5 backdrop-blur-md flex flex-col justify-center gap-2">
+              <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20">
                 <Zap className="size-3.5" />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <h3 className="text-xs sm:text-sm font-bold text-foreground tracking-tight">
                   Reescrita Cirúrgica
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   Aperfeiçoe qualquer argumento selecionando o parágrafo no editor.
                 </p>
-                <div>
+                <div className="pt-0.5">
                   <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
                     <span>Refinamento instantâneo</span>
                     <ChevronRight className="size-3" />
@@ -386,18 +386,18 @@ export default function Home() {
             </Card>
 
             {/* Bento Card 4: Segurança e Sigilo */}
-            <Card className="md:col-span-2 border-border/80 bg-card/70 px-4 py-4.5 backdrop-blur-md flex flex-col justify-center">
-              <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20 mb-1">
+            <Card className="md:col-span-2 border-border/80 bg-card/70 px-4 py-4.5 backdrop-blur-md flex flex-col justify-center gap-2">
+              <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20">
                 <ShieldCheck className="size-3.5" />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <h3 className="text-xs sm:text-sm font-bold text-foreground tracking-tight">
                   Sigilo Profissional e Privacidade
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   Estruturado para respeitar o sigilo das informações e a privacidade do advogado. Seus documentos pertencem exclusivamente a você.
                 </p>
-                <div className="flex flex-wrap gap-1 font-mono text-[9px] text-muted-foreground">
+                <div className="flex flex-wrap gap-1 font-mono text-[9px] text-muted-foreground pt-0.5">
                   <span className="rounded border border-border bg-muted/40 px-1.5 py-0.2">TLS 1.3</span>
                   <span className="rounded border border-border bg-muted/40 px-1.5 py-0.2">Isolamento de Dados</span>
                   <span className="rounded border border-border bg-muted/40 px-1.5 py-0.2">LGPD</span>
