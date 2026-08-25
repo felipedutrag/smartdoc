@@ -139,7 +139,7 @@ REGRAS RÍGIDAS CONTRA ALUCINAÇÃO E SEGURANÇA JURÍDICA (100% GROUNDING):
         model: modelName,
         response_format: { type: "json_object" },
         max_tokens: 4096,
-        temperature: 0.1,
+        temperature: 0.3,
         stream: true,
       });
     } else {
@@ -151,7 +151,7 @@ REGRAS RÍGIDAS CONTRA ALUCINAÇÃO E SEGURANÇA JURÍDICA (100% GROUNDING):
         generationConfig: {
           responseMimeType: "application/json",
           maxOutputTokens: 8192,
-          temperature: 0.1,
+          temperature: 0.3,
         }
       });
       const result = await model.generateContentStream(prompt);
