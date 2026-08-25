@@ -49,9 +49,41 @@ body,
   line-height: 1.65;
   font-size: var(--editor-font-size, 17px);
   color: var(--text-primary);
+  counter-reset: petition-paragraph;
+  position: relative;
+  padding-left: 2.75rem !important;
 
   .dark & {
     color: #d4d4d8;
+  }
+
+  /* Régua Vertical / Numeração de Linha IDE de Parágrafos */
+  > p, > h1, > h2, > h3, > blockquote {
+    position: relative;
+
+    &::before {
+      counter-increment: petition-paragraph;
+      content: counter(petition-paragraph);
+      position: absolute;
+      left: -2.75rem;
+      top: 0.15rem;
+      width: 2rem;
+      text-align: right;
+      font-family: var(--font-mono, "Fira Code", monospace);
+      font-size: 11px;
+      font-weight: 500;
+      color: #a1a1aa;
+      opacity: 0.45;
+      user-select: none;
+      pointer-events: none;
+      transition: opacity 0.2s ease, color 0.2s ease;
+    }
+
+    &:hover::before {
+      opacity: 1;
+      color: var(--primary, #d97706);
+      font-weight: 700;
+    }
   }
 
   p, li {
@@ -338,6 +370,20 @@ body,
 
     .font-value {
       color: var(--text-primary) !important;
+    }
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .tiptap.ProseMirror {
+    padding-left: 2rem !important;
+
+    > p, > h1, > h2, > h3, > blockquote {
+      &::before {
+        left: -2rem;
+        width: 1.5rem;
+        font-size: 10px;
+      }
     }
   }
 }

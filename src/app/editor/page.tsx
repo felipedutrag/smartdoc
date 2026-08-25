@@ -72,7 +72,13 @@ export default function EditorPage() {
     if (!draft) return "";
     const parser = new DOMParser();
     const doc = parser.parseFromString(draft, "text/html");
-    return doc.body.textContent || "";
+    const blocks = Array.from(doc.body.children).filter(
+      (el) => el.textContent && el.textContent.trim().length > 0
+    );
+    if (blocks.length === 0) return doc.body.textContent || "";
+    return blocks
+      .map((el, index) => `[Parágrafo ${index + 1}]: ${el.textContent?.trim()}`)
+      .join("\n\n");
   };
 
   const {
