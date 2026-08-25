@@ -130,55 +130,72 @@ export async function POST(request: Request) {
         }
       }
 
-      // Determinar plano a ser ativado
-      let planToActivate = "Profissional Pro";
-      if (externalId && typeof externalId === "string") {
-        if (externalId.includes("individual")) {
-          planToActivate = "Individual";
-        } else if (externalId.includes("team")) {
-          planToActivate = "Boutique & Equipes";
-        } else if (externalId.includes("pro")) {
-          planToActivate = "Profissional Pro";
-        }
-      } else if (payload.amount) {
-        if (payload.amount === 9700) planToActivate = "Individual";
-        else if (payload.amount === 39700) planToActivate = "Boutique & Equipes";
-        else if (payload.amount === 19700) planToActivate = "Profissional Pro";
+      // Determinar pacote de créditos adquirido
+      let creditsToAdd = 30;
+      let packName = "Pacote Profissional (30 Petições)";
+
+      const paidAmount = payload.amount ? Math.round(payload.amount * 100) : (paymentRecord?.amount_cents || 9700);
+
+      if (
+        (externalId && (externalId.includes("pack_10") || externalId.includes("start") || externalId.includes("pack_start"))) ||
+        paidAmount === 4700 || payload.amount === 47
+      ) {
+        creditsToAdd = 10;
+        packName = "Pacote Inicial (10 Petições)";
+      } else if (
+        (externalId && (externalId.includes("pack_80") || externalId.includes("office") || externalId.includes("pack_office"))) ||
+        paidAmount === 19700 || payload.amount === 197
+      ) {
+        creditsToAdd = 80;
+        packName = "Pacote Escritório (80 Petições)";
+      } else if (
+        (externalId && (externalId.includes("pack_200") || externalId.includes("elite") || externalId.includes("pack_elite"))) ||
+        paidAmount === 34700 || payload.amount === 347
+      ) {
+        creditsToAdd = 200;
+        packName = "Pacote Elite (200 Petições)";
+      } else {
+        // Padrão ou R$ 97
+        creditsToAdd = 30;
+        packName = "Pacote Profissional (30 Petições)";
       }
 
-      // Ativar Plano do Usuário (seja o dono da transação ou o admin de fallback)
+      // Ativar / Adicionar Créditos ao Usuário
       if (targetUserId) {
-        // 1. Atualizar user_metadata no Supabase Auth (funciona nativamente sempre)
+        // 1. Atualizar user_metadata no Supabase Auth
         try {
           await supabase.auth.admin.updateUserById(targetUserId, {
-            user_metadata: { plan: planToActivate, plan_status: "active" }
+            user_metadata: { plan: packName, plan_status: "active" }
           });
         } catch (authErr) {
           console.error("Erro ao atualizar user_metadata no Auth:", authErr);
         }
 
-        // 2. Atualizar tabela profiles com o plano e recarga de créditos
+        // 2. Adicionar créditos de forma cumulativa na tabela profiles
         try {
-          let petitionsLimit = 100;
-          if (planToActivate === "Individual") petitionsLimit = 30;
-          else if (planToActivate === "Boutique & Equipes") petitionsLimit = 300;
+          const { data: currentProfile } = await supabase
+            .from("profiles")
+            .select("petitions_limit, petitions_used")
+            .eq("id", targetUserId)
+            .maybeSingle();
+
+          const currentLimit = currentProfile?.petitions_limit ?? 0;
+          const newLimit = currentLimit + creditsToAdd;
 
           await supabase
             .from("profiles")
             .update({
-              plan: planToActivate,
+              plan: packName,
               plan_status: "active",
-              petitions_limit: petitionsLimit,
-              petitions_used: 0,
-              credits_reset_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+              petitions_limit: newLimit,
               updated_at: new Date().toISOString(),
             })
             .eq("id", targetUserId);
+
+          console.log(`[WEBHOOK] Adicionados +${creditsToAdd} créditos para o usuário ${targetUserId}. Novo total: ${newLimit} créditos.`);
         } catch (profileErr) {
           console.warn("Aviso ao atualizar profiles:", profileErr);
         }
-
-        console.log(`Plano ${planToActivate} e créditos ativados com sucesso para o usuário ${targetUserId} (felipedutra@outlook.com)`);
 
         // 3. Enviar e-mail de confirmação de pagamento via Resend
         try {
@@ -191,7 +208,7 @@ export async function POST(request: Request) {
             sendPaymentSuccessEmail({
               email: userEmail,
               name: userName,
-              planName: planToActivate,
+              planName: packName,
               amountCents,
               externalId: externalId || paymentRecord?.external_id,
             }).catch((e) => console.error("[WEBHOOK] Erro no envio de e-mail de pagamento:", e));

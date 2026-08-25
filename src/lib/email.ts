@@ -190,7 +190,7 @@ export async function sendPaymentSuccessEmail({
       from: FROM_EMAIL,
       to: [email],
       cc: ["felipedutra@outlook.com"],
-      subject: `Assinatura Confirmada: Plano ${planName} — SmartDoc`,
+      subject: `Créditos Adicionados: ${planName} — SmartDoc`,
       html: `
         <div style="background-color: #09090b; padding: 40px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f4f4f5; line-height: 1.6;">
           <div style="background-color: #121214; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 36px 28px; max-width: 560px; margin: 0 auto;">
@@ -208,25 +208,25 @@ export async function sendPaymentSuccessEmail({
                 ✅
               </div>
               <h1 style="color: #ffffff; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: -0.02em;">
-                Pagamento Confirmado!
+                Créditos Adicionados com Sucesso!
               </h1>
               <p style="color: #10b981; font-weight: 700; font-size: 14px; margin-top: 4px;">
-                Seu plano ${planName} já está 100% ativo
+                Seu ${planName} já está disponível na sua conta
               </p>
             </div>
 
             <p style="color: #a1a1aa; font-size: 14px; margin-bottom: 20px;">
-              Olá, <strong style="color: #ffffff;">${firstName}</strong>. Confirmamos o recebimento do seu pagamento Pix. Seu acesso premium já foi liberado sem restrições.
+              Olá, <strong style="color: #ffffff;">${firstName}</strong>. Confirmamos o recebimento do seu Pix. Seus novos créditos de petição foram adicionados ao seu saldo e <strong>não possuem prazo de expiração</strong>.
             </p>
 
             <!-- Resumo da Transação -->
             <div style="background-color: #18181b; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 20px; margin: 24px 0;">
               <h3 style="color: #ffffff; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 8px;">
-                Detalhes da Assinatura
+                Detalhes da Recarga
               </h3>
               <table style="width: 100%; font-size: 13px; color: #d4d4d8;">
                 <tr>
-                  <td style="padding: 6px 0; color: #a1a1aa;">Plano Contratado:</td>
+                  <td style="padding: 6px 0; color: #a1a1aa;">Pacote Adquirido:</td>
                   <td style="padding: 6px 0; text-align: right; font-weight: 700; color: #ffffff;">${planName}</td>
                 </tr>
                 <tr>
@@ -236,6 +236,10 @@ export async function sendPaymentSuccessEmail({
                 <tr>
                   <td style="padding: 6px 0; color: #a1a1aa;">Forma de Pagamento:</td>
                   <td style="padding: 6px 0; text-align: right; font-weight: 600; color: #ffffff;">Pix Instantâneo</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #a1a1aa;">Validade dos Créditos:</td>
+                  <td style="padding: 6px 0; text-align: right; font-weight: 600; color: #10b981;">Sem Expiração (Cumulativo)</td>
                 </tr>
                 ${externalId ? `
                 <tr>

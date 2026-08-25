@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     }
 
     const amountCents = Math.round(price * 100);
-    const prefix = planId ? `smartdoc_plan_${planId}` : `smartdoc_doc`;
+    const prefix = planId ? `smartdoc_pack_${planId}` : `smartdoc_doc`;
     const externalId = `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
     // Obter usuário se autenticado
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://smartdoc.work";
     const webhookUrl = `${appUrl}/api/payment/webhook`;
-    const description = body.description || (planName ? `Assinatura ${planName} - SmartDoc` : "SmartDoc - Tecnologia Jurídica com IA");
+    const description = body.description || (planName ? `Pacote ${planName} - SmartDoc` : "SmartDoc - Créditos de Petição com IA");
 
     const payloadGG: Record<string, any> = {
       amountCents,

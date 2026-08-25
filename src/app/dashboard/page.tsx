@@ -41,6 +41,7 @@ import {
   QrCode,
   Loader2,
   Zap,
+  Coins,
   X
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -413,7 +414,9 @@ export default function DashboardPage() {
           email: user.email || "",
           name: user.user_metadata?.name || "Advogado(a)",
           oab: user.user_metadata?.oab || "",
-          plan: "Pro Trial",
+          plan: "Pacote Inicial (10 Petições)",
+          petitions_limit: 10,
+          petitions_used: 0,
         };
 
         setProfile(currentProf);
@@ -792,7 +795,7 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Planos de Assinatura */}
+          {/* Créditos & Pacotes */}
           <Button
             variant="ghost"
             onClick={() => {
@@ -804,14 +807,14 @@ export default function DashboardPage() {
                 ? "bg-muted/80 text-foreground font-semibold border border-border/60"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/40 font-normal"
             }`}
-            title="Planos & Assinatura"
+            title="Créditos & Pacotes"
           >
-            <Crown className="size-3.5 shrink-0 text-amber-500" />
+            <Coins className="size-3.5 shrink-0 text-amber-500" />
             {(sidebarOpen || isDrawer) && (
               <div className="flex flex-1 items-center justify-between">
-                <span>Planos & Assinatura</span>
+                <span>Créditos de Petição</span>
                 <span className="font-mono text-[9px] text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.2 rounded-full">
-                  Pro
+                  {Math.max(0, (profile?.petitions_limit ?? 0) - (profile?.petitions_used ?? 0))}
                 </span>
               </div>
             )}
@@ -844,11 +847,11 @@ export default function DashboardPage() {
           <div className="rounded-xl border border-border/80 bg-card/80 p-2.5 space-y-1.5 shadow-xs">
             <div className="flex items-center justify-between text-[11px]">
               <span className="font-semibold text-foreground flex items-center gap-1.5">
-                <Scale className="size-3 text-primary" />
-                <span>Petições no Mês</span>
+                <Coins className="size-3 text-primary" />
+                <span>Saldo de Créditos</span>
               </span>
               <span className="font-mono text-[10px] font-bold text-foreground">
-                {profile?.petitions_used ?? 0} / {profile?.petitions_limit ?? 30}
+                {Math.max(0, (profile?.petitions_limit ?? 0) - (profile?.petitions_used ?? 0))}
               </span>
             </div>
             
@@ -856,20 +859,20 @@ export default function DashboardPage() {
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
               <div
                 className={`h-full rounded-full transition-all duration-500 ${
-                  ((profile?.petitions_used ?? 0) / (profile?.petitions_limit ?? 30)) >= 0.9
+                  (profile?.petitions_limit ?? 0) > 0 && ((profile?.petitions_used ?? 0) / (profile?.petitions_limit ?? 1)) >= 0.9
                     ? "bg-destructive"
-                    : ((profile?.petitions_used ?? 0) / (profile?.petitions_limit ?? 30)) >= 0.7
-                    ? "bg-amber-500"
                     : "bg-primary"
                 }`}
                 style={{
-                  width: `${Math.min(100, Math.round(((profile?.petitions_used ?? 0) / (profile?.petitions_limit ?? 30)) * 100))}%`,
+                  width: (profile?.petitions_limit ?? 0) > 0 
+                    ? `${Math.min(100, Math.round(((profile?.petitions_used ?? 0) / (profile?.petitions_limit ?? 1)) * 100))}%` 
+                    : "0%",
                 }}
               />
             </div>
             
             <div className="flex items-center justify-between text-[9px] text-muted-foreground font-mono">
-              <span>{Math.max(0, (profile?.petitions_limit ?? 30) - (profile?.petitions_used ?? 0))} restantes</span>
+              <span>{profile?.petitions_used ?? 0} usadas / {profile?.petitions_limit ?? 0} total</span>
               <button
                 onClick={() => {
                   setActiveTab("plans");
@@ -877,7 +880,7 @@ export default function DashboardPage() {
                 }}
                 className="text-primary hover:underline font-sans font-semibold cursor-pointer"
               >
-                + Créditos
+                + Comprar
               </button>
             </div>
           </div>
@@ -1253,29 +1256,36 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* ════ TAB 2: PLANOS DE ASSINATURA ════ */}
+          {/* ════ TAB 2: CRÉDITOS & PACOTES DE PETIÇÃO ════ */}
           {activeTab === "plans" && (
             <div className="space-y-6">
               <div className="border-b border-border/60 pb-5">
-                <h1 className="text-xl font-bold tracking-tight text-foreground">Planos & Assinatura</h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl font-bold tracking-tight text-foreground">Créditos de Petição</h1>
+                  <span className="font-mono text-[10px] bg-primary/10 border border-primary/20 text-primary px-2 py-0.5 rounded-full font-bold">
+                    Sem Mensalidade Fixa
+                  </span>
+                </div>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Escolha o plano ideal para a escala de produção jurídica do seu escritório.
+                  Adquira créditos sob demanda. Seus créditos são cumulativos, não possuem prazo de expiração e o valor por petição diminui em pacotes maiores.
                 </p>
               </div>
 
-              {/* Status do Plano Atual (Linear Style) */}
+              {/* Status do Saldo Atual (Linear Style) */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-primary/30 bg-primary/5 p-4">
                 <div className="flex items-center gap-3">
                   <div className="flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
-                    <Crown className="size-5" />
+                    <Coins className="size-5" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-foreground">Plano Atual: {profile?.plan || "Pro Trial"}</span>
-                      <Badge className="bg-primary text-primary-foreground text-[10px] font-bold">Ativo</Badge>
+                      <span className="text-sm font-bold text-foreground">
+                        Saldo Disponível: <strong className="text-primary font-black text-base">{Math.max(0, (profile?.petitions_limit ?? 0) - (profile?.petitions_used ?? 0))} Petições</strong>
+                      </span>
+                      <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[10px] font-bold">Sem Expiração</Badge>
                     </div>
                     <div className="text-xs text-muted-foreground mt-0.5">
-                      Franquia mensal: <strong className="text-foreground">{profile?.petitions_limit ?? 30} petições</strong> ({Math.max(0, (profile?.petitions_limit ?? 30) - (profile?.petitions_used ?? 0))} restantes neste ciclo)
+                      Você já utilizou <strong className="text-foreground">{profile?.petitions_used ?? 0}</strong> de um total de <strong className="text-foreground">{profile?.petitions_limit ?? 0}</strong> créditos adquiridos.
                     </div>
                   </div>
                 </div>
@@ -1283,104 +1293,177 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3 sm:border-l sm:border-border/60 sm:pl-4">
                   <div className="text-right">
                     <div className="font-mono text-xs font-bold text-foreground">
-                      {profile?.petitions_used ?? 0} / {profile?.petitions_limit ?? 30}
+                      {Math.max(0, (profile?.petitions_limit ?? 0) - (profile?.petitions_used ?? 0))}
                     </div>
-                    <div className="text-[10px] text-muted-foreground">Petições Utilizadas</div>
+                    <div className="text-[10px] text-muted-foreground">Créditos Restantes</div>
                   </div>
                 </div>
               </div>
 
-              {/* Grade de Planos (Linear Style) */}
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                {/* Individual */}
-                <div className="flex flex-col justify-between rounded-xl border border-border/70 bg-card/60 p-5 backdrop-blur-md">
+              {/* Grade de Pacotes de Créditos (4 Colunas) */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {/* 1. Pacote Start (10 Petições) */}
+                <div className="flex flex-col justify-between rounded-xl border border-border/70 bg-card/60 p-4.5 backdrop-blur-md">
                   <div>
-                    <span className="font-mono text-[10px] text-muted-foreground uppercase border border-border px-2 py-0.5 rounded-md">Individual</span>
-                    <div className="mt-3 text-2xl font-extrabold">R$ 97<span className="text-xs text-muted-foreground font-normal">/mês</span></div>
-                    <p className="mt-1.5 text-xs text-muted-foreground">Para advogados autônomos que buscam agilidade na rotina.</p>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] text-muted-foreground uppercase border border-border px-2 py-0.5 rounded-md">Start</span>
+                      <span className="font-mono text-[10px] text-muted-foreground">R$ 4,70/petição</span>
+                    </div>
+                    <div className="mt-3 text-2xl font-extrabold text-foreground">
+                      R$ 47
+                    </div>
+                    <div className="mt-1 text-xs font-bold text-primary">
+                      10 Petições
+                    </div>
+                    <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                      Ideal para demandas pontuais ou experimentar a tecnologia.
+                    </p>
                     
-                    <ul className="mt-5 space-y-2 text-xs text-muted-foreground">
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary" /> 30 Petições por mês</li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary" /> Visual Law e formatação padrão</li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary" /> Exportação ilimitada (.docx)</li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary" /> Ditado por voz local</li>
+                    <ul className="mt-4 space-y-1.5 text-xs text-muted-foreground">
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> 10 Petições completas</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Créditos sem validade</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Exportação Word (.docx)</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Ditado e revisão por IA</li>
                     </ul>
                   </div>
 
                   <Button
                     variant="outline"
                     onClick={() => handleOpenPixModal({
-                      id: "individual",
-                      name: "Individual",
-                      price: 97.00,
-                      description: "Plano Individual SmartDoc (30 Petições/mês)",
+                      id: "pack_10",
+                      name: "Inicial (10 Petições)",
+                      price: 47.00,
+                      description: "Pacote Inicial SmartDoc - 10 Créditos de Petição",
                     })}
                     className="mt-5 w-full text-xs h-9 border-border font-semibold hover:bg-muted/80 gap-1.5"
                   >
                     <Zap className="size-3.5 text-primary" />
-                    <span>{profile?.plan === "Individual" ? "Renovar Individual (Pix)" : "Assinar Individual (Pix)"}</span>
+                    <span>Comprar 10 Créditos (Pix)</span>
                   </Button>
                 </div>
 
-                {/* Profissional (Destaque) */}
-                <div className="relative flex flex-col justify-between rounded-xl border-2 border-primary bg-card/80 p-5 shadow-lg shadow-primary/5 backdrop-blur-md">
-                  <div className="absolute -top-2.5 right-4 rounded-full bg-primary px-2.5 py-0.5 font-mono text-[9px] font-bold text-primary-foreground uppercase">
-                    Mais Popular
+                {/* 2. Pacote Profissional (30 Petições - Destaque) */}
+                <div className="relative flex flex-col justify-between rounded-xl border-2 border-primary bg-card/80 p-4.5 shadow-lg shadow-primary/5 backdrop-blur-md">
+                  <div className="absolute -top-2.5 right-3 rounded-full bg-primary px-2 py-0.5 font-mono text-[9px] font-bold text-primary-foreground uppercase">
+                    Mais Escolhido
                   </div>
                   <div>
-                    <span className="font-mono text-[10px] text-primary uppercase bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-md font-semibold">Profissional Pro</span>
-                    <div className="mt-3 text-2xl font-extrabold text-foreground">R$ 197<span className="text-xs text-muted-foreground font-normal">/mês</span></div>
-                    <p className="mt-1.5 text-xs text-muted-foreground">Para escritórios que exigem profundidade máxima e escala.</p>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] text-primary uppercase bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-md font-semibold">Profissional</span>
+                      <span className="font-mono text-[10px] font-semibold text-emerald-500">R$ 3,23/petição</span>
+                    </div>
+                    <div className="mt-3 text-2xl font-extrabold text-foreground">
+                      R$ 97
+                    </div>
+                    <div className="mt-1 text-xs font-bold text-primary flex items-center justify-between">
+                      <span>30 Petições</span>
+                      <span className="font-mono text-[10px] bg-primary/10 px-1.5 py-0.2 rounded text-primary">Economize 31%</span>
+                    </div>
+                    <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                      Para advogados com fluxo recorrente de peças e prazos.
+                    </p>
                     
-                    <ul className="mt-5 space-y-2 text-xs text-foreground font-medium">
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary" /> <strong>Petições Ilimitadas</strong></li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary" /> Modelos jurídicos de raciocínio profundo</li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary" /> Reescrita inteligente via IA flutuante</li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary" /> Suporte prioritário via WhatsApp</li>
+                    <ul className="mt-4 space-y-1.5 text-xs text-foreground font-medium">
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> <strong>30 Petições completas</strong></li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Créditos sem validade</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Exportação Word (.docx)</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Ditado e revisão por IA</li>
                     </ul>
                   </div>
 
                   <Button
                     onClick={() => handleOpenPixModal({
-                      id: "pro",
-                      name: "Profissional Pro",
-                      price: 197.00,
-                      description: "Plano Profissional Pro SmartDoc (Petições Ilimitadas)",
+                      id: "pack_30",
+                      name: "Profissional (30 Petições)",
+                      price: 97.00,
+                      description: "Pacote Profissional SmartDoc - 30 Créditos de Petição",
                     })}
                     className="mt-5 w-full text-xs h-9 bg-primary text-primary-foreground font-semibold shadow-xs hover:opacity-90 gap-1.5"
                   >
                     <Crown className="size-3.5" />
-                    <span>{profile?.plan === "Profissional Pro" ? "Renovar Pro (Pix)" : "Assinar Profissional Pro (Pix)"}</span>
+                    <span>Comprar 30 Créditos (Pix)</span>
                   </Button>
                 </div>
 
-                {/* Escritório / Equipe */}
-                <div className="flex flex-col justify-between rounded-xl border border-border/70 bg-card/60 p-5 backdrop-blur-md">
+                {/* 3. Pacote Escritório (80 Petições) */}
+                <div className="flex flex-col justify-between rounded-xl border border-border/70 bg-card/60 p-4.5 backdrop-blur-md">
                   <div>
-                    <span className="font-mono text-[10px] text-muted-foreground uppercase border border-border px-2 py-0.5 rounded-md">Boutique & Equipes</span>
-                    <div className="mt-3 text-2xl font-extrabold">R$ 397<span className="text-xs text-muted-foreground font-normal">/mês</span></div>
-                    <p className="mt-1.5 text-xs text-muted-foreground">Multi-usuários com centralização de documentos da banca.</p>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] text-muted-foreground uppercase border border-border px-2 py-0.5 rounded-md">Escritório</span>
+                      <span className="font-mono text-[10px] font-semibold text-emerald-500">R$ 2,46/petição</span>
+                    </div>
+                    <div className="mt-3 text-2xl font-extrabold text-foreground">
+                      R$ 197
+                    </div>
+                    <div className="mt-1 text-xs font-bold text-primary flex items-center justify-between">
+                      <span>80 Petições</span>
+                      <span className="font-mono text-[10px] bg-primary/10 px-1.5 py-0.2 rounded text-primary">Economize 48%</span>
+                    </div>
+                    <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                      Excelente para bancas e escritórios em expansão.
+                    </p>
                     
-                    <ul className="mt-5 space-y-2 text-xs text-muted-foreground">
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary" /> Até 5 contas para advogados</li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary" /> Painel de gestão unificado</li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary" /> Modelos personalizados do escritório</li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary" /> Gerente de conta dedicado</li>
+                    <ul className="mt-4 space-y-1.5 text-xs text-muted-foreground">
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> 80 Petições completas</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Créditos sem validade</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Exportação Word (.docx)</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Suporte prioritário via WhatsApp</li>
                     </ul>
                   </div>
 
                   <Button
                     variant="outline"
                     onClick={() => handleOpenPixModal({
-                      id: "team",
-                      name: "Boutique & Equipes",
-                      price: 397.00,
-                      description: "Plano Boutique & Equipes SmartDoc (Até 5 Contas)",
+                      id: "pack_80",
+                      name: "Escritório (80 Petições)",
+                      price: 197.00,
+                      description: "Pacote Escritório SmartDoc - 80 Créditos de Petição",
                     })}
                     className="mt-5 w-full text-xs h-9 border-border font-semibold hover:bg-muted/80 gap-1.5"
                   >
                     <Briefcase className="size-3.5 text-primary" />
-                    <span>{profile?.plan === "Boutique & Equipes" ? "Renovar Equipes (Pix)" : "Assinar Equipes (Pix)"}</span>
+                    <span>Comprar 80 Créditos (Pix)</span>
+                  </Button>
+                </div>
+
+                {/* 4. Pacote Elite (200 Petições) */}
+                <div className="flex flex-col justify-between rounded-xl border border-border/70 bg-card/60 p-4.5 backdrop-blur-md">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] text-muted-foreground uppercase border border-border px-2 py-0.5 rounded-md">Elite & Volume</span>
+                      <span className="font-mono text-[10px] font-semibold text-emerald-500">R$ 1,73/petição</span>
+                    </div>
+                    <div className="mt-3 text-2xl font-extrabold text-foreground">
+                      R$ 347
+                    </div>
+                    <div className="mt-1 text-xs font-bold text-primary flex items-center justify-between">
+                      <span>200 Petições</span>
+                      <span className="font-mono text-[10px] bg-primary/10 px-1.5 py-0.2 rounded text-primary">Economize 63%</span>
+                    </div>
+                    <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                      Máxima economia para bancas de alto volume processual.
+                    </p>
+                    
+                    <ul className="mt-4 space-y-1.5 text-xs text-muted-foreground">
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> 200 Petições completas</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Créditos sem validade</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Exportação Word (.docx)</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Gerente de conta dedicado</li>
+                    </ul>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => handleOpenPixModal({
+                      id: "pack_200",
+                      name: "Elite (200 Petições)",
+                      price: 347.00,
+                      description: "Pacote Elite SmartDoc - 200 Créditos de Petição",
+                    })}
+                    className="mt-5 w-full text-xs h-9 border-border font-semibold hover:bg-muted/80 gap-1.5"
+                  >
+                    <Scale className="size-3.5 text-primary" />
+                    <span>Comprar 200 Créditos (Pix)</span>
                   </Button>
                 </div>
               </div>

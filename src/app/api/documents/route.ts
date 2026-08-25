@@ -55,36 +55,24 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { title, action_type, facts, content_html, status = "draft" } = body;
 
-    // 1. Verificar perfil e limite de créditos do usuário
+    // 1. Verificar saldo de créditos de petição do usuário
     const { data: profile } = await supabase
       .from("profiles")
-      .select("plan, plan_status, petitions_limit, petitions_used, credits_reset_at")
+      .select("plan, plan_status, petitions_limit, petitions_used")
       .eq("id", user.id)
       .maybeSingle();
 
-    const limit = profile?.petitions_limit ?? 30;
-    let used = profile?.petitions_used ?? 0;
-    const resetAt = profile?.credits_reset_at ? new Date(profile.credits_reset_at) : null;
+    const limit = profile?.petitions_limit ?? 0;
+    const used = profile?.petitions_used ?? 0;
+    const available = Math.max(0, limit - used);
 
-    // Se o ciclo de 30 dias expirou, resetar automaticamente a contagem de uso
-    if (resetAt && new Date() > resetAt) {
-      used = 0;
-      await supabase
-        .from("profiles")
-        .update({
-          petitions_used: 0,
-          credits_reset_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        })
-        .eq("id", user.id);
-    }
-
-    // Trava de limite de petições
-    if (used >= limit) {
+    // Trava de esgotamento de créditos
+    if (available <= 0) {
       return NextResponse.json(
         {
-          error: `Você atingiu o limite de ${limit} petições do seu plano neste mês. Faça upgrade ou renove sua assinatura para continuar gerando peças.`,
-          code: "CREDIT_LIMIT_REACHED",
-          credits: { used, limit },
+          error: "Seus créditos de petição se esgotaram. Adquira um novo pacote de créditos para continuar gerando peças com IA.",
+          code: "CREDITS_EXHAUSTED",
+          credits: { used, limit, available: 0 },
         },
         { status: 403 }
       );
