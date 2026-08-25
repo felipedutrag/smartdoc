@@ -1,0 +1,60 @@
+# SÚMULAS VINCULANTES DO STF (CONSOLIDADAS E ATUALIZADAS ATÉ 2026)
+
+- **SV 1:** Ofende a garantia constitucional do ato jurídico perfeito a decisão que, sem ponderar as circunstâncias do caso concreto, desconsidera a validez e a eficácia de acordo constante de termo de adesão firmado em matéria de FGTS com base na Lei Complementar 110/2001.
+- **SV 2:** É inconstitucional a lei ou ato normativo estadual ou distrital que disponha sobre sistemas de consórcios e sorteios, inclusive bingos e loterias (Competência privativa da União - CF, art. 22, XX).
+- **SV 3:** Nos processos perante o Tribunal de Contas da União asseguram-se o contraditório e a ampla defesa quando da decisão puder resultar anulação ou revogação de ato administrativo que beneficie o interessado, excetuada a apreciação da legalidade do ato de concessão inicial de aposentadoria, reforma e pensão.
+- **SV 4:** Salvo nos casos previstos na Constituição, o salário mínimo não pode ser usado como indexador de base de cálculo de vantagem de servidor público ou de empregado, nem ser substituído por decisão judicial.
+- **SV 5:** A falta de defesa técnica por advogado no processo administrativo disciplinar não ofende a Constituição.
+- **SV 6:** Não viola a Constituição o estabelecimento de remuneração inferior ao salário mínimo para as praças prestadoras de serviço militar inicial.
+- **SV 7:** A norma do § 3º do art. 192 da Constituição, revogada pela EC 40/2003, que limitava a taxa de juros reais a 12% ao ano, tinha sua aplicação condicionada à edição de lei complementar.
+- **SV 8:** São inconstitucionais o parágrafo único do artigo 5º do Decreto-Lei 1.569/1977 e os artigos 45 e 46 da Lei 8.212/1991, que tratam de prescrição e decadência de crédito tributário (Reserva de Lei Complementar - CTN).
+- **SV 9:** O disposto no art. 127 da Lei 7.210/1984 (LEP) foi recebido pela ordem constitucional vigente, e não se lhe aplica o limite temporal previsto no caput do art. 58 (Perda de até 1/3 dos dias remidos por falta grave).
+- **SV 10:** Viola a cláusula de reserva de plenário (CF, art. 97) a decisão de órgão fracionário de tribunal que, embora não declare expressamente a inconstitucionalidade de lei ou ato normativo do Poder Público, afasta sua incidência, no todo ou em parte.
+- **SV 11:** Só é lícito o uso de algemas em casos de resistência e de fundado receio de fuga ou de perigo à integridade física própria ou alheia, por parte do preso ou de terceiros, justificada a excepcionalidade por escrito, sob pena de responsabilidade disciplinar, civil e penal do agente ou da autoridade e de nulidade da prisão ou do ato processual a que se refere, sem prejuízo da responsabilidade civil do Estado.
+- **SV 12:** A cobrança de taxa de matrícula nas universidades públicas viola o art. 206, IV, da Constituição Federal.
+- **SV 13:** A nomeação de cônjuge, companheiro ou parente em linha reta, colateral ou por afinidade, até o terceiro grau, inclusive, da autoridade nomeante ou de servidor da mesma pessoa jurídica investido em cargo de direção, chefia ou assessoramento, para o exercício de cargo em comissão ou de confiança ou, ainda, de função gratificada na administração pública direta e indireta em qualquer dos Poderes da União, dos Estados, do Distrito Federal e dos Municípios, compreendido o ajuste mediante designações recíprocas (nepotismo cruzado), viola a Constituição Federal.
+- **SV 14:** É direito do defensor, no interesse do representado, ter acesso amplo aos elementos de prova que, já documentados em procedimento investigatório realizado por órgão com competência de polícia judiciária, digam respeito ao exercício do direito de defesa.
+- **SV 15:** O cálculo de gratificações e outras vantagens não incide sobre o abono utilizado para se atingir o salário mínimo.
+- **SV 16:** Os artigos 7º, IV, e 39, § 3º (redação da EC 19/98), da Constituição, referem-se ao total da remuneração percebida pelo servidor público, e não ao vencimento básico.
+- **SV 17:** Durante o período previsto no parágrafo 1º do artigo 100 da Constituição, não incidem juros de mora sobre os precatórios que nele sejam pagos.
+- **SV 18:** A dissolução da sociedade ou do vínculo conjugal, no curso do mandato, não afasta a inelegibilidade prevista no § 7º do artigo 14 da Constituição Federal.
+- **SV 19:** A taxa cobrada exclusivamente em razão dos serviços públicos de coleta, remoção e tratamento ou destinação de lixo ou resíduos provenientes de imóveis (taxa de lixo) não viola o artigo 145, II, da Constituição Federal.
+- **SV 20:** A Gratificação de Desempenho de Atividade Técnico-Administrativa – GDATA, instituída pela Lei 10.404/2002, deve ser deferida aos inativos nos valores correspondentes a 37,5 pontos no período de fevereiro a maio de 2002 e a 10 pontos de junho de 2002 até a conclusão dos efeitos do último ciclo de avaliação.
+- **SV 21:** É inconstitucional a exigência de depósito ou arrolamento prévios de dinheiro ou bens para admissibilidade de recurso administrativo.
+- **SV 22:** A Justiça do Trabalho é competente para processar e julgar as ações de indenização por danos morais e patrimoniais decorrentes de acidente de trabalho propostas por empregado contra empregador, inclusive aquelas que ainda não possuíam sentença de mérito em primeiro grau quando da promulgação da EC 45/2004.
+- **SV 23:** A Justiça do Trabalho é competente para processar e julgar ação possessória ajuizada em decorrência do exercício do direito de greve pelos trabalhadores da iniciativa privada.
+- **SV 24:** Não se tipifica crime material contra a ordem tributária, previsto no art. 1º, incisos I a IV, da Lei 8.137/1990, antes do lançamento definitivo do tributo.
+- **SV 25:** É ilícita a prisão civil de depositário infiel, qualquer que seja a modalidade do depósito.
+- **SV 26:** Para efeito de progressão de regime no cumprimento de pena por crime hediondo, ou equiparado, o juízo da execução observará a inconstitucionalidade do art. 2º da Lei 8.072/1990, sem prejuízo de avaliar se o condenado preenche os requisitos objetivos e subjetivos, podendo determinar, de modo fundamentado, exame criminológico.
+- **SV 27:** Compete à Justiça Estadual Comum processar e julgar crime de estelionato praticado mediante falsificação das guias de recolhimento das contribuições previdenciárias, quando não há lesão a bens, serviços ou interesses da União ou de suas autarquias.
+- **SV 28:** É inconstitucional a exigência de depósito prévio como requisito de admissibilidade de ação judicial na qual se pretenda discutir a exigibilidade de crédito tributário.
+- **SV 29:** É constitucional a adoção, no cálculo do valor de taxa, de um ou mais elementos da base de cálculo própria de determinado imposto, desde que não haja integral identidade entre uma base e outra.
+- **SV 30:** É inconstitucional a taxa de fiscalização dos mercados de títulos e valores mobiliários no ponto em que tem como base de cálculo o patrimônio líquido da empresa.
+- **SV 31:** É inconstitucional a incidência do Imposto sobre Serviços de Qualquer Natureza – ISS sobre operações de locação de bens móveis.
+- **SV 32:** O ICMS não incide sobre a alienação de salvados de sinistro pelas seguradoras.
+- **SV 33:** Aplicam-se ao servidor público, no que couber, as regras do regime geral da previdência social sobre aposentadoria especial de que trata o artigo 40, § 4º, inciso III da Constituição Federal, até a edição de lei complementar específica.
+- **SV 34:** A gratuidade da justiça estende-se aos atos notariais e de registro necessários à efetivação de decisões judiciais.
+- **SV 35:** A homologação do acordo de transação penal previsto no art. 76 da Lei 9.099/1995 não faz coisa julgada material, e, descumpridas suas cláusulas, retoma-se a situação anterior, possibilitando-se a denúncia.
+- **SV 36:** O benefício da suspensão condicional do processo não é aplicável no âmbito da Justiça Militar.
+- **SV 37:** Não cabe ao Poder Judiciário, que não tem função legislativa, aumentar vencimentos de servidores públicos sob o fundamento de isonomia.
+- **SV 38:** É competente o Município para fixar o horário de funcionamento de estabelecimento comercial.
+- **SV 39:** Compete privativamente à União legislar sobre vencimentos dos membros das polícias civil e militar e do corpo de bombeiros militar do Distrito Federal.
+- **SV 40:** A contribuição confederativa de que trata o art. 8º, IV, da Constituição, só é exigível dos filiados ao sindicato respectivo.
+- **SV 41:** O serviço de iluminação pública não pode ser remunerado mediante taxa (mas sim por COSIP - CF, art. 149-A).
+- **SV 42:** É inconstitucional a vinculação do reajuste de vencimentos de servidores estaduais ou municipais a índices federais de correção monetária.
+- **SV 43:** É inconstitucional toda modalidade de provimento que propicie ao servidor investir-se, sem prévia aprovação em concurso público destinado ao seu provimento, em cargo que não integra a carreira na qual anteriormente investido (vedação à transposição, ascensão e derivação).
+- **SV 44:** Só por lei se pode sujeitar a exame psicotécnico a habilitação de candidato a cargo público.
+- **SV 45:** A competência constitucional do Tribunal do Júri prevalece sobre o foro por prerrogativa de função estabelecido exclusivamente pela Constituição Estadual.
+- **SV 46:** A definição dos crimes de responsabilidade e o estabelecimento das respectivas normas de processo e julgamento são da competência legislativa privativa da União (CF, art. 22, I).
+- **SV 47:** Os honorários advocatícios incluídos na condenação ou destacados do montante principal pertencem ao advogado, têm natureza alimentar e podem ser executados de forma autônoma por RPV ou Precatório Alimentar.
+- **SV 48:** Na entrada de mercadoria importada do exterior, é legítima a cobrança do ICMS por ocasião do desembaraço aduaneiro.
+- **SV 49:** Ofende o princípio da livre concorrência lei municipal que impede a instalação de estabelecimentos comerciais do mesmo ramo em determinada área (distanciamento mínimo entre farmácias/postos).
+- **SV 50:** Norma legal que altera o prazo de recolhimento da obrigação tributária não se sujeita ao princípio da anterioridade.
+- **SV 51:** O reajuste de 28,86%, concedido aos servidores militares pelas Leis 8.622/1993 e 8.627/1993, estende-se aos servidores civis do Poder Executivo, observadas eventuais compensações.
+- **SV 52:** Ainda quando alugado a terceiros, permanece imune ao IPTU o imóvel pertencente a entidades de assistência social, templos ou partidos, desde que o valor dos aluguéis seja aplicado em suas finalidades essenciais.
+- **SV 53:** A competência da Justiça do Trabalho prevista no art. 114, VIII, da CF alcança a execução de ofício das contribuições previdenciárias relativas ao objeto da condenação constante das sentenças que proferir e acordos homologados, não abrangendo as contribuições sobre salários pagos durante o vínculo apenas reconhecido em juízo.
+- **SV 54:** A medida provisória não apreciada pelo Congresso Nacional podia, até a EC 32/2001, ser reeditada dentro do seu prazo de eficácia de trinta dias, mantidos os efeitos de lei desde a primeira edição.
+- **SV 55:** O direito ao auxílio-alimentação não se estende aos servidores inativos.
+- **SV 56:** A falta de estabelecimento penal adequado não autoriza a manutenção do condenado em regime prisional mais gravoso, devendo-se observar os parâmetros do RE 641.320 (saída antecipada, monitoração eletrônica e prisão domiciliar).
+- **SV 57:** A imunidade tributária do art. 150, VI, "d", da CF (livros, jornais, periódicos e papel) abrange os livros eletrônicos (e-books) e suportes magnéticos/eletrônicos dedicados exclusivamente a essa função (e-readers).
+- **SV 58:** A concessão de férias-prêmio a servidor público militar inativo ou civil que não as tenha usufruído durante a atividade converte-se em indenização pecuniária, sob pena de enriquecimento ilícito da Administração Pública.
