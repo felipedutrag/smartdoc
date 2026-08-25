@@ -151,7 +151,7 @@ export default function AuthPage() {
 
     if (mode === "register") {
       if (!name.trim()) {
-        setErrorMessage("Por favor, informe seu nome completo.");
+        setErrorMessage("Por favor, informe seu nome.");
         return;
       }
       if (password !== confirmPassword) {
@@ -336,48 +336,29 @@ export default function AuthPage() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            {/* REGISTER: Nome & OAB */}
+            {/* REGISTER: Nome */}
             {mode === "register" && (
-              <>
-                <div className="space-y-1.5">
-                  <Label htmlFor="name">Nome Completo *</Label>
-                  <div className="relative flex items-center">
-                    <User className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
-                    <Input
-                      id="name"
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Dr. Carlos Eduardo da Silva"
-                      required={mode === "register"}
-                      className="pl-9"
-                    />
-                  </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="name">Nome *</Label>
+                <div className="relative flex items-center">
+                  <User className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Seu nome"
+                    required={mode === "register"}
+                    className="pl-9"
+                  />
                 </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="oab">
-                    OAB / Estado <span className="font-normal text-muted-foreground">(Opcional)</span>
-                  </Label>
-                  <div className="relative flex items-center">
-                    <Briefcase className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
-                    <Input
-                      id="oab"
-                      type="text"
-                      value={oab}
-                      onChange={(e) => setOab(e.target.value)}
-                      placeholder="Ex: OAB/SP 123.456"
-                      className="pl-9"
-                    />
-                  </div>
-                </div>
-              </>
+              </div>
             )}
 
             {/* EMAIL (Login, Register, Forgot) */}
             {mode !== "reset" && (
               <div className="space-y-1.5">
-                <Label htmlFor="email">E-mail Profissional *</Label>
+                <Label htmlFor="email">E-mail *</Label>
                 <div className="relative flex items-center">
                   <Mail className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
                   <Input
@@ -385,7 +366,7 @@ export default function AuthPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="contato@escritorio.adv.br"
+                    placeholder="seu@email.com"
                     required
                     className="pl-9"
                   />
