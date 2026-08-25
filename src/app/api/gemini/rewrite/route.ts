@@ -28,35 +28,43 @@ export async function POST(req: Request) {
       - Demonstre a *ratio decidendi* (raciocínio jurídico determinante) do julgado aplicável ao caso do cliente, articulando os fatos concretos com a proteção conferida pela jurisprudência do STF/STJ.
       ` : ""}
 
-      REGRAS CRÍTICAS PARA A SAÍDA (FORMATO NODE-BASED):
-      1. Você NÃO DEVE retornar o documento inteiro. Retorne APENAS os blocos (nodes) que sofreram alguma modificação.
-      2. Para cada bloco modificado, você deve envolvê-lo em uma tag <update id="ID_DO_BLOCO_ORIGINAL">.
-      3. O atributo id da tag <update> deve ser EXATAMENTE o mesmo atributo id do bloco HTML original que você está alterando (ex: id="node-abc123").
-      4. Dentro da tag <update>, coloque o conteúdo HTML do bloco inteiro (por exemplo, a tag <p id="..."> inteira). Preserve os atributos originais do bloco.
-      Exemplo de saída esperada:
-      <update id="node-12345678">
-        <p id="node-12345678" style="text-align: justify;">Texto modificado com a <mark style="background-color: rgba(59, 130, 246, 0.15); color: #2563eb; padding: 2px 4px; border-radius: 4px; font-weight: 600;">nova alteração</mark>.</p>
-      </update>
+      REGRAS CRÍTICAS PARA A SAÍDA (FORMATO NODE-BASED CIRÚRGICO):
+      1. Você NÃO DEVE retornar o documento inteiro. Retorne APENAS as tags <update> referentes aos blocos que sofrerem modificação, inserção ou exclusão.
+      2. O atributo 'id' da tag <update> deve ser OBRIGATORIAMENTE o mesmo 'id' do nó de referência existente no HTML (ex: id="node-abc123").
       
-      REGRAS CRÍTICAS PARA "DIFF VISUAL":
-      1. Dentro do bloco modificado, você DEVE envolver o trecho exato que foi alterado na seguinte tag HTML para criar um efeito de destaque:
-         <mark style="background-color: rgba(59, 130, 246, 0.15); color: #2563eb; padding: 2px 4px; border-radius: 4px; font-weight: 600;">texto modificado</mark>
-      2. Qualquer bloco que você editar ou criar DEVE manter seu atributo id original e usar style="text-align: justify;".
-      
-      REFERÊNCIA A NÚMERO DE PARÁGRAFO:
-      1. Se a instrução fizer referência a um número de parágrafo (ex: "adicione um parágrafo abaixo do parágrafo 10", "reescreva o parágrafo 3", "exclua o parágrafo 7"), conte sequencialmente os blocos de cima para baixo no HTML fornecido para identificar o bloco exato correspondente (o 1º bloco de nível superior é o parágrafo 1, o 2º é o parágrafo 2, o 10º é o parágrafo 10, etc.).
-      2. Para adicionar um parágrafo abaixo de um parágrafo de referência (ex: abaixo do parágrafo 10), retorne a tag <update id="node-ID_DO_PARAGRAFO_10"> contendo o bloco 10 seguido imediatamente da nova tag <p id="node-novo-..." style="text-align: justify;"><mark style="background-color: rgba(59, 130, 246, 0.15); color: #2563eb; padding: 2px 4px; border-radius: 4px; font-weight: 600;">novo texto</mark></p>. O editor reordenará e renumerará todos os parágrafos subsequentes automaticamente.
-      
-      REGRAS RÍGIDAS CONTRA ALUCINAÇÃO E SEGURANÇA JURÍDICA (100% GROUNDING):
-      1. NUNCA invente julgados, números de processos, súmulas inexistentes, ministros relatores ou ementas forjadas.
-      2. Cite apenas artigos e leis reais e vigentes no ordenamento brasileiro.
-      3. Atenha-se estritamente aos fatos e comandos do usuário. Não invente detalhes fáticos não solicitados.
-      
-      REGRAS GERAIS:
-      1. Formate CPFs como XXX.XXX.XXX-XX, Valores como R$ X.XXX,XX e Nomes Próprios com Iniciais Maiúsculas.
-      2. NUNCA use bullets (•), listas <ul> ou <li>. Para listas e pedidos, utilize alíneas com letras: a), b), c)... em parágrafos separados (<p style="text-align: justify;"><strong>a)</strong> ...</p>).
-      3. NÃO use marcadores de markdown ("**"). Use a tag <strong>.
-      4. NÃO inclua nenhum tipo de comentário, saudação ou bloco \`\`\`html. Apenas as tags <update> são permitidas na sua resposta.
+      3. COMO REALIZAR CADA TIPO DE OPERAÇÃO:
+         A) MODIFICAR/SUBSTITUIR UM PARÁGRAFO EXISTENTE:
+            - Retorne a tag <update id="ID_DO_NÓ"> com o parágrafo modificado:
+            <update id="node-12345678">
+              <p id="node-12345678" style="text-align: justify;">Texto que permaneceu <mark style="background-color: rgba(59, 130, 246, 0.15); color: #2563eb; padding: 2px 4px; border-radius: 4px; font-weight: 600;">trecho modificado ou adicionado</mark>.</p>
+            </update>
+
+         B) ADICIONAR UM NOVO PARÁGRAFO ABAIXO DE UM BLOCO EXISTENTE:
+            - Envolva na tag <update id="ID_DO_BLOCO_ANTERIOR"> o bloco anterior inalterado SEGUIDO do novo parágrafo:
+            <update id="node-12345678">
+              <p id="node-12345678" style="text-align: justify;">Texto do parágrafo anterior inalterado...</p>
+              <p id="node-novo-123" style="text-align: justify;"><mark style="background-color: rgba(59, 130, 246, 0.15); color: #2563eb; padding: 2px 4px; border-radius: 4px; font-weight: 600;">Conteúdo do novo parágrafo inserido com sucesso...</mark></p>
+            </update>
+
+         C) ADICIONAR UM NOVO PEDIDO OU ALÍNEA NOS PEDIDOS:
+            - Localize o último pedido existente ou a seção 'III. DOS PEDIDOS' e insira a nova alínea logo abaixo:
+            <update id="node-ultimo-pedido">
+              <p id="node-ultimo-pedido" style="text-align: justify;"><strong>c)</strong> Pedido anterior...</p>
+              <p id="node-novo-pedido" style="text-align: justify;"><strong>d)</strong> <mark style="background-color: rgba(59, 130, 246, 0.15); color: #2563eb; padding: 2px 4px; border-radius: 4px; font-weight: 600;">A condenação da ré em obrigação de fazer...</mark></p>
+            </update>
+
+         D) EXCLUIR / REMOVER UM PARÁGRAFO:
+            - Use a tag <update id="ID_DO_BLOCO" action="delete"></update> ou <update id="ID_DO_BLOCO" delete="true"></update> vazia.
+
+      4. REGRAS CRÍTICAS PARA "DIFF VISUAL":
+         - Dentro do conteúdo modificado ou novo, envolva o trecho alterado/inserido na tag:
+           <mark style="background-color: rgba(59, 130, 246, 0.15); color: #2563eb; padding: 2px 4px; border-radius: 4px; font-weight: 600;">texto novo ou modificado</mark>
+         - Todo parágrafo <p> deve possuir style="text-align: justify;".
+
+      5. REGRAS RÍGIDAS DE IDENTIFICAÇÃO DE LOCAL:
+         - Analise o contexto semântico da instrução (ex: "adicione aos fatos", "coloque nos pedidos", "mude o valor da causa", "acrescente na fundamentação do dano moral", "abaixo do parágrafo sobre o contrato") para eleger com precisão o id do bloco alvo.
+         - NUNCA invente julgados ou números de leis inexistentes.
+         - NÃO inclua markdown (como \`\`\`html) ou comentários conversacionais. Apenas as tags <update>.
     `;
 
     let prompt = `DOCUMENTO ATUAL (HTML):\n${text}\n\nINSTRUÇÃO DO USUÁRIO:\n${instruction}`;

@@ -687,16 +687,32 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
           let modified = false;
           updates.forEach(updateTag => {
             const id = updateTag.getAttribute('id');
+            const action = updateTag.getAttribute('action'); // 'delete', 'replace', etc.
             if (!id) return;
 
             const targetNode = currentDoc.querySelector(`[id="${id}"]`);
             if (targetNode) {
-              if (updateTag.firstElementChild && updateTag.firstElementChild.getAttribute('id') === id) {
-                targetNode.replaceWith(updateTag.firstElementChild.cloneNode(true));
+              if (action === 'delete' || updateTag.getAttribute('delete') === 'true' || updateTag.innerHTML.trim() === '') {
+                targetNode.remove();
+                modified = true;
               } else {
-                targetNode.innerHTML = updateTag.innerHTML;
+                // Se a tag <update> contém múltiplos filhos (ex: o nó original + um novo parágrafo inserido)
+                const children = Array.from(updateTag.children);
+                if (children.length > 0) {
+                  // Substitui o targetNode por todos os filhos do updateTag
+                  const parent = targetNode.parentNode;
+                  if (parent) {
+                    children.forEach(child => {
+                      parent.insertBefore(child.cloneNode(true), targetNode);
+                    });
+                    parent.removeChild(targetNode);
+                    modified = true;
+                  }
+                } else if (updateTag.textContent?.trim()) {
+                  targetNode.innerHTML = updateTag.innerHTML;
+                  modified = true;
+                }
               }
-              modified = true;
             }
           });
 
@@ -706,7 +722,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
             localStorage.setItem("extrajus_draft", finalHtml);
           }
         } else {
-          // Fallback se a IA não usar tags <update> (retornar o doc inteiro)
+          // Fallback se a IA retornar o documento completo ou trecho direto
           if (cleaned.length > 50 && !cleaned.includes('<update')) {
             editor.commands.setContent(cleaned);
             localStorage.setItem("extrajus_draft", cleaned);

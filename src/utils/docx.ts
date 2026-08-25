@@ -15,57 +15,56 @@ export function compileWordHtml(title: string, rawHtml: string): string {
 
   let html = rawHtml.trim();
 
-  // Limpeza de tags vazias e spans residuais
-  html = html.replace(/<span[^>]*>/gi, '').replace(/<\/span>/gi, '');
+  // Limpeza de tags desnecessárias e marcas de revisão
+  html = html.replace(/<mark[^>]*>([\s\S]*?)<\/mark>/gi, '$1');
 
-  // 1. Título da Ação Centralizado (ex: AÇÃO DE COBRANÇA C/C INDENIZAÇÃO)
+  // 1. Título da Ação Centralizado (ex: AÇÃO DE OBRIGAÇÃO DE FAZER...)
   html = html.replace(
     /<h2([^>]*)style="[^"]*text-align:\s*center[^"]*"([^>]*)>([\s\S]*?)<\/h2>/gi,
-    '<p align="center" style="text-align: center; text-indent: 0.0pt; font-family: \'Times New Roman\', serif; font-size: 13.0pt; font-weight: bold; text-transform: uppercase; margin-top: 18.0pt; margin-bottom: 18.0pt; color: #000000;">$3</p>'
+    '<p align="center" style="text-align: center; text-indent: 0.0pt; font-family: \'Cambria\', \'Times New Roman\', serif; font-size: 13.0pt; font-weight: bold; text-transform: uppercase; margin-top: 24.0pt; margin-bottom: 24.0pt; color: #000000; letter-spacing: 0.5pt;">$3</p>'
   );
 
   // 2. Títulos de Seções (I. DOS FATOS, II. DO DIREITO, III. DOS PEDIDOS)
   html = html.replace(
     /<h2([^>]*)>([\s\S]*?)<\/h2>/gi,
-    '<p style="text-align: left; text-indent: 0.0pt; font-family: \'Times New Roman\', serif; font-size: 12.0pt; font-weight: bold; text-transform: uppercase; margin-top: 18.0pt; margin-bottom: 8.0pt; color: #000000;">$2</p>'
+    '<p style="text-align: left; text-indent: 0.0pt; font-family: \'Cambria\', \'Times New Roman\', serif; font-size: 12.0pt; font-weight: bold; text-transform: uppercase; margin-top: 20.0pt; margin-bottom: 8.0pt; color: #000000;">$2</p>'
   );
 
   html = html.replace(
     /<h1([^>]*)>([\s\S]*?)<\/h1>/gi,
-    '<p style="text-align: left; text-indent: 0.0pt; font-family: \'Times New Roman\', serif; font-size: 12.0pt; font-weight: bold; text-transform: uppercase; margin-top: 18.0pt; margin-bottom: 8.0pt; color: #000000;">$2</p>'
+    '<p style="text-align: left; text-indent: 0.0pt; font-family: \'Cambria\', \'Times New Roman\', serif; font-size: 12.0pt; font-weight: bold; text-transform: uppercase; margin-top: 20.0pt; margin-bottom: 8.0pt; color: #000000;">$2</p>'
   );
 
-  // 3. Citações / Jurisprudência / Doutrina (Blockquotes com recuo forense de 4.0cm = 113pt)
+  // 3. Citações / Jurisprudência / Doutrina (Blockquotes idênticos ao editor: sem margem lateral, barra dourada fina à esquerda, fonte menor em itálico e fundo suave)
   html = html.replace(/<blockquote([^>]*)>([\s\S]*?)<\/blockquote>/gi, (_match, _attrs, inner) => {
-    const cleanInner = inner.replace(/<p[^>]*>/gi, '').replace(/<\/p>/gi, '<br/>');
-    return `<div style="margin-left: 113.0pt; margin-right: 0.0pt; margin-top: 10.0pt; margin-bottom: 10.0pt; padding-left: 12.0pt; border-left: 2.5pt solid #4b5563; font-family: 'Times New Roman', serif; font-size: 10.0pt; line-height: 1.15; font-style: italic; text-align: justify; color: #1f2937;">${cleanInner}</div>`;
+    const cleanInner = inner.replace(/<p[^>]*>/gi, '').replace(/<\/p>/gi, '<br/>').trim();
+    return `<div style="margin-top: 14.0pt; margin-bottom: 14.0pt; padding-left: 12.0pt; padding-top: 6.0pt; padding-bottom: 6.0pt; padding-right: 10.0pt; border-left: 2.5pt solid #c97a2b; background-color: #fdfaf6; font-family: 'Cambria', 'Times New Roman', serif; font-size: 10.5pt; line-height: 1.4; font-style: italic; text-align: justify; color: #374151;">${cleanInner}</div>`;
   });
 
   // 4. Divisores horizontais
-  html = html.replace(/<hr\s*\/?>/gi, '<p style="margin-top: 12.0pt; margin-bottom: 12.0pt; border-top: 1.0pt solid #d1d5db;"></p>');
+  html = html.replace(/<hr\s*\/?>/gi, '<p style="margin-top: 14.0pt; margin-bottom: 14.0pt; border-top: 1.0pt solid #e5e7eb;"></p>');
 
   // 5. Parágrafos com alinhamento central (Fechamento: Nestes termos, Local e Data, Linha de Assinatura, Advogado)
   html = html.replace(
     /<p([^>]*)style="[^"]*text-align:\s*center[^"]*"([^>]*)>([\s\S]*?)<\/p>/gi,
-    '<p align="center" style="text-align: center; text-indent: 0.0pt; font-family: \'Times New Roman\', serif; font-size: 12.0pt; line-height: 1.5; margin-bottom: 6.0pt; color: #000000;">$3</p>'
+    '<p align="center" style="text-align: center; text-indent: 0.0pt; font-family: \'Cambria\', \'Times New Roman\', serif; font-size: 12.0pt; line-height: 1.5; margin-bottom: 4.0pt; color: #000000;">$3</p>'
   );
 
   // 6. Parágrafos Justificados padrão
   html = html.replace(/<p([^>]*)>([\s\S]*?)<\/p>/gi, (match, attrs, inner) => {
-    // Não mexer nos parágrafos centralizados já processados
     if (attrs.includes('align="center"') || attrs.includes('text-align: center')) {
       return match;
     }
 
     const trimmedInner = inner.trim();
 
-    // Endereçamento ao Juízo (primeiro parágrafo em caixa alta)
+    // Endereçamento ao Juízo (primeiro parágrafo: negrito, sem recuo, com respiro de 3.5rem / ~36pt abaixo)
     if (
       trimmedInner.includes('EXCELENTÍSSIMO') ||
       trimmedInner.includes('AO JUÍZO') ||
       trimmedInner.includes('ILUSTRÍSSIMO')
     ) {
-      return `<p align="justify" style="text-align: justify; text-indent: 0.0pt; font-family: 'Times New Roman', serif; font-size: 12.0pt; font-weight: bold; line-height: 1.5; margin-bottom: 18.0pt; color: #000000;">${trimmedInner}</p>`;
+      return `<p align="justify" style="text-align: justify; text-indent: 0.0pt; font-family: 'Cambria', 'Times New Roman', serif; font-size: 12.0pt; font-weight: bold; line-height: 1.5; margin-bottom: 36.0pt; color: #000000;">${trimmedInner}</p>`;
     }
 
     // Subtítulos do Direito (ex: 1. Da Relação de Consumo)
@@ -77,7 +76,7 @@ export function compileWordHtml(title: string, rawHtml: string): string {
       trimmedInner.startsWith('<strong>5.') ||
       attrs.includes('font-weight: bold')
     ) {
-      return `<p align="justify" style="text-align: justify; text-indent: 0.0pt; font-family: 'Times New Roman', serif; font-size: 12.0pt; font-weight: bold; line-height: 1.5; margin-top: 14.0pt; margin-bottom: 6.0pt; color: #000000;">${trimmedInner}</p>`;
+      return `<p align="justify" style="text-align: justify; text-indent: 0.0pt; font-family: 'Cambria', 'Times New Roman', serif; font-size: 12.0pt; font-weight: bold; line-height: 1.5; margin-top: 16.0pt; margin-bottom: 6.0pt; color: #000000;">${trimmedInner}</p>`;
     }
 
     // Alíneas de pedidos (ex: a) A concessão da justiça gratuita)
@@ -90,11 +89,11 @@ export function compileWordHtml(title: string, rawHtml: string): string {
       trimmedInner.includes('<strong>f)') ||
       trimmedInner.includes('<strong>g)')
     ) {
-      return `<p align="justify" style="text-align: justify; text-indent: 20.0pt; font-family: 'Times New Roman', serif; font-size: 12.0pt; line-height: 1.5; margin-bottom: 6.0pt; color: #000000;">${trimmedInner}</p>`;
+      return `<p align="justify" style="text-align: justify; text-indent: 0.0pt; font-family: 'Cambria', 'Times New Roman', serif; font-size: 12.0pt; line-height: 1.5; margin-bottom: 6.0pt; color: #000000;">${trimmedInner}</p>`;
     }
 
-    // Parágrafo padrão do corpo forense com recuo de 1,25cm (36pt)
-    return `<p align="justify" style="text-align: justify; text-indent: 36.0pt; font-family: 'Times New Roman', serif; font-size: 12.0pt; line-height: 1.5; margin-bottom: 8.0pt; color: #000000;">${trimmedInner}</p>`;
+    // Parágrafo padrão do corpo forense (sem recuo artificial indesejado, idêntico à visualização do editor)
+    return `<p align="justify" style="text-align: justify; text-indent: 0.0pt; font-family: 'Cambria', 'Times New Roman', serif; font-size: 12.0pt; line-height: 1.6; margin-bottom: 12.0pt; color: #000000;">${trimmedInner}</p>`;
   });
 
   return `
@@ -105,9 +104,9 @@ export function compileWordHtml(title: string, rawHtml: string): string {
       <title>${title || 'Petição Inicial'}</title>
       <style>
         body {
-          font-family: 'Times New Roman', serif;
+          font-family: 'Cambria', 'Times New Roman', serif;
           font-size: 12.0pt;
-          line-height: 1.5;
+          line-height: 1.6;
           color: #000000;
         }
       </style>

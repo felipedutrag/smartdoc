@@ -70,7 +70,7 @@ export function getPeticaoBlocks(data: PeticaoDocumentJson): string[] {
   );
 
   blocks.push(
-    `<h2 style="text-align: center; text-transform: uppercase; margin: 1.25rem 0; font-family: inherit;">${tipoAcao}</h2>`
+    `<h2 style="text-align: center; text-transform: uppercase; margin: 2rem 0; font-family: inherit;">${tipoAcao}</h2>`
   );
 
   blocks.push(

@@ -87,8 +87,9 @@ body,
     margin-bottom: 1rem;
     margin-top: 0;
 
-    // O primeiro parágrafo é sempre o endereçamento ao Juízo -> Respiro forense automático
+    // O primeiro parágrafo é sempre o endereçamento ao Juízo -> Negrito e Respiro forense automático
     &:first-child {
+      font-weight: 700 !important;
       margin-bottom: 3.5rem !important;
     }
   }
@@ -122,6 +123,14 @@ body,
     margin-top: 1.5rem;
     margin-bottom: 0.5rem;
     letter-spacing: -0.01em;
+
+    // Título da Ação Centralizado (entre a qualificação do autor e a do réu)
+    &[style*="text-align: center"],
+    &[style*="text-align:center"] {
+      margin-top: 2rem !important;
+      margin-bottom: 2rem !important;
+      letter-spacing: 0.04em;
+    }
   }
 
   h3 {
@@ -129,20 +138,40 @@ body,
   }
 
   blockquote {
-    border-left: 3px solid var(--primary);
-    padding-left: 1.25rem;
-    margin: 1.5rem 0;
+    border: none !important;
+    border-left: 2px solid var(--primary) !important;
+    padding-left: 1rem;
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+    padding-right: 1rem;
+    margin: 1.25rem 0 !important;
     font-style: italic;
+    font-size: calc(var(--editor-font-size, 17px) * 0.88) !important; /* Tamanho proporcional equilibrado */
+    font-weight: 400 !important; /* Sem negrito */
+    line-height: 1.45 !important;
     color: var(--text-secondary);
-    background: color-mix(in srgb, var(--primary) 4%, transparent);
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-    border-radius: 0 8px 8px 0;
+    background: color-mix(in srgb, var(--primary) 5%, transparent);
+    border-radius: 0 6px 6px 0;
+    outline: none !important;
+    box-shadow: none !important;
+
+    &::before,
+    &::after {
+      display: none !important;
+      content: none !important;
+    }
+
+    p, span, strong, b {
+      font-size: inherit !important;
+      line-height: inherit !important;
+      font-weight: 400 !important; /* Remove negrito de tags internas */
+      margin: 0 !important;
+    }
 
     .dark & {
       color: #a1a1aa;
-      background: color-mix(in srgb, var(--primary) 8%, transparent);
-      border-left-color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 7%, transparent);
+      border-left: 2px solid var(--primary) !important;
     }
   }
 
