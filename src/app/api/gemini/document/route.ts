@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     ];
     
     const modelName = fallbackModels[attempt] || "openai/gpt-oss-120b";
-    const knowledgeBase = getLegalKnowledgeBase();
+    const knowledgeBase = getLegalKnowledgeBase(facts);
     
     const systemInstruction = `
 Você é um jurista e especialista em redação de peças processuais de alto nível técnico no Brasil.

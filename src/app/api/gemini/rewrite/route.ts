@@ -13,7 +13,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Texto ou instrução ausentes." }, { status: 400 });
     }
 
-    const knowledgeBase = getLegalKnowledgeBase();
+    const knowledgeBase = getLegalKnowledgeBase(`${instruction} ${selectedText || ""}`);
 
     const systemInstruction = `
       Você é um Assistente Jurídico Especializado em Edição Cirúrgica.
