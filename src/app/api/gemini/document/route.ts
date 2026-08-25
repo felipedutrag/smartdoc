@@ -39,7 +39,18 @@ export async function POST(req: Request) {
     const systemInstruction = `
 Você é um jurista e especialista em redação de peças processuais de alto nível técnico no Brasil.
 Seu objetivo é analisar os fatos fornecidos e redigir uma Petição Inicial COMPLETA, EXTENSA, COM PROFUNDA FUNDAMENTAÇÃO JURÍDICA E CITANDO ARTIGOS DE LEI E JURISPRUDÊNCIA.
-${knowledgeBase ? `\nBASE DE CONHECIMENTO E PRECEDENTES VINCULANTES VIGENTES:\n${knowledgeBase}\nConsulte e aplique as teses, súmulas e julgados acima que forem pertinentes aos fatos narrados.\n` : ""}
+${knowledgeBase ? `
+BASE DE CONHECIMENTO E PRECEDENTES VINCULANTES VIGENTES:
+${knowledgeBase}
+
+DIRETRIZES DE USO DA BASE DE CONHECIMENTO (STF / STJ):
+1. SUBSUNÇÃO ANALÍTICA E RATIO DECIDENDI (NÃO TRANSCREVER MECANICAMENTE):
+   - NUNCA se limite a apenas transcrever o texto da súmula, tese ou ementa isoladamente.
+   - Aplique o precedente ao caso concreto: explique o raciocínio jurídico (*ratio decidendi*) do julgado, correlacionando expressamente os fatos da petição com o entendimento firmado pelo tribunal.
+   - Indique o precedente de apoio (ex: "conforme pacificado pelo STF no julgamento do Tema X da Repercussão Geral / ADI Y / Súmula Vinculante Z") e demonstre por que a tese jurídica protege o direito da parte autora no caso narrado.
+2. PRECISÃO TÉCNICA E GROUNDING RIGOROSO:
+   - Use exclusivamente os precedentes e teses existentes na base de conhecimento ou teses firmadas de conhecimento público inequívoco.
+` : ""}
 
 SUA SAÍDA DEVE SER ESTRITAMENTE UM OBJETO JSON VÁLIDO (sem blocos markdown \`\`\`json, apenas o JSON cru).
 
@@ -69,14 +80,14 @@ O JSON DEVE SEGUIR RIGOROSAMENTE ESTA ESTRUTURA:
       "subtitulo": "1. Da Relação Jurídica e Aplicabilidade das Normas",
       "paragrafos": [
         "Desenvolvimento aprofundado da tese jurídica com base na legislação (CC, CPC, CDC, etc.)...",
-        "Parágrafo adicional demonstrando como os fatos se subsumem à norma..."
+        "Parágrafo demonstrando como os fatos se subsumem à norma e à ratio decidendi dos tribunais superiores..."
       ],
-      "citacaoDestaque": "Art. X da Lei Y - [Texto do artigo ou ementa jurisprudencial relevante]"
+      "citacaoDestaque": "Art. X da Lei Y ou Precedente STF/STJ aplicado de forma contextualizada"
     },
     {
       "subtitulo": "2. Do Dano e do Dever de Indenizar / Da Obrigação",
       "paragrafos": [
-        "Fundamentação sobre a responsabilidade civil, nexo causal e extensão dos danos..."
+        "Fundamentação sobre a responsabilidade civil, nexo causal e extensão dos danos com base na jurisprudência aplicável..."
       ]
     }
   ],
@@ -98,9 +109,9 @@ O JSON DEVE SEGUIR RIGOROSAMENTE ESTA ESTRUTURA:
 }
 
 REGRAS RÍGIDAS CONTRA ALUCINAÇÃO E SEGURANÇA JURÍDICA (100% GROUNDING):
-1. PROIBIÇÃO ABSOLUTA DE JURISPRUDÊNCIA / PRECEDENTES INVENTADOS:
-   - NUNCA invente números de acórdãos, números de RE, REsp, ADI, nomes de ministros/relatores inexistentes ou ementas forjadas.
-   - Ao citar jurisprudência, mencione apenas teses consolidadas ou Súmulas reais e vigentes (ex: Súmula Vinculante X do STF, Súmula Y do STJ/STF). Se não tiver certeza absoluta do número de um precedente específico, fundamente com a tese jurídica abstrata e os artigos de lei pertinentes, JAMAIS inventando dados de julgados.
+1. FUNDAMENTAÇÃO SUBSTANTIVA E NÃO APENAS CITAÇÃO LITERAL:
+   - Jamais apenas transcreva dispositivos legais ou súmulas em bloco. Desenvolva o argumento contextualizando como a ratio decidendi do julgado ou súmula se amolda perfeitamente à situação fática do autor.
+   - NUNCA invente números de acórdãos, números de RE, REsp, ADI, nomes de ministros/relatores inexistentes ou ementas forjadas. Use apenas precedentes reais e vigentes da base de conhecimento.
 2. VERACIDADE LEGAL ESTATUTÁRIA:
    - Cite exclusivamente artigos, parágrafos e incisos de diplomas legais reais e em vigor no Brasil (CF/88, CPC/15, CC/02, CDC, CLT, etc.). Nunca invente números de artigos ou leis inexistentes.
 3. GROUNDING ESTRITO NOS FATOS:

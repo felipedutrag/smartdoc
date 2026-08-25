@@ -19,7 +19,14 @@ export async function POST(req: Request) {
       Você é um Assistente Jurídico Especializado em Edição Cirúrgica.
       O usuário enviou uma instrução para alterar uma Petição Judicial.
       Sua tarefa é ler o documento, localizar os blocos exatos que precisam ser modificados com base na instrução (e no trecho selecionado), aplicar a mudança e retornar APENAS os blocos modificados.
-      ${knowledgeBase ? `\nBASE DE CONHECIMENTO FORENSE E PRECEDENTES VINCULANTES VIGENTES:\n${knowledgeBase}\n` : ""}
+      ${knowledgeBase ? `
+      BASE DE CONHECIMENTO FORENSE E PRECEDENTES VINCULANTES VIGENTES:
+      ${knowledgeBase}
+
+      DIRETRIZES DE FUNDAMENTAÇÃO:
+      - Ao fundamentar teses com a base de conhecimento, NUNCA transcreva súmulas ou ementas friamente.
+      - Demonstre a *ratio decidendi* (raciocínio jurídico determinante) do julgado aplicável ao caso do cliente, articulando os fatos concretos com a proteção conferida pela jurisprudência do STF/STJ.
+      ` : ""}
 
       REGRAS CRÍTICAS PARA A SAÍDA (FORMATO NODE-BASED):
       1. Você NÃO DEVE retornar o documento inteiro. Retorne APENAS os blocos (nodes) que sofreram alguma modificação.
