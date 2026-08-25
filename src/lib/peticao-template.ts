@@ -54,7 +54,7 @@ export function getPeticaoBlocks(data: PeticaoDocumentJson): string[] {
   // 1. Endereçamento (Juízo)
   if (cabecalho?.enderecamento) {
     blocks.push(
-      `<p style="text-align: justify; line-height: 1.5; margin-bottom: 2.5rem;"><strong>${cabecalho.enderecamento}</strong></p>`
+      `<p style="text-align: justify; line-height: 1.5; margin-bottom: 3.5rem;"><strong>${cabecalho.enderecamento}</strong></p>`
     );
   }
 
