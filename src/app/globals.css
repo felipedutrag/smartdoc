@@ -173,7 +173,6 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   position: relative;
-  transition: background 0.3s ease, color 0.3s ease;
 }
 
 @keyframes spaceTimeMesh {
@@ -581,30 +580,6 @@ body {
 
 @media screen and (max-width: 860px) {
 
-  html,
-  body {
-    height: auto !important;
-    min-height: 100%;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-  }
-
-  body::before,
-  body::after {
-    inset: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    position: fixed !important;
-  }
-
-  main {
-    height: auto !important;
-    min-height: 100vh !important;
-    min-height: 100dvh !important;
-    overflow-x: hidden !important;
-    overflow-y: visible !important;
-  }
-
   .mobile-only-flex {
     display: flex !important;
   }
@@ -899,10 +874,7 @@ body {
 }
 
 @media screen and (max-width: 768px) {
-  .home-main-content {
-    /* Mantendo padding original para não quebrar títulos */
-  }
-
+  /* Mantendo padding original para não quebrar títulos */
   .textarea-wrapper {
     margin-left: -10px !important;
     margin-right: -10px !important;

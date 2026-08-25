@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import {
   Mic,
   ArrowRight,
-  Sparkles,
   Zap,
   ShieldCheck,
   FileText,
@@ -14,7 +13,14 @@ import {
   Scale,
   Download,
   ChevronRight,
-  Bot
+  Bot,
+  Bold,
+  Italic,
+  Underline,
+  AlignJustify,
+  FileCheck,
+  Radio,
+  Gavel
 } from "lucide-react";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -22,16 +28,52 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 export default function Home() {
+  const router = useRouter();
   const [isDark, setIsDark] = useState<boolean | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [typedConclusion, setTypedConclusion] = useState("");
 
   const isMobileRaw = useIsBreakpoint("max", 768);
   const isMobile = isMobileRaw ?? false;
 
   useEffect(() => {
+    const fullText = "Configurada a manifesta falha na prestação dos serviços e o dever de indenizar nos termos do art. 14 do CDC, requer-se a total procedência dos pedidos com a condenação da ré ao pagamento de reparação por danos morais e materiais.";
+    let timeout: NodeJS.Timeout;
+    let charIndex = 0;
+
+    const typeLoop = () => {
+      if (charIndex <= fullText.length) {
+        setTypedConclusion(fullText.slice(0, charIndex));
+        charIndex++;
+        timeout = setTimeout(typeLoop, 28);
+      } else {
+        timeout = setTimeout(() => {
+          charIndex = 0;
+          setTypedConclusion("");
+          timeout = setTimeout(typeLoop, 600);
+        }, 5000);
+      }
+    };
+
+    timeout = setTimeout(typeLoop, 900);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        router.replace("/dashboard");
+      }
+    };
+    checkUser();
+
     setIsMounted(true);
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme === "dark" || (!savedTheme && document.documentElement.classList.contains("dark"))) {
@@ -39,7 +81,7 @@ export default function Home() {
     } else {
       setIsDark(false);
     }
-  }, []);
+  }, [router]);
 
   const toggleTheme = () => {
     const newTheme = !isDark;
@@ -56,10 +98,10 @@ export default function Home() {
   };
 
   return (
-    <main className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background text-foreground selection:bg-primary/20 selection:text-primary">
+    <main className="relative flex min-h-screen w-full flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary">
       {/* ── Ambient Linear Subtle Grid ── */}
       <div
-        className="pointer-events-none fixed inset-0 z-0 opacity-25 dark:opacity-20"
+        className="pointer-events-none fixed inset-0 z-0 opacity-25 dark:opacity-20 [transform:translateZ(0)]"
         style={{
           backgroundImage: `
             radial-gradient(circle, var(--grid-color) 1px, transparent 1px),
@@ -71,10 +113,10 @@ export default function Home() {
       />
 
       {/* Top Ambient Glow Orb */}
-      <div className="pointer-events-none absolute -top-32 left-1/2 z-0 h-[400px] w-[800px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_50%_20%,var(--primary),transparent_70%)] opacity-15 blur-3xl" />
+      <div className="pointer-events-none absolute -top-32 left-1/2 z-0 h-[400px] w-[800px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_50%_20%,var(--primary),transparent_70%)] opacity-15 blur-3xl [transform:translateZ(0)]" />
 
       {/* ── Linear Navigation Bar (Fixed) ── */}
-      <nav className="fixed top-0 inset-x-0 z-50 flex w-full items-center justify-center border-b border-border/80 bg-background/90 px-4 sm:px-8 py-3 backdrop-blur-xl shadow-xs transition-all">
+      <nav className="fixed top-0 inset-x-0 z-50 flex w-full items-center justify-center border-b border-border/80 bg-background/90 px-4 sm:px-8 py-3 backdrop-blur-md shadow-xs transition-all [transform:translateZ(0)]">
         <div className="flex w-full max-w-5xl items-center justify-between">
           {/* Brand Logo */}
           <Link href="/" className="group flex items-center gap-2">
@@ -93,12 +135,16 @@ export default function Home() {
           {/* Center Links with subtle vertical separators */}
           {!isMobile && (
             <div className="flex items-center text-xs font-medium text-muted-foreground">
-              <a href="#como-funciona" className="px-3 py-1 transition-colors hover:text-foreground">
-                Como Funciona
+              <a href="#inicio" className="px-3 py-1 transition-colors hover:text-foreground">
+                Início
               </a>
               <span className="text-border/80 select-none">|</span>
               <a href="#recursos" className="px-3 py-1 transition-colors hover:text-foreground">
                 Recursos
+              </a>
+              <span className="text-border/80 select-none">|</span>
+              <a href="#como-funciona" className="px-3 py-1 transition-colors hover:text-foreground">
+                Como Funciona
               </a>
               <span className="text-border/80 select-none">|</span>
               <a href="#faq" className="px-3 py-1 transition-colors hover:text-foreground">
@@ -145,10 +191,10 @@ export default function Home() {
       </nav>
 
       {/* ── HERO SECTION ── */}
-      <section className="relative z-10 flex w-full flex-col items-center px-4 pt-24 sm:pt-32 pb-12 text-center">
-        <div className="flex max-w-3xl flex-col items-center">
+      <section id="inicio" className="relative z-10 flex w-full flex-col items-center px-4 pt-24 sm:pt-32 pb-12 text-center">
+        <div className="flex w-full max-w-4xl flex-col items-center mx-auto">
           {/* Micro Linear Badge */}
-          <div className="mb-5 inline-flex items-center gap-2 rounded-md border border-border/80 bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur-md shadow-xs">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-md border border-border/80 bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground shadow-xs">
             <span className="flex size-1.5 rounded-full bg-primary animate-pulse" />
             <span className="text-foreground font-semibold">SmartDoc 2.0</span>
             <span className="text-muted-foreground/40">•</span>
@@ -157,7 +203,7 @@ export default function Home() {
           </div>
 
           {/* Main Title Objective & High Contrast */}
-          <h1 className="mb-4 text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15]">
+          <h1 className="mb-4 text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15] max-w-4xl mx-auto">
             Sua Assistente Jurídica <br className="hidden sm:inline" />
             <span className="text-primary font-black">
               com IA de Voz
@@ -165,24 +211,23 @@ export default function Home() {
           </h1>
 
           {/* Subtitle Objective */}
-          <p className="mb-4 max-w-xl text-xs sm:text-sm leading-relaxed text-muted-foreground font-normal">
-            Converse naturalmente com a IA para redigir, alterar e aperfeiçoar petições inteiras — por voz ou texto. Pronta para protocolo no PJe em minutos.
+          <p className="mb-6 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed text-muted-foreground font-normal">
+            Converse naturalmente com a IA para redigir, alterar e aperfeiçoar petições inteiras — por voz ou texto. Pronta para protocolo judicial em minutos.
           </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/register"
-              className={cn(buttonVariants({ size: "default" }), "h-10 px-6 text-xs font-bold bg-primary text-primary-foreground rounded-xl shadow-md hover:opacity-90 gap-1.5")}
+              className={cn(buttonVariants({ size: "default" }), "h-11 px-6 text-xs sm:text-sm font-bold bg-primary text-primary-foreground rounded-xl shadow-md hover:opacity-90 gap-1.5")}
             >
-              <Sparkles className="size-3.5" />
-              <span>Experimentar Grátis</span>
+              <span>Experimentar</span>
               <ArrowRight className="size-3.5" />
             </Link>
 
             <Link
               href="/login"
-              className={cn(buttonVariants({ variant: "outline", size: "default" }), "h-10 px-5 text-xs font-semibold border-border/80 rounded-xl bg-card/60 backdrop-blur-md")}
+              className={cn(buttonVariants({ variant: "outline", size: "default" }), "h-11 px-5 text-xs sm:text-sm font-semibold border-border/80 rounded-xl bg-card")}
             >
               <span>Acessar Meu Painel</span>
             </Link>
@@ -206,10 +251,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── PRODUCT SHOWCASE (Linear-Style Window) ── */}
+      {/* ── PRODUCT SHOWCASE (Interactive Editor Window) ── */}
       <section className="relative z-10 flex w-full justify-center px-4 pb-16">
-        <div className="w-full max-w-4xl rounded-2xl border border-border/80 bg-card/60 p-1.5 shadow-2xl backdrop-blur-xl">
-          {/* Window Header */}
+        <div className="w-full max-w-4xl rounded-2xl border border-border/80 bg-card p-1.5 shadow-2xl">
+          {/* Window Header / Browser Chrome */}
           <div className="flex items-center justify-between border-b border-border/70 px-4 py-2 bg-muted/30 rounded-t-xl">
             <div className="flex items-center gap-2">
               <div className="flex gap-1.5">
@@ -223,18 +268,41 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-[9px] font-mono text-emerald-600 dark:text-emerald-400">
-                ● Pronto para Protocolo
+              <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-[9px] font-mono text-emerald-600 dark:text-emerald-400 gap-1">
+                <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Pronto para Protocolo</span>
               </Badge>
             </div>
           </div>
 
+          {/* Sub Editor Toolbar */}
+          <div className="flex items-center justify-between border-b border-border/60 px-4 py-1.5 bg-muted/15 text-muted-foreground text-xs">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 border-r border-border/60 pr-2">
+                <span className="font-semibold text-foreground text-[11px]">Padrão Forense</span>
+                <span className="text-[10px] font-mono opacity-60">12pt</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-muted-foreground/70">
+                <span className="px-1 py-0.5 rounded font-bold hover:bg-muted text-[10px]">B</span>
+                <span className="px-1 py-0.5 rounded italic hover:bg-muted text-[10px]">I</span>
+                <span className="px-1 py-0.5 rounded underline hover:bg-muted text-[10px]">U</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-mono text-primary font-medium">
+                <span className="size-1.5 rounded-full bg-primary animate-ping" />
+                IA Redigindo em Tempo Real
+              </span>
+            </div>
+          </div>
+
           {/* Window Mockup Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-border/60 bg-background/50 rounded-b-xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-border/60 bg-background/60 rounded-b-xl">
             {/* Left Document Editor Area */}
-            <div className="lg:col-span-8 p-6 sm:p-8 font-serif text-xs leading-relaxed text-foreground/90 space-y-3">
+            <div className="lg:col-span-8 p-6 sm:p-8 font-serif text-xs leading-relaxed text-foreground/90 space-y-3.5 bg-card/40">
               <div className="text-center font-bold font-sans text-[11px] tracking-wider text-muted-foreground border-b border-border/40 pb-2">
-                EXCELENTÍSSIMO SENHOR DOUTOR JUIZ DE DIREITO DA ___ª VARA CÍVEL DA COMARCA DE SÃO PAULO/SP
+                EXCELENTÍSSIMO SENHOR DOUTOR JUIZ DE DIREITO DA 12ª VARA CÍVEL DA COMARCA DE SÃO PAULO/SP
               </div>
 
               <div className="pt-1 text-justify">
@@ -245,49 +313,73 @@ export default function Home() {
                 AÇÃO DE OBRIGAÇÃO DE FAZER C/C REPARAÇÃO POR DANOS MORAIS E MATERIAIS
               </div>
 
-              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 font-sans text-[11px] text-muted-foreground">
-                <div className="font-semibold text-primary flex items-center gap-1 mb-0.5">
-                  <Sparkles className="size-3" />
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 font-sans text-[11px] text-muted-foreground space-y-1">
+                <div className="font-semibold text-primary flex items-center gap-1.5">
+                  <Scale className="size-3.5" />
                   <span>Fundamentação Jurídica Estruturada:</span>
                 </div>
-                Art. 186 e 927 do CC c/c Art. 6º, VI e Art. 14 do CDC. Jurisprudência pacificada do STJ.
+                <p className="text-[11px] leading-relaxed">
+                  Art. 186 e 927 do CC c/c Art. 6º, VI e Art. 14 do CDC. Jurisprudência pacificada do STJ (Súmula 162).
+                </p>
               </div>
 
-              <p className="text-justify font-serif text-[11px] leading-relaxed text-muted-foreground">
-                Configurada a falha na prestação de serviços e o dever de indenizar, requer-se a citação da ré e a total procedência dos pedidos formulados.
-              </p>
+              {/* Dynamic Typewriter Paragraph */}
+              <div className="pt-1">
+                <p className="text-justify font-serif text-[11px] leading-relaxed text-foreground/90 min-h-[46px]">
+                  {typedConclusion}
+                  <span className="inline-block w-1.5 h-3 bg-primary ml-0.5 animate-pulse align-middle" />
+                </p>
+              </div>
             </div>
 
             {/* Right Live Assistant & Meta Panel */}
             <div className="lg:col-span-4 p-4 bg-muted/10 flex flex-col justify-between space-y-3 font-sans">
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 <div className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                   Painel de Inteligência
                 </div>
 
-                <div className="rounded-xl border border-border/80 bg-card p-2.5 space-y-1.5">
+                {/* Voice Assistant Active Card */}
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-1.5 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <div className="text-[11px] font-semibold text-primary flex items-center gap-1.5">
+                      <Mic className="size-3.5 text-primary animate-pulse" />
+                      <span>Assistente de Voz Ativo</span>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                      <span className="size-1.5 rounded-full bg-emerald-500 animate-ping" />
+                      Ao Vivo
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground leading-relaxed">
+                    Converse com a IA para reescrever argumentos, adicionar pedidos ou alterar teses — tudo por voz.
+                  </p>
+                </div>
+
+                {/* Mapped Legal Articles */}
+                <div className="rounded-xl border border-border/80 bg-card p-2.5 space-y-2 shadow-2xs">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-muted-foreground">Dispositivos Mapeados:</span>
+                    <span className="font-mono font-bold text-foreground text-[10px]">7 artigos</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    <span className="px-1.5 py-0.5 rounded bg-muted/60 text-[9px] font-mono text-muted-foreground border border-border/60">Art. 186 CC</span>
+                    <span className="px-1.5 py-0.5 rounded bg-muted/60 text-[9px] font-mono text-muted-foreground border border-border/60">Art. 927 CC</span>
+                    <span className="px-1.5 py-0.5 rounded bg-muted/60 text-[9px] font-mono text-muted-foreground border border-border/60">Art. 14 CDC</span>
+                    <span className="px-1.5 py-0.5 rounded bg-muted/60 text-[9px] font-mono text-muted-foreground border border-border/60">Súmula 162 STJ</span>
+                  </div>
+                </div>
+
+                {/* Speed & Formatting stats */}
+                <div className="rounded-xl border border-border/80 bg-card p-2.5 space-y-1.5 shadow-2xs">
                   <div className="flex items-center justify-between text-[11px]">
                     <span className="text-muted-foreground">Elaboração:</span>
                     <span className="font-mono font-semibold text-emerald-600 dark:text-emerald-400">1.8 segundos</span>
                   </div>
                   <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-muted-foreground">Artigos Mapeados:</span>
-                    <span className="font-mono font-semibold text-foreground">7 dispositivos</span>
-                  </div>
-                  <div className="flex items-center justify-between text-[11px]">
                     <span className="text-muted-foreground">Visual Law:</span>
                     <span className="font-mono font-semibold text-foreground">Formatado</span>
                   </div>
-                </div>
-
-                <div className="rounded-xl border border-border/80 bg-card p-2.5 space-y-1">
-                  <div className="text-[11px] font-semibold text-foreground flex items-center gap-1">
-                    <Bot className="size-3 text-primary" />
-                    <span>Assistente de Voz Ativo</span>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground leading-relaxed">
-                    Converse com a IA para reescrever argumentos, adicionar pedidos ou alterar teses — tudo por voz, em tempo real.
-                  </p>
                 </div>
               </div>
 
@@ -296,7 +388,7 @@ export default function Home() {
                   href="/register"
                   className={cn(buttonVariants({ size: "sm" }), "w-full text-xs font-semibold bg-primary text-primary-foreground rounded-lg shadow-xs h-8")}
                 >
-                  Começar Agora — É Grátis
+                  Começar Agora
                 </Link>
               </div>
             </div>
@@ -305,25 +397,25 @@ export default function Home() {
       </section>
 
       {/* ── BENTO GRID: RECURSOS (Compact & Linear Style) ── */}
-      <section id="recursos" className="relative z-10 flex w-full flex-col items-center px-4 py-14 bg-muted/20 border-y border-border/60">
+      <section id="recursos" className="relative z-10 flex w-full flex-col items-center px-4 py-16 bg-muted/20 border-y border-border/60">
         <div className="w-full max-w-4xl">
           {/* Section Heading */}
-          <div className="mb-6 text-center max-w-xl mx-auto">
-            <div className="mb-1 text-xs font-mono font-bold uppercase tracking-widest text-primary">
+          <div className="mb-8 text-center w-full max-w-4xl mx-auto">
+            <div className="mb-2 text-xs font-mono font-bold uppercase tracking-widest text-primary">
               Tecnologia
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground sm:whitespace-nowrap">
               Ferramentas que advogados precisam
             </h2>
-            <p className="mt-1.5 text-xs sm:text-sm text-muted-foreground leading-relaxed">
+            <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto">
               Cada recurso foi projetado por quem entende a rotina de um escritório de advocacia.
             </p>
           </div>
 
           {/* Bento Grid Container (Subtle Balanced Spacing) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
             {/* Bento Card 1: Voz */}
-            <Card className="md:col-span-2 border-border/80 bg-card/70 px-4 py-4.5 backdrop-blur-md flex flex-col justify-center gap-2">
+            <Card className="md:col-span-2 border-border/80 bg-card px-4 py-4.5 shadow-sm flex flex-col justify-center gap-2">
               <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20">
                 <Mic className="size-3.5" />
               </div>
@@ -344,7 +436,7 @@ export default function Home() {
             </Card>
 
             {/* Bento Card 2: Visual Law & DOCX */}
-            <Card className="border-border/80 bg-card/70 px-4 py-4.5 backdrop-blur-md flex flex-col justify-center gap-2">
+            <Card className="border-border/80 bg-card px-4 py-4.5 shadow-sm flex flex-col justify-center gap-2">
               <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20">
                 <Download className="size-3.5" />
               </div>
@@ -353,7 +445,7 @@ export default function Home() {
                   Exportação Word Forense
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Baixe a peça com tipografia, margens e formatação nos padrões do PJe. Pronta para protocolo.
+                  Baixe a peça com tipografia, margens e formatação nos padrões judiciais. Pronta para protocolo.
                 </p>
                 <div className="pt-0.5">
                   <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
@@ -365,7 +457,7 @@ export default function Home() {
             </Card>
 
             {/* Bento Card 3: IA Flutuante */}
-            <Card className="border-border/80 bg-card/70 px-4 py-4.5 backdrop-blur-md flex flex-col justify-center gap-2">
+            <Card className="border-border/80 bg-card px-4 py-4.5 shadow-sm flex flex-col justify-center gap-2">
               <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20">
                 <Zap className="size-3.5" />
               </div>
@@ -386,7 +478,7 @@ export default function Home() {
             </Card>
 
             {/* Bento Card 4: Segurança e Sigilo */}
-            <Card className="md:col-span-2 border-border/80 bg-card/70 px-4 py-4.5 backdrop-blur-md flex flex-col justify-center gap-2">
+            <Card className="md:col-span-2 border-border/80 bg-card px-4 py-4.5 shadow-sm flex flex-col justify-center gap-2">
               <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20">
                 <ShieldCheck className="size-3.5" />
               </div>
@@ -412,13 +504,16 @@ export default function Home() {
       {/* ── HOW IT WORKS (Timeline 1-2-3) ── */}
       <section id="como-funciona" className="relative z-10 flex w-full flex-col items-center px-4 py-16">
         <div className="w-full max-w-4xl">
-          <div className="mb-6 text-center max-w-xl mx-auto">
-            <div className="mb-1 text-xs font-mono font-bold uppercase tracking-widest text-primary">
+          <div className="mb-8 text-center w-full max-w-4xl mx-auto">
+            <div className="mb-2 text-xs font-mono font-bold uppercase tracking-widest text-primary">
               Como Funciona
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground sm:whitespace-nowrap">
               Da reunião ao protocolo em 3 etapas
             </h2>
+            <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+              Fluxo simplificado para transformar atendimento em petição protocolada.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -442,7 +537,7 @@ export default function Home() {
               <div className="font-mono text-[10px] font-extrabold text-primary mb-2">03 / REFINAMENTO</div>
               <h4 className="text-sm font-bold text-foreground">Refine por voz e protocole</h4>
               <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                Converse com a IA para ajustar qualquer trecho. Exporte o .docx formatado e protocole no PJe.
+                Converse com a IA para ajustar qualquer trecho. Exporte o .docx formatado e protocole no tribunal.
               </p>
             </div>
           </div>
@@ -451,17 +546,20 @@ export default function Home() {
 
       {/* ── FAQ SECTION ── */}
       <section id="faq" className="relative z-10 flex w-full flex-col items-center px-4 py-16 bg-muted/10 border-t border-border/60">
-        <div className="w-full max-w-3xl">
-          <div className="mb-6 text-center">
-            <h2 className="text-2xl font-extrabold tracking-tight text-foreground">
+        <div className="w-full max-w-4xl">
+          <div className="mb-8 text-center w-full max-w-4xl mx-auto">
+            <div className="mb-2 text-xs font-mono font-bold uppercase tracking-widest text-primary">
+              FAQ
+            </div>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground sm:whitespace-nowrap">
               Dúvidas Frequentes
             </h2>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto">
               O que advogados perguntam antes de começar.
             </p>
           </div>
 
-          <div className="space-y-2.5">
+          <div className="space-y-3 max-w-3xl mx-auto">
             {[
               {
                 q: "Como funciona a IA de voz durante a reunião?",
@@ -472,8 +570,8 @@ export default function Home() {
                 a: 'Sim. Após a geração da peça, você conversa naturalmente com a IA: "adicione um pedido de dano moral de R$ 15.000" ou "reforce a fundamentação no CDC". A IA localiza o trecho correto e aplica a alteração cirurgicamente.'
               },
               {
-                q: "A petição gerada já vem pronta para o PJe?",
-                a: "Sim. A peça é gerada com estrutura jurídica completa — endereçamento, qualificação, fatos, fundamentação com artigos e jurisprudência, pedidos detalhados e valor da causa. Você exporta o .docx formatado e protocola."
+                q: "A petição gerada já vem pronta para protocolo nos tribunais?",
+                a: "Sim. A peça é gerada com estrutura jurídica completa — endereçamento, qualificação, fatos, fundamentação com artigos e jurisprudência, pedidos detalhados e valor da causa. Você exporta o .docx formatado e protocola em qualquer sistema judicial."
               },
               {
                 q: "Meus dados e os de meus clientes estão seguros?",
@@ -482,20 +580,39 @@ export default function Home() {
             ].map((faq, i) => (
               <div
                 key={i}
-                className="rounded-xl border border-border/80 bg-card overflow-hidden transition-colors"
+                className={cn(
+                  "rounded-xl border bg-card overflow-hidden transition-all duration-300 ease-out",
+                  openFaq === i
+                    ? "border-primary/40 shadow-xs bg-card/90"
+                    : "border-border/80 hover:border-border"
+                )}
               >
                 <button
+                  type="button"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between p-3.5 text-left font-semibold text-xs sm:text-sm text-foreground hover:text-primary transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-between p-4 text-left font-semibold text-xs sm:text-sm text-foreground hover:text-primary transition-colors cursor-pointer"
                 >
-                  <span>{faq.q}</span>
-                  <ChevronDown className={cn("size-3.5 text-muted-foreground transition-transform duration-200", openFaq === i ? "rotate-180 text-primary" : "")} />
+                  <span className="pr-4">{faq.q}</span>
+                  <ChevronDown
+                    className={cn(
+                      "size-4 shrink-0 text-muted-foreground transition-transform duration-300 ease-out",
+                      openFaq === i ? "rotate-180 text-primary" : ""
+                    )}
+                  />
                 </button>
-                {openFaq === i && (
-                  <div className="px-3.5 pb-3.5 text-xs text-muted-foreground leading-relaxed border-t border-border/40 pt-2.5">
-                    {faq.a}
+
+                <div
+                  className={cn(
+                    "grid transition-all duration-300 ease-out",
+                    openFaq === i ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                  )}
+                >
+                  <div className="overflow-hidden">
+                    <div className="px-4 pb-4 text-xs text-muted-foreground leading-relaxed border-t border-border/40 pt-3">
+                      {faq.a}
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
             ))}
           </div>
@@ -503,24 +620,24 @@ export default function Home() {
       </section>
 
       {/* ── FINAL CTA (Distinct Background & Border) ── */}
-      <section className="relative z-10 flex w-full flex-col items-center px-4 py-20 text-center bg-card/60 border-y border-border/70 backdrop-blur-md">
-        <div className="flex max-w-2xl flex-col items-center">
+      <section className="relative z-10 flex w-full flex-col items-center px-4 py-20 text-center bg-muted/30 border-y border-border/70">
+        <div className="flex w-full max-w-4xl flex-col items-center mx-auto">
           <div className="mb-2 text-xs font-mono font-bold uppercase tracking-widest text-primary">
-            Pare de perder horas com trabalho repetitivo
+            Produtividade Forense
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground sm:whitespace-nowrap">
             Comece a advogar com IA agora
           </h2>
-          <p className="mt-2 text-xs sm:text-sm text-muted-foreground">
-            Crie sua conta gratuita e descubra como a IA de voz transforma a rotina do seu escritório.
+          <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+            Crie sua conta e descubra como a IA de voz transforma a rotina do seu escritório.
           </p>
 
           <div className="mt-6 flex items-center gap-3">
             <Link
               href="/register"
-              className={cn(buttonVariants({ size: "default" }), "h-10 px-6 text-xs font-bold bg-primary text-primary-foreground rounded-lg shadow-md hover:opacity-90 transition-all")}
+              className={cn(buttonVariants({ size: "default" }), "h-11 px-7 text-xs sm:text-sm font-bold bg-primary text-primary-foreground rounded-xl shadow-md hover:opacity-90 transition-all")}
             >
-              Criar Conta Gratuita
+              Criar Conta
             </Link>
           </div>
         </div>

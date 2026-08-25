@@ -377,7 +377,7 @@ export default function AuthPage() {
                 </>
               ) : (
                 <>
-                  <span>{mode === "login" ? "Acessar Meu Painel" : "Criar Minha Conta Grátis"}</span>
+                  <span>{mode === "login" ? "Acessar Meu Painel" : "Criar Minha Conta"}</span>
                   <ArrowRight className="size-4" />
                 </>
               )}

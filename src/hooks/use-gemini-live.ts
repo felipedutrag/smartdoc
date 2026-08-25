@@ -361,7 +361,7 @@ export function useGeminiLive(
         }
 
         // Por padrão, sempre queremos a transcrição do áudio de entrada
-        setupPayload.setup.inputAudioTranscription = { model: "models/gemini-2.0-flash-exp" };
+        setupPayload.setup.inputAudioTranscription = {};
 
         if (responseModalities.includes("AUDIO")) {
           setupPayload.setup.generationConfig.speechConfig = {

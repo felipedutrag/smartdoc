@@ -13,7 +13,6 @@ import {
   LogOut,
   ChevronRight,
   ChevronLeft,
-  Sparkles,
   ShieldCheck,
   Mic,
   ArrowRight,
@@ -36,7 +35,12 @@ import {
   Scale,
   Video,
   FileSignature,
-  Activity
+  Activity,
+  Copy,
+  CheckCheck,
+  QrCode,
+  Loader2,
+  Zap
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
@@ -123,6 +127,93 @@ export default function DashboardPage() {
   const [isDictating, setIsDictating] = useState(false);
   const [recognition, setRecognition] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Pix Payment State (Subscription via Realtime Webhook - No Polling)
+  const [isPixModalOpen, setIsPixModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<{ id: string; name: string; price: number; description: string } | null>(null);
+  const [pixLoading, setPixLoading] = useState(false);
+  const [pixData, setPixData] = useState<{ id: string; pixCode: string; pixQrCode: string; externalId: string } | null>(null);
+  const [pixError, setPixError] = useState<string | null>(null);
+  const [pixSuccess, setPixSuccess] = useState(false);
+  const [copiedPix, setCopiedPix] = useState(false);
+
+  const handleOpenPixModal = async (plan: { id: string; name: string; price: number; description: string }) => {
+    setSelectedPlan(plan);
+    setIsPixModalOpen(true);
+    setPixLoading(true);
+    setPixError(null);
+    setPixSuccess(false);
+    setPixData(null);
+
+    try {
+      const res = await fetch("/api/payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planId: plan.id,
+          planName: plan.name,
+          price: plan.price,
+          customerName: profile?.name,
+          customerEmail: profile?.email,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error || "Não foi possível gerar a cobrança Pix.");
+      }
+
+      setPixData(data);
+    } catch (err: any) {
+      console.error("Erro ao gerar Pix:", err);
+      setPixError(err.message || "Erro de conexão ao gerar o Pix.");
+    } finally {
+      setPixLoading(false);
+    }
+  };
+
+  // Escuta confirmação de pagamento em tempo real via Supabase Realtime (SEM POLLING e com cleanup correto)
+  useEffect(() => {
+    if (!isPixModalOpen || !pixData?.externalId || pixSuccess) return;
+
+    const externalId = pixData.externalId;
+    const planName = selectedPlan?.name;
+
+    // Criar canal único por ID de transação para evitar colisões
+    const paymentChannel = supabase
+      .channel(`payment_rt_${externalId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "payments",
+          filter: `external_id=eq.${externalId}`,
+        },
+        (payload) => {
+          console.log("[Webhook Realtime] Pagamento confirmado:", payload);
+          if (payload.new && (payload.new.status === "PAID" || payload.new.status === "COMPLETE")) {
+            setPixSuccess(true);
+            if (planName) {
+              setProfile((prev) => prev ? { ...prev, plan: planName } : null);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(paymentChannel);
+    };
+  }, [isPixModalOpen, pixData?.externalId, pixSuccess, selectedPlan?.name]);
+
+  const handleCopyPix = () => {
+    if (pixData?.pixCode) {
+      navigator.clipboard.writeText(pixData.pixCode);
+      setCopiedPix(true);
+      setTimeout(() => setCopiedPix(false), 3000);
+    }
+  };
 
   // Notifications State
   const [notifications, setNotifications] = useState([
@@ -1060,7 +1151,7 @@ export default function DashboardPage() {
                     <Crown className="size-4.5" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-foreground">Seu Plano Atual: Pro Trial</div>
+                    <div className="text-xs font-bold text-foreground">Seu Plano Atual: {profile?.plan || "Pro Trial"}</div>
                     <div className="text-[11px] text-muted-foreground">Modelos avançados e exportação DOCX ilimitada</div>
                   </div>
                 </div>
@@ -1084,8 +1175,18 @@ export default function DashboardPage() {
                     </ul>
                   </div>
 
-                  <Button variant="outline" className="mt-5 w-full text-xs h-8 border-border">
-                    Migrar para Individual
+                  <Button
+                    variant="outline"
+                    onClick={() => handleOpenPixModal({
+                      id: "individual",
+                      name: "Individual",
+                      price: 97.00,
+                      description: "Plano Individual SmartDoc (30 Petições/mês)",
+                    })}
+                    className="mt-5 w-full text-xs h-9 border-border font-semibold hover:bg-muted/80 gap-1.5"
+                  >
+                    <Zap className="size-3.5 text-primary" />
+                    <span>{profile?.plan === "Individual" ? "Renovar Individual (Pix)" : "Assinar Individual (Pix)"}</span>
                   </Button>
                 </div>
 
@@ -1107,8 +1208,17 @@ export default function DashboardPage() {
                     </ul>
                   </div>
 
-                  <Button className="mt-5 w-full text-xs h-8 bg-primary text-primary-foreground font-semibold shadow-xs hover:opacity-90">
-                    Manter Plano Pro
+                  <Button
+                    onClick={() => handleOpenPixModal({
+                      id: "pro",
+                      name: "Profissional Pro",
+                      price: 197.00,
+                      description: "Plano Profissional Pro SmartDoc (Petições Ilimitadas)",
+                    })}
+                    className="mt-5 w-full text-xs h-9 bg-primary text-primary-foreground font-semibold shadow-xs hover:opacity-90 gap-1.5"
+                  >
+                    <Crown className="size-3.5" />
+                    <span>{profile?.plan === "Profissional Pro" ? "Renovar Pro (Pix)" : "Assinar Profissional Pro (Pix)"}</span>
                   </Button>
                 </div>
 
@@ -1127,8 +1237,18 @@ export default function DashboardPage() {
                     </ul>
                   </div>
 
-                  <Button variant="outline" className="mt-5 w-full text-xs h-8 border-border">
-                    Falar com Consultor
+                  <Button
+                    variant="outline"
+                    onClick={() => handleOpenPixModal({
+                      id: "team",
+                      name: "Boutique & Equipes",
+                      price: 397.00,
+                      description: "Plano Boutique & Equipes SmartDoc (Até 5 Contas)",
+                    })}
+                    className="mt-5 w-full text-xs h-9 border-border font-semibold hover:bg-muted/80 gap-1.5"
+                  >
+                    <Briefcase className="size-3.5 text-primary" />
+                    <span>{profile?.plan === "Boutique & Equipes" ? "Renovar Equipes (Pix)" : "Assinar Equipes (Pix)"}</span>
                   </Button>
                 </div>
               </div>
@@ -1374,7 +1494,7 @@ export default function DashboardPage() {
               Descreva o Caso do seu Cliente
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Cole os fatos brutos, mensagens de WhatsApp ou dite a narrativa do caso. Nossa IA estruturará a Petição Inicial completa para o PJe.
+              Cole os fatos brutos, mensagens de WhatsApp ou dite a narrativa do caso. Nossa IA estruturará a Petição Inicial completa pronta para protocolo.
             </DialogDescription>
           </DialogHeader>
 
@@ -1431,6 +1551,137 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+      {/* ── Dialog: Pagamento de Plano via Pix (Instantâneo com Webhook em Tempo Real) ── */}
+      <Dialog open={isPixModalOpen} onOpenChange={setIsPixModalOpen}>
+        <DialogContent className="max-w-lg border-border/80 bg-card p-6 shadow-2xl rounded-2xl">
+          {pixLoading ? (
+            <div className="flex flex-col items-center justify-center py-10 text-center space-y-3">
+              <Loader2 className="size-8 animate-spin text-primary" />
+              <div className="text-sm font-semibold text-foreground">Gerando Cobrança Pix...</div>
+              <p className="text-xs text-muted-foreground max-w-xs">
+                Conectando ao gateway bancário GG Pix para emitir seu QR Code seguro.
+              </p>
+            </div>
+          ) : pixError ? (
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-2 text-destructive font-semibold text-sm">
+                <AlertCircle className="size-5" />
+                <span>Falha ao gerar Pix</span>
+              </div>
+              <p className="text-xs text-muted-foreground">{pixError}</p>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" size="sm" onClick={() => setIsPixModalOpen(false)}>
+                  Fechar
+                </Button>
+                {selectedPlan && (
+                  <Button size="sm" onClick={() => handleOpenPixModal(selectedPlan)}>
+                    Tentar Novamente
+                  </Button>
+                )}
+              </div>
+            </div>
+          ) : pixSuccess ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center space-y-4">
+              <div className="flex size-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 animate-bounce">
+                <CheckCircle2 className="size-9" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-lg font-bold text-foreground">Pagamento Confirmado!</h3>
+                <p className="text-xs text-muted-foreground max-w-sm">
+                  O Webhook recebeu a confirmação do pagamento com sucesso. Seu plano <strong className="text-foreground">{selectedPlan?.name}</strong> já está ativo no seu painel.
+                </p>
+              </div>
+              <div className="pt-2">
+                <Button
+                  onClick={() => {
+                    setIsPixModalOpen(false);
+                    setActiveTab("documents");
+                  }}
+                  className="bg-primary text-primary-foreground font-semibold px-6 text-xs h-9 rounded-xl shadow-md hover:opacity-90"
+                >
+                  Ir para Minhas Petições
+                </Button>
+              </div>
+            </div>
+          ) : pixData ? (
+            <div className="space-y-5">
+              <DialogHeader className="space-y-1 text-left">
+                <div className="flex items-center justify-between">
+                  <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+                    <Zap className="size-3" />
+                    <span>Pagamento Instantâneo via Pix</span>
+                  </div>
+                  <Badge variant="outline" className="font-mono text-xs font-bold text-foreground bg-muted/60">
+                    R$ {selectedPlan?.price?.toFixed(2).replace(".", ",")}/mês
+                  </Badge>
+                </div>
+                <DialogTitle className="text-base sm:text-lg font-bold tracking-tight text-foreground">
+                  Assinatura {selectedPlan?.name}
+                </DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground">
+                  Abra o aplicativo do seu banco, escaneie o QR Code ou copie o código Pix abaixo.
+                </DialogDescription>
+              </DialogHeader>
+
+              {/* QR Code Container */}
+              <div className="flex flex-col items-center justify-center rounded-xl border border-border/80 bg-muted/20 p-4 space-y-3">
+                <div className="p-3 bg-white rounded-xl shadow-xs border border-border/40">
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(pixData.pixCode)}&size=190x190`}
+                    alt="QR Code Pix"
+                    className="size-44 object-contain rounded"
+                  />
+                </div>
+                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-medium">
+                  <QrCode className="size-3.5 text-primary" />
+                  <span>Aponte a câmera do seu aplicativo bancário</span>
+                </div>
+              </div>
+
+              {/* Pix Copia e Cola Field */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground">Código Pix (Copia e Cola)</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    readOnly
+                    value={pixData.pixCode}
+                    className="font-mono text-[11px] bg-background select-all h-9"
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleCopyPix}
+                    className={`shrink-0 text-xs h-9 px-3 gap-1.5 font-semibold transition-all ${
+                      copiedPix
+                        ? "bg-emerald-600 text-white"
+                        : "bg-primary text-primary-foreground hover:opacity-90"
+                    }`}
+                  >
+                    {copiedPix ? (
+                      <>
+                        <CheckCheck className="size-3.5" />
+                        <span>Copiado!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="size-3.5" />
+                        <span>Copiar</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Live Realtime Webhook Banner */}
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 flex items-center gap-2.5 text-xs text-foreground">
+                <span className="flex size-2 rounded-full bg-emerald-500 animate-ping shrink-0" />
+                <div className="text-[11px] leading-relaxed text-muted-foreground">
+                  <strong className="text-foreground font-semibold">Aguardando confirmação via Webhook:</strong> assim que você pagar no app do banco, seu plano será liberado automaticamente aqui em tempo real.
+                </div>
+              </div>
+            </div>
+          ) : null}
         </DialogContent>
       </Dialog>
     </div>
