@@ -138,13 +138,21 @@ export default function EditorPage() {
 
   // Efeito de digitação suave / Progressive Stream Typewriter
   const startTypewriterStream = async (blocks: string[], fullHtml: string, docId: string | null) => {
-    setIsGenerating(false); // Fecha o overlay de carregamento
+    // 1. Limpar o rascunho anterior e garantir posição no topo absoluto da página
+    localStorage.setItem("extrajus_draft", "");
+    window.dispatchEvent(new Event("storage_extrajus_draft"));
+
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+
+    // 2. Fechar o overlay de loading e exibir a folha em branco limpa no topo
+    setIsGenerating(false);
     setIsTypewriting(true);
     skipTypewritingRef.current = false;
 
-    // Limpar o rascunho anterior para iniciar a redação ao vivo
-    localStorage.setItem("extrajus_draft", "");
-    window.dispatchEvent(new Event("storage_extrajus_draft"));
+    // 3. Pausa de 2 segundos para o usuário contemplar o início do zero no topo
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     let accumulatedHtml = "";
 
@@ -157,16 +165,16 @@ export default function EditorPage() {
       localStorage.setItem("extrajus_draft", accumulatedHtml);
       window.dispatchEvent(new Event("storage_extrajus_draft"));
 
-      // Rolagem suave automática acompanhando o documento sendo redigido
-      if (typeof window !== "undefined") {
+      // Rolagem suave automática acompanhando o documento sendo redigido (somente após os blocos iniciais)
+      if (typeof window !== "undefined" && i >= 3) {
         window.scrollTo({
           top: document.body.scrollHeight,
           behavior: "smooth",
         });
       }
 
-      // Intervalo refinado para permitir acompanhar a redação com naturalidade
-      const delay = blocks[i].length > 300 ? 220 : blocks[i].length > 100 ? 160 : 120;
+      // Intervalo refinado para leitura fluida e ritmo forense natural
+      const delay = blocks[i].length > 300 ? 300 : blocks[i].length > 100 ? 220 : 160;
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
 
