@@ -92,7 +92,6 @@ export async function POST(request: Request) {
         paid_at: payload.paidAt || new Date().toISOString(),
         payer_name: payload.payer?.name || null,
         payer_document: payload.payer?.document || null,
-        end_to_end_id: payload.endToEndId || null,
       });
 
       if (externalId) {
