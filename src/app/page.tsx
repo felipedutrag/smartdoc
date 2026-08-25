@@ -140,58 +140,56 @@ export default function Home() {
       <div className="pointer-events-none absolute -top-32 left-1/2 z-0 h-[400px] w-[800px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_50%_20%,var(--primary),transparent_70%)] opacity-15 blur-3xl [transform:translateZ(0)]" />
 
       {/* ── Linear Navigation Bar (Fixed) ── */}
-      <nav className="fixed top-0 inset-x-0 z-50 flex w-full items-center justify-center border-b border-border/80 bg-background/90 px-4 sm:px-8 py-3 backdrop-blur-md shadow-xs transition-all [transform:translateZ(0)]">
-        <div className="flex w-full max-w-5xl items-center justify-between">
+      <nav className="fixed top-0 inset-x-0 z-50 flex w-full items-center justify-center border-b border-border/80 bg-background/90 px-3 sm:px-8 py-2.5 sm:py-3 backdrop-blur-md shadow-xs transition-all [transform:translateZ(0)]">
+        <div className="flex w-full max-w-5xl items-center justify-between gap-2">
           {/* Brand Logo */}
-          <Link href="/" className="group flex items-center gap-2">
+          <Link href="/" className="group flex items-center gap-1.5 sm:gap-2 shrink-0">
             <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 border border-primary/20 text-primary transition-transform group-hover:scale-105">
               <Scale className="size-4" />
             </div>
             <div className="flex items-center text-sm font-bold tracking-tight">
               <span>SMART</span>
               <span className="text-primary font-black ml-0.5">DOC</span>
-              <span className="ml-2 rounded border border-border/80 bg-muted/60 px-1.5 py-0.2 font-mono text-[9px] font-semibold text-muted-foreground uppercase tracking-widest">
+              <span className="hidden xs:inline-block ml-1.5 sm:ml-2 rounded border border-border/80 bg-muted/60 px-1.5 py-0.2 font-mono text-[8px] sm:text-[9px] font-semibold text-muted-foreground uppercase tracking-widest">
                 2.0
               </span>
             </div>
           </Link>
 
-          {/* Center Links with subtle vertical separators */}
-          {!isMobile && (
-            <div className="flex items-center text-xs font-medium text-muted-foreground">
-              <a href="#inicio" className="px-3 py-1 transition-colors hover:text-foreground">
-                Início
-              </a>
-              <span className="text-border/80 select-none">|</span>
-              <a href="#recursos" className="px-3 py-1 transition-colors hover:text-foreground">
-                Recursos
-              </a>
-              <span className="text-border/80 select-none">|</span>
-              <a href="#como-funciona" className="px-3 py-1 transition-colors hover:text-foreground">
-                Como Funciona
-              </a>
-              <span className="text-border/80 select-none">|</span>
-              <a href="#faq" className="px-3 py-1 transition-colors hover:text-foreground">
-                FAQ
-              </a>
-            </div>
-          )}
+          {/* Center Links (Desktop only) */}
+          <div className="hidden md:flex items-center text-xs font-medium text-muted-foreground">
+            <a href="#inicio" className="px-3 py-1 transition-colors hover:text-foreground">
+              Início
+            </a>
+            <span className="text-border/80 select-none">|</span>
+            <a href="#recursos" className="px-3 py-1 transition-colors hover:text-foreground">
+              Recursos
+            </a>
+            <span className="text-border/80 select-none">|</span>
+            <a href="#como-funciona" className="px-3 py-1 transition-colors hover:text-foreground">
+              Como Funciona
+            </a>
+            <span className="text-border/80 select-none">|</span>
+            <a href="#faq" className="px-3 py-1 transition-colors hover:text-foreground">
+              FAQ
+            </a>
+          </div>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <Button
               variant="ghost"
               size="icon-xs"
               onClick={toggleTheme}
               aria-label="Alternar tema"
-              className="size-8 rounded-md border border-border/60 text-muted-foreground hover:text-foreground"
+              className="size-7 sm:size-8 rounded-md border border-border/60 text-muted-foreground hover:text-foreground"
             >
               {isDark ? (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
                 </svg>
               ) : (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                 </svg>
               )}
@@ -199,16 +197,17 @@ export default function Home() {
 
             <Link
               href="/login"
-              className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "text-xs font-medium text-muted-foreground hover:text-foreground h-8 px-3 rounded-md")}
+              className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "text-xs font-medium text-muted-foreground hover:text-foreground h-7 sm:h-8 px-2 sm:px-3 rounded-md")}
             >
               Entrar
             </Link>
 
             <Link
               href="/register"
-              className={cn(buttonVariants({ size: "sm" }), "text-xs font-semibold bg-primary text-primary-foreground h-8 px-3.5 rounded-md shadow-sm hover:opacity-90")}
+              className={cn(buttonVariants({ size: "sm" }), "text-xs font-semibold bg-primary text-primary-foreground h-7 sm:h-8 px-2.5 sm:px-3.5 rounded-md shadow-sm hover:opacity-90 whitespace-nowrap")}
             >
-              Começar Agora
+              <span className="hidden xs:inline">Começar Agora</span>
+              <span className="xs:hidden">Criar Conta</span>
             </Link>
           </div>
         </div>
