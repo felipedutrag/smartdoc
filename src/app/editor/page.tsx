@@ -2,25 +2,36 @@
 
 export const dynamic = "force-dynamic";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 import { useDashboardVoice } from "@/hooks/use-dashboard-voice";
-import { FileDown, ArrowLeft, Mic, MicOff, Sparkles, Radio, Loader2 } from "lucide-react";
+import { FileDown, ArrowLeft, Mic, MicOff, Sparkles, Radio, Loader2, FastForward } from "lucide-react";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import { SimpleEditorRef } from "@/components/tiptap-templates/simple/simple-editor";
 import Link from "next/link";
 
 import { LoadingOverlay } from "@/components/editor/LoadingOverlay";
 import { FloatingAiBar } from "@/components/editor/FloatingAiBar";
-import { renderPeticaoJsonToHtml, PeticaoDocumentJson } from "@/lib/peticao-template";
+import { renderPeticaoJsonToHtml, getPeticaoBlocks, PeticaoDocumentJson } from "@/lib/peticao-template";
 
 export default function EditorPage() {
   const isMobileRaw = useIsBreakpoint("max", 860);
   const isMobile = isMobileRaw ?? false;
   const editorRef = React.useRef<SimpleEditorRef>(null);
   const [mounted, setMounted] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [streamStarted, setStreamStarted] = useState(false);
+
+  // Inicializa isGenerating como true caso a URL possua ?generate=true para evitar flash de tela vazia
+  const [isGenerating, setIsGenerating] = useState(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("generate") === "true";
+    }
+    return false;
+  });
+
+  const [isTypewriting, setIsTypewriting] = useState(false);
+  const skipTypewritingRef = useRef(false);
+
   const [isRewriting, setIsRewriting] = useState(false);
   const [hasActiveEdit, setHasActiveEdit] = useState(false);
 
@@ -125,6 +136,58 @@ export default function EditorPage() {
 
   const hasTriggeredGen = React.useRef(false);
 
+  // Efeito de digitação suave / Progressive Stream Typewriter
+  const startTypewriterStream = async (blocks: string[], fullHtml: string, docId: string | null) => {
+    setIsGenerating(false); // Fecha o overlay de carregamento
+    setIsTypewriting(true);
+    skipTypewritingRef.current = false;
+
+    // Limpar o rascunho anterior para iniciar a redação ao vivo
+    localStorage.setItem("extrajus_draft", "");
+    window.dispatchEvent(new Event("storage_extrajus_draft"));
+
+    let accumulatedHtml = "";
+
+    for (let i = 0; i < blocks.length; i++) {
+      if (skipTypewritingRef.current) {
+        break;
+      }
+
+      accumulatedHtml += (i > 0 ? "\n" : "") + blocks[i];
+      localStorage.setItem("extrajus_draft", accumulatedHtml);
+      window.dispatchEvent(new Event("storage_extrajus_draft"));
+
+      // Rolagem suave automática acompanhando o documento sendo redigido
+      if (typeof window !== "undefined") {
+        window.scrollTo({
+          top: document.body.scrollHeight,
+          behavior: "smooth",
+        });
+      }
+
+      // Intervalo entre blocos para criar o efeito realista de redação contínua
+      const delay = blocks[i].length > 250 ? 110 : 70;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+
+    // Ao terminar (ou se clicou em pular digitação)
+    localStorage.setItem("extrajus_draft", fullHtml);
+    window.dispatchEvent(new Event("storage_extrajus_draft"));
+    setIsTypewriting(false);
+
+    // Salva a versão final no banco de dados
+    if (docId) {
+      fetch(`/api/documents/${docId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content_html: fullHtml,
+          status: "draft",
+        })
+      }).catch(console.error);
+    }
+  };
+
   const generateDocument = async (factsToUse?: string, existingDocId?: string | null) => {
     const facts = factsToUse || localStorage.getItem("extrajus_facts");
     if (!facts) {
@@ -133,7 +196,6 @@ export default function EditorPage() {
     }
 
     setIsGenerating(true);
-    setStreamStarted(false);
 
     let docId = existingDocId || currentDocId;
 
@@ -150,6 +212,15 @@ export default function EditorPage() {
             content_html: ""
           })
         });
+
+        if (createRes.status === 403) {
+          const errData = await createRes.json();
+          setIsGenerating(false);
+          alert(errData.error || "Limite mensal de petições atingido.");
+          window.location.href = "/dashboard";
+          return;
+        }
+
         if (createRes.ok) {
           const createData = await createRes.json();
           if (createData.document?.id) {
@@ -194,16 +265,14 @@ export default function EditorPage() {
               if (done) break;
               const chunk = decoder.decode(value);
               fullJsonText += chunk;
-              setStreamStarted(true);
             }
           } catch (streamError) {
             const streamMsg = streamError instanceof Error ? streamError.message : String(streamError);
             console.warn(`Stream interrompido na tentativa ${retryCount + 1}: ${streamMsg}`);
           }
 
-          // Parse JSON e renderiza template HTML
+          // Parse JSON e inicia digitação progressiva
           try {
-            // Remove possíveis marcadores de código caso o LLM os adicione
             let cleanJsonStr = fullJsonText.trim();
             if (cleanJsonStr.startsWith("```json")) {
               cleanJsonStr = cleanJsonStr.replace(/^```json/, "").replace(/```$/, "").trim();
@@ -212,23 +281,13 @@ export default function EditorPage() {
             }
 
             const parsedJson: PeticaoDocumentJson = JSON.parse(cleanJsonStr);
+            const blocks = getPeticaoBlocks(parsedJson);
             const renderedHtml = renderPeticaoJsonToHtml(parsedJson);
 
-            localStorage.setItem("extrajus_draft", renderedHtml);
-            window.dispatchEvent(new Event("storage_extrajus_draft"));
             isComplete = true;
 
-            // Salva no banco de dados
-            if (docId) {
-              fetch(`/api/documents/${docId}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  content_html: renderedHtml,
-                  status: "draft",
-                })
-              }).catch(console.error);
-            }
+            // Inicia o efeito progressivo de redação ao vivo
+            await startTypewriterStream(blocks, renderedHtml, docId);
           } catch (jsonErr) {
             console.warn("JSON ainda incompleto ou inválido na tentativa:", retryCount + 1, jsonErr);
             retryCount++;
@@ -243,7 +302,6 @@ export default function EditorPage() {
     }
 
     setIsGenerating(false);
-    setStreamStarted(false);
     if (docId) {
       window.history.replaceState({}, document.title, `/editor?id=${docId}`);
     }
@@ -351,11 +409,34 @@ export default function EditorPage() {
 
   return (
     <main className="min-h-screen bg-background text-foreground relative">
+      {/* ── Overlay de Carregamento Inicial (Sem piscar editor vazio) ── */}
+      <LoadingOverlay isGenerating={isGenerating} />
+
+      {/* ── Barra de Status da Redação ao Vivo (Typewriter Mode) ── */}
+      {isTypewriting && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[1500] flex items-center gap-3 rounded-full border border-primary/40 bg-card/95 px-4 py-2 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-top-4">
+          <span className="flex size-2 rounded-full bg-emerald-500 animate-ping shrink-0" />
+          <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+            <Sparkles className="size-3.5 text-primary" />
+            <span>Redigindo petição ao vivo com IA...</span>
+          </span>
+          <button
+            onClick={() => {
+              skipTypewritingRef.current = true;
+            }}
+            className="text-[11px] font-bold text-primary hover:underline pl-2 border-l border-border/80 cursor-pointer flex items-center gap-1"
+          >
+            <span>Concluir Agora</span>
+            <FastForward className="size-3" />
+          </button>
+        </div>
+      )}
+
       <div className="w-full pb-20">
         <SimpleEditor
           ref={editorRef}
-          editable={true}
-          isGenerating={isGenerating}
+          editable={!isTypewriting && !isGenerating}
+          isGenerating={isGenerating || isTypewriting}
           isRewriting={isRewriting}
           setIsRewriting={setIsRewriting}
           isPaid={true}
@@ -370,13 +451,7 @@ export default function EditorPage() {
             </Link>
           }
         >
-          <LoadingOverlay
-            mounted={mounted}
-            isGenerating={isGenerating}
-            streamStarted={streamStarted}
-          />
-
-          {!isGenerating && (
+          {!isGenerating && !isTypewriting && (
             <div className="flex w-full flex-col items-center justify-center gap-4 rounded-b-2xl border-t border-border bg-card p-6 sm:p-8 text-center">
               <div>
                 <h3 className="text-base font-bold text-foreground">
@@ -406,7 +481,7 @@ export default function EditorPage() {
         </SimpleEditor>
 
         <FloatingAiBar
-          isGenerating={isGenerating}
+          isGenerating={isGenerating || isTypewriting}
           isPaid={true}
           isRewriting={isRewriting}
           textInput={textInput}

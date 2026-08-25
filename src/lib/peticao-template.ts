@@ -35,10 +35,10 @@ export interface PeticaoDocumentJson {
 }
 
 /**
- * Converte o JSON estruturado gerado pela IA em HTML padronizado com Visual Law e regras formais
+ * Retorna os blocos HTML sequenciais da petição para permitir renderização progressiva / typewriter
  */
-export function renderPeticaoJsonToHtml(data: PeticaoDocumentJson): string {
-  if (!data) return "";
+export function getPeticaoBlocks(data: PeticaoDocumentJson): string[] {
+  if (!data) return [];
 
   const {
     cabecalho,
@@ -49,17 +49,17 @@ export function renderPeticaoJsonToHtml(data: PeticaoDocumentJson): string {
     fechamento,
   } = data;
 
-  const htmlParts: string[] = [];
+  const blocks: string[] = [];
 
   // 1. Endereçamento (Juízo)
   if (cabecalho?.enderecamento) {
-    htmlParts.push(
+    blocks.push(
       `<p style="text-align: justify; line-height: 1.5; margin-bottom: 0;"><strong>${cabecalho.enderecamento}</strong></p>`
     );
   }
 
   // 1 linha de respiro forense
-  htmlParts.push("<p><br></p>");
+  blocks.push("<p><br></p>");
 
   // 2. Preâmbulo / Qualificação das Partes
   const autorNome = partes?.autor?.nome || "[NOME DO AUTOR]";
@@ -68,66 +68,66 @@ export function renderPeticaoJsonToHtml(data: PeticaoDocumentJson): string {
   const reuNome = partes?.reu?.nome || "[NOME DO RÉU]";
   const reuQualif = partes?.reu?.qualificacao || "[nacionalidade/tipo], inscrito no CPF/CNPJ nº [Número], com endereço em [Endereço]";
 
-  htmlParts.push(
+  blocks.push(
     `<p style="text-align: justify; margin-top: 0;"><strong>${autorNome}</strong>, ${autorQualif}, por seu advogado que esta subscreve, vem, mui respeitosamente, perante Vossa Excelência, propor a presente</p>`
   );
 
-  htmlParts.push(
+  blocks.push(
     `<h2 style="text-align: center; text-transform: uppercase; margin: 1.25rem 0; font-family: inherit;">${tipoAcao}</h2>`
   );
 
-  htmlParts.push(
+  blocks.push(
     `<p style="text-align: justify; margin-bottom: 1.25rem;">em face de <strong>${reuNome}</strong>, ${reuQualif}, pelos fatos e fundamentos jurídicos que passa a expor:</p>`
   );
 
-  htmlParts.push("<hr/>");
+  blocks.push("<hr/>");
 
   // 3. Dos Fatos
-  htmlParts.push(`<h2 style="text-align: left;">I. DOS FATOS</h2>`);
+  blocks.push(`<h2 style="text-align: left;">I. DOS FATOS</h2>`);
   if (Array.isArray(fatos) && fatos.length > 0) {
     for (const fato of fatos) {
       if (fato?.trim()) {
-        htmlParts.push(`<p style="text-align: justify;">${fato.trim()}</p>`);
+        blocks.push(`<p style="text-align: justify;">${fato.trim()}</p>`);
       }
     }
   } else {
-    htmlParts.push(`<p style="text-align: justify;">[Narra-se os fatos que deram origem à demanda]</p>`);
+    blocks.push(`<p style="text-align: justify;">[Narra-se os fatos que deram origem à demanda]</p>`);
   }
 
-  htmlParts.push("<hr/>");
+  blocks.push("<hr/>");
 
   // 4. Do Direito
-  htmlParts.push(`<h2 style="text-align: left;">II. DO DIREITO</h2>`);
+  blocks.push(`<h2 style="text-align: left;">II. DO DIREITO</h2>`);
   if (Array.isArray(direito) && direito.length > 0) {
     for (const item of direito) {
       if (item.subtitulo?.trim()) {
-        htmlParts.push(`<p style="text-align: justify; font-weight: bold; margin-top: 1rem;">${item.subtitulo.trim()}</p>`);
+        blocks.push(`<p style="text-align: justify; font-weight: bold; margin-top: 1rem;">${item.subtitulo.trim()}</p>`);
       }
       if (Array.isArray(item.paragrafos)) {
         for (const p of item.paragrafos) {
           if (p?.trim()) {
-            htmlParts.push(`<p style="text-align: justify;">${p.trim()}</p>`);
+            blocks.push(`<p style="text-align: justify;">${p.trim()}</p>`);
           }
         }
       }
       if (item.citacaoDestaque?.trim()) {
-        htmlParts.push(
+        blocks.push(
           `<blockquote style="text-align: justify;">${item.citacaoDestaque.trim()}</blockquote>`
         );
       }
     }
   }
 
-  htmlParts.push("<hr/>");
+  blocks.push("<hr/>");
 
   // 5. Dos Pedidos
-  htmlParts.push(`<h2 style="text-align: left;">III. DOS PEDIDOS</h2>`);
-  htmlParts.push(`<p style="text-align: justify;">Ante o exposto, requer a Vossa Excelência:</p>`);
+  blocks.push(`<h2 style="text-align: left;">III. DOS PEDIDOS</h2>`);
+  blocks.push(`<p style="text-align: justify;">Ante o exposto, requer a Vossa Excelência:</p>`);
 
   if (Array.isArray(pedidos) && pedidos.length > 0) {
     for (const ped of pedidos) {
       const alinea = ped.alinea ? `${ped.alinea})` : "•";
-      htmlParts.push(
+      blocks.push(
         `<p style="text-align: justify;"><strong>${alinea}</strong> ${ped.texto?.trim() || ""}</p>`
       );
     }
@@ -135,40 +135,47 @@ export function renderPeticaoJsonToHtml(data: PeticaoDocumentJson): string {
 
   // Protesto por provas e Valor da Causa dentro dos pedidos
   if (fechamento?.provas?.trim()) {
-    htmlParts.push(`<p style="text-align: justify; margin-top: 1rem;">${fechamento.provas.trim()}</p>`);
+    blocks.push(`<p style="text-align: justify; margin-top: 1rem;">${fechamento.provas.trim()}</p>`);
   } else {
-    htmlParts.push(
+    blocks.push(
       `<p style="text-align: justify; margin-top: 1rem;">Protesta provar o alegado por todos os meios de prova em direito admitidos, especialmente documental, testemunhal e pericial.</p>`
     );
   }
 
   const valorCausa = fechamento?.valorCausa?.trim() || "R$ [Valor da Causa]";
-  htmlParts.push(
+  blocks.push(
     `<p style="text-align: justify; font-weight: 500;">Dá-se à causa o valor de ${valorCausa}.</p>`
   );
 
-  htmlParts.push("<br/>");
+  blocks.push("<br/>");
 
   // 6. Fechamento e Assinatura
   const localData = fechamento?.localData?.trim() || "[Local], [Data]";
   const advNome = fechamento?.advogado?.nome?.trim() || "[Nome do Advogado]";
   const advOab = fechamento?.advogado?.oab?.trim() || "OAB/[UF] [Número]";
 
-  htmlParts.push(
+  blocks.push(
     `<p style="text-align: center; margin-bottom: 0.5rem;">Nestes termos,<br/>Pede deferimento.</p>`
   );
-  htmlParts.push(
+  blocks.push(
     `<p style="text-align: center; margin-bottom: 2rem;">${localData}.</p>`
   );
-  htmlParts.push(
+  blocks.push(
     `<p style="text-align: center; margin-bottom: 0.25rem;">_________________________________________</p>`
   );
-  htmlParts.push(
+  blocks.push(
     `<p style="text-align: center; font-weight: bold; margin-bottom: 0.25rem;">${advNome}</p>`
   );
-  htmlParts.push(
+  blocks.push(
     `<p style="text-align: center; color: var(--text-secondary);">${advOab}</p>`
   );
 
-  return htmlParts.join("\n");
+  return blocks;
+}
+
+/**
+ * Converte o JSON estruturado gerado pela IA em HTML padronizado com Visual Law e regras formais
+ */
+export function renderPeticaoJsonToHtml(data: PeticaoDocumentJson): string {
+  return getPeticaoBlocks(data).join("\n");
 }
