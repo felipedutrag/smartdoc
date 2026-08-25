@@ -35,10 +35,11 @@ export async function POST(request: Request) {
     const signature = request.headers.get("x-webhook-signature");
     const authHeader = request.headers.get("authorization");
 
-    // 1. Validação opcional por Bearer Token (se configurado na env)
-    if (process.env.GGPIX_BEARER_TOKEN && authHeader) {
-      const token = authHeader.replace("Bearer ", "").trim();
-      if (token !== process.env.GGPIX_BEARER_TOKEN) {
+    // 1. Validação por Bearer Token no Header de Autorização
+    const expectedBearer = process.env.GGPIX_BEARER_TOKEN || "83380259fd8ead3107b71f27e2c8f7ab4d22528bbe3e6f102c8014b48baecd98";
+    if (expectedBearer && authHeader) {
+      const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+      if (token !== expectedBearer) {
         console.warn("Webhook: Bearer token inválido.");
         return NextResponse.json({ error: "Invalid Bearer Token" }, { status: 401 });
       }

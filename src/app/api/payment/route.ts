@@ -62,6 +62,7 @@ export async function POST(request: Request) {
       headers: {
         "Content-Type": "application/json",
         "X-API-Key": process.env.GGPIX_API_KEY || "",
+        "Authorization": `Bearer ${process.env.GGPIX_BEARER_TOKEN || "83380259fd8ead3107b71f27e2c8f7ab4d22528bbe3e6f102c8014b48baecd98"}`,
       },
       body: JSON.stringify(payloadGG),
     });
