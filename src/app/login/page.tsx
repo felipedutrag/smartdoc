@@ -13,13 +13,15 @@ import {
   CheckCircle2,
   Briefcase,
   AlertCircle,
-  Loader2
+  Loader2,
+  ChevronLeft,
+  KeyRound
 } from "lucide-react";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,7 +32,7 @@ export default function AuthPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [mode, setMode] = useState<"login" | "register" | "forgot" | "reset">("login");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -50,24 +52,98 @@ export default function AuthPage() {
     // Verificar se usuário já está logado
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
+      if (session && mode !== "reset") {
         router.push("/dashboard");
       }
     };
     checkUser();
 
-    // Check query params if they wanted ?mode=register
+    // Ouvinte para evento de recuperação de senha do Supabase
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setMode("reset");
+      }
+    });
+
+    // Checar query params na URL (?mode=register, ?mode=forgot, ?mode=reset)
     const params = new URLSearchParams(window.location.search);
-    if (params.get("mode") === "register") {
-      setMode("register");
+    const modeParam = params.get("mode");
+    if (modeParam === "register" || modeParam === "forgot" || modeParam === "reset") {
+      setMode(modeParam);
     }
-  }, [router, supabase]);
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [router, supabase, mode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
 
+    // ── MODO 1: RECUPERAÇÃO DE SENHA (FORGOT) ──
+    if (mode === "forgot") {
+      if (!email.trim()) {
+        setErrorMessage("Por favor, informe seu e-mail cadastrado.");
+        return;
+      }
+      setLoading(true);
+      try {
+        const res = await fetch("/api/auth/forgot-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email.trim() }),
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          throw new Error(data.error || "Falha ao enviar e-mail de recuperação.");
+        }
+        setSuccessMessage("Instruções e link de redefinição enviados com sucesso para seu e-mail!");
+      } catch (err: any) {
+        setErrorMessage(err.message || "Erro ao processar recuperação.");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // ── MODO 2: REDEFINIR SENHA (RESET) ──
+    if (mode === "reset") {
+      if (!password || !confirmPassword) {
+        setErrorMessage("Por favor, preencha a nova senha e a confirmação.");
+        return;
+      }
+      if (password !== confirmPassword) {
+        setErrorMessage("As senhas não coincidem.");
+        return;
+      }
+      if (password.length < 6) {
+        setErrorMessage("A senha deve ter no mínimo 6 caracteres.");
+        return;
+      }
+      setLoading(true);
+      try {
+        const { error } = await supabase.auth.updateUser({
+          password: password,
+        });
+        if (error) {
+          throw error;
+        }
+        setSuccessMessage("Senha alterada com sucesso! Redirecionando para seu painel...");
+        setTimeout(() => {
+          router.push("/dashboard");
+          router.refresh();
+        }, 1200);
+      } catch (err: any) {
+        setErrorMessage(err.message || "Não foi possível redefinir a senha.");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // ── VALIDAÇÕES DE LOGIN / REGISTRO ──
     if (!email || !password) {
       setErrorMessage("Por favor, preencha todos os campos obrigatórios.");
       return;
@@ -115,7 +191,7 @@ export default function AuthPage() {
           }, 800);
         }
       } else {
-        // Mode: Register via API com auto-confirmação (sem dupla verificação de e-mail)
+        // Mode: Register via API com auto-confirmação e disparo de boas-vindas via Resend
         const regRes = await fetch("/api/auth/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -142,7 +218,8 @@ export default function AuthPage() {
         });
 
         if (loginError) {
-          setErrorMessage("Conta criada, mas ocorreu um erro no login automático: " + loginError.message);
+          setErrorMessage("Conta criada! Por favor, faça login com seus dados.");
+          setMode("login");
           setLoading(false);
           return;
         }
@@ -155,23 +232,6 @@ export default function AuthPage() {
       setErrorMessage(err?.message || "Ocorreu um erro ao processar sua solicitação.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleForgotPassword = async () => {
-    if (!email.trim()) {
-      setErrorMessage("Digite seu e-mail no campo acima para recuperar a senha.");
-      return;
-    }
-    setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${window.location.origin}/login?mode=reset`,
-    });
-    setLoading(false);
-    if (error) {
-      setErrorMessage(error.message);
-    } else {
-      setSuccessMessage("Link de recuperação de senha enviado para seu e-mail!");
     }
   };
 
@@ -202,7 +262,6 @@ export default function AuthPage() {
         {/* Left Side: Auth Form */}
         <div className="flex flex-col justify-center p-6 sm:p-10 md:col-span-7">
           {/* Logo Header */}
-          {/* Logo Header */}
           <div className="mb-6">
             <a href="/" className="inline-flex items-center text-xl font-bold tracking-tight">
               <span className="tracking-tight">SMART</span>
@@ -213,30 +272,52 @@ export default function AuthPage() {
             </a>
 
             <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground">
-              {mode === "login" ? "Acesse seu escritório digital" : "Crie sua conta e comece a advogar com IA"}
+              {mode === "login" && "Acesse seu escritório digital"}
+              {mode === "register" && "Crie sua conta e comece a advogar com IA"}
+              {mode === "forgot" && "Recuperação de Senha"}
+              {mode === "reset" && "Definir Nova Senha"}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              {mode === "login"
-                ? "Suas petições, assistente de voz e documentos aguardam você."
-                : "Milhares de advogados já utilizam IA para redigir petições em minutos, não horas."}
+              {mode === "login" && "Suas petições, assistente de voz e documentos aguardam você."}
+              {mode === "register" && "Advogados utilizam IA forense para redigir peças em minutos, não horas."}
+              {mode === "forgot" && "Informe seu e-mail para receber o link seguro de redefinição."}
+              {mode === "reset" && "Digite sua nova senha de acesso abaixo."}
             </p>
           </div>
 
-          {/* Mode Switcher Tabs */}
-          <Tabs
-            value={mode}
-            onValueChange={(val) => {
-              setMode(val as "login" | "register");
-              setErrorMessage("");
-              setSuccessMessage("");
-            }}
-            className="mb-6 w-full"
-          >
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Entrar</TabsTrigger>
-              <TabsTrigger value="register">Criar Conta</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          {/* Mode Switcher Tabs (Only for login and register) */}
+          {(mode === "login" || mode === "register") && (
+            <Tabs
+              value={mode}
+              onValueChange={(val) => {
+                setMode(val as "login" | "register");
+                setErrorMessage("");
+                setSuccessMessage("");
+              }}
+              className="mb-6 w-full"
+            >
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="login">Entrar</TabsTrigger>
+                <TabsTrigger value="register">Criar Conta</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          )}
+
+          {/* Back button for forgot/reset */}
+          {mode === "forgot" && (
+            <button
+              type="button"
+              onClick={() => {
+                setMode("login");
+                setErrorMessage("");
+                setSuccessMessage("");
+              }}
+              className="mb-6 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            >
+              <ChevronLeft className="size-4" />
+              <span>Voltar para o Login</span>
+            </button>
+          )}
 
           {/* Error & Success Alerts */}
           {errorMessage && (
@@ -255,9 +336,9 @@ export default function AuthPage() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {/* REGISTER: Nome & OAB */}
             {mode === "register" && (
               <>
-                {/* Nome Completo */}
                 <div className="space-y-1.5">
                   <Label htmlFor="name">Nome Completo *</Label>
                   <div className="relative flex items-center">
@@ -274,7 +355,6 @@ export default function AuthPage() {
                   </div>
                 </div>
 
-                {/* Número da OAB */}
                 <div className="space-y-1.5">
                   <Label htmlFor="oab">
                     OAB / Estado <span className="font-normal text-muted-foreground">(Opcional)</span>
@@ -294,61 +374,74 @@ export default function AuthPage() {
               </>
             )}
 
-            {/* Email */}
-            <div className="space-y-1.5">
-              <Label htmlFor="email">E-mail Profissional *</Label>
-              <div className="relative flex items-center">
-                <Mail className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="contato@escritorio.adv.br"
-                  required
-                  className="pl-9"
-                />
+            {/* EMAIL (Login, Register, Forgot) */}
+            {mode !== "reset" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="email">E-mail Profissional *</Label>
+                <div className="relative flex items-center">
+                  <Mail className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="contato@escritorio.adv.br"
+                    required
+                    className="pl-9"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Senha */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Senha *</Label>
-                {mode === "login" && (
+            {/* PASSWORD (Login, Register, Reset) */}
+            {mode !== "forgot" && (
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">
+                    {mode === "reset" ? "Nova Senha *" : "Senha *"}
+                  </Label>
+                  {mode === "login" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode("forgot");
+                        setErrorMessage("");
+                        setSuccessMessage("");
+                      }}
+                      className="text-xs text-primary hover:underline cursor-pointer"
+                    >
+                      Esqueceu a senha?
+                    </button>
+                  )}
+                </div>
+                <div className="relative flex items-center">
+                  <Lock className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    className="px-9"
+                  />
                   <button
                     type="button"
-                    onClick={handleForgotPassword}
-                    className="text-xs text-primary hover:underline"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 text-muted-foreground hover:text-foreground cursor-pointer"
                   >
-                    Esqueceu a senha?
+                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   </button>
-                )}
+                </div>
               </div>
-              <div className="relative flex items-center">
-                <Lock className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className="px-9"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                </button>
-              </div>
-            </div>
+            )}
 
-            {mode === "register" && (
+            {/* CONFIRM PASSWORD (Register, Reset) */}
+            {(mode === "register" || mode === "reset") && (
               <div className="space-y-1.5">
-                <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
+                <Label htmlFor="confirmPassword">
+                  {mode === "reset" ? "Confirmar Nova Senha *" : "Confirmar Senha *"}
+                </Label>
                 <div className="relative flex items-center">
                   <Shield className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
                   <Input
@@ -368,7 +461,7 @@ export default function AuthPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="mt-2 h-11 w-full bg-primary text-primary-foreground hover:opacity-90 font-semibold shadow-md"
+              className="mt-2 h-11 w-full bg-primary text-primary-foreground hover:opacity-90 font-semibold shadow-md cursor-pointer"
             >
               {loading ? (
                 <>
@@ -377,7 +470,10 @@ export default function AuthPage() {
                 </>
               ) : (
                 <>
-                  <span>{mode === "login" ? "Acessar Meu Painel" : "Criar Minha Conta"}</span>
+                  {mode === "login" && <span>Acessar Meu Painel</span>}
+                  {mode === "register" && <span>Criar Minha Conta</span>}
+                  {mode === "forgot" && <span>Enviar Link de Recuperação</span>}
+                  {mode === "reset" && <span>Salvar Nova Senha</span>}
                   <ArrowRight className="size-4" />
                 </>
               )}
@@ -396,11 +492,11 @@ export default function AuthPage() {
             <div>
               <div className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                 <Scale className="size-3.5" />
-                <span>IA de Voz Jurídica</span>
+                <span>IA de Redação Forense</span>
               </div>
 
               <h2 className="text-xl font-bold tracking-tight text-foreground leading-snug">
-                &ldquo;Eu ativo o assistente durante a reunião com o cliente. Quando termino, a petição já está praticamente pronta. Economizo horas todos os dias.&rdquo;
+                &ldquo;Ditei a narrativa do caso e a IA estruturou a petição completa com teses, artigos e pedidos nos padrões do tribunal. Economizo horas todos os dias.&rdquo;
               </h2>
             </div>
 
@@ -411,7 +507,7 @@ export default function AuthPage() {
               </div>
               <div>
                 <div className="text-sm font-semibold text-foreground">Dra. Marina Cardoso</div>
-                <div className="text-xs text-muted-foreground">Sócia • Cardoso & Vasconcelos Advogados</div>
+                <div className="text-xs text-muted-foreground">Sócia • Cardoso &amp; Vasconcelos Advogados</div>
               </div>
             </div>
           </div>

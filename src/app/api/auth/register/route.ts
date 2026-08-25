@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendWelcomeEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
   try {
@@ -24,6 +25,16 @@ export async function POST(request: Request) {
 
     if (createError) {
       return NextResponse.json({ error: createError.message }, { status: 400 });
+    }
+
+    // Envia e-mail de boas-vindas com link para login via Resend (de forma não-bloqueante)
+    try {
+      sendWelcomeEmail({
+        email: email.trim(),
+        name: name?.trim() || "Advogado(a)",
+      }).catch((e) => console.error("[REGISTER] Erro no envio de boas-vindas:", e));
+    } catch (e) {
+      console.error("[REGISTER] Falha ao invocar sendWelcomeEmail:", e);
     }
 
     return NextResponse.json({ user: userData.user });

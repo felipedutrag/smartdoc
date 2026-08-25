@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendPaymentSuccessEmail } from "@/lib/email";
 import crypto from "crypto";
 
 function validateWebhookSignature(rawBody: string, signature: string, secret: string): boolean {
@@ -170,6 +171,26 @@ export async function POST(request: Request) {
         }
 
         console.log(`Plano ${planToActivate} ativado com sucesso para o usuário ${targetUserId} (felipedutra@outlook.com)`);
+
+        // 3. Enviar e-mail de confirmação de pagamento via Resend
+        try {
+          const { data: userData } = await supabase.auth.admin.getUserById(targetUserId);
+          const userEmail = userData?.user?.email || paymentRecord?.payer_email || payload.payer?.email;
+          const userName = userData?.user?.user_metadata?.name || paymentRecord?.payer_name || payload.payer?.name || "Doutor(a)";
+          const amountCents = payload.amount ? Math.round(payload.amount * 100) : (paymentRecord?.amount_cents || 19700);
+
+          if (userEmail) {
+            sendPaymentSuccessEmail({
+              email: userEmail,
+              name: userName,
+              planName: planToActivate,
+              amountCents,
+              externalId: externalId || paymentRecord?.external_id,
+            }).catch((e) => console.error("[WEBHOOK] Erro no envio de e-mail de pagamento:", e));
+          }
+        } catch (mailErr) {
+          console.error("[WEBHOOK] Falha ao disparar e-mail de pagamento:", mailErr);
+        }
       }
 
       // Liberar documento avulso se houver
