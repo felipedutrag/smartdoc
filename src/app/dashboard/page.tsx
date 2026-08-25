@@ -46,7 +46,6 @@ import { createClient } from "@/lib/supabase/client";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { VideoconferenciaTab } from "@/components/dashboard/VideoconferenciaTab";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -96,7 +95,7 @@ export default function DashboardPage() {
   // Layout & Navigation State
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"documents" | "plans" | "profile" | "meeting">("documents");
+  const [activeTab, setActiveTab] = useState<"documents" | "plans" | "profile">("documents");
 
   // User & Data State
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -298,15 +297,13 @@ export default function DashboardPage() {
         setIsShortcutsModalOpen(prev => !prev);
       }
 
-      // Navegar para Minhas Petições: tecla 'g' seguida de 'p' ou atalhos numéricos 1, 2, 3, 4
+      // Navegar pelas abas com atalhos numéricos 1, 2, 3
       if (e.key === "1") {
         setActiveTab("documents");
       } else if (e.key === "2") {
         setActiveTab("plans");
       } else if (e.key === "3") {
         setActiveTab("profile");
-      } else if (e.key === "4") {
-        setActiveTab("meeting");
       }
     };
 
@@ -624,30 +621,21 @@ export default function DashboardPage() {
             {(sidebarOpen || isDrawer) && <span>Minhas Petições</span>}
           </Button>
 
-          {/* Videoconferências */}
-          <Button
-            variant="ghost"
-            onClick={() => {
-              setActiveTab("meeting");
-              if (isDrawer) setMobileDrawerOpen(false);
-            }}
-            className={`w-full text-xs h-8.5 rounded-lg transition-colors ${(sidebarOpen || isDrawer) ? "justify-start gap-2.5 px-2.5" : "justify-center px-0"} ${
-              activeTab === "meeting"
-                ? "bg-muted/80 text-foreground font-semibold border border-border/60"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/40 font-normal"
-            }`}
-            title="Videoconferências"
+          {/* Videoconferências (Em Breve) */}
+          <div
+            className={`flex items-center w-full text-xs h-8.5 rounded-lg opacity-50 cursor-not-allowed ${(sidebarOpen || isDrawer) ? "justify-start gap-2.5 px-2.5" : "justify-center px-0"} text-muted-foreground`}
+            title="Videoconferências (Em Breve)"
           >
-            <Video className="size-3.5 shrink-0 text-primary" />
+            <Video className="size-3.5 shrink-0" />
             {(sidebarOpen || isDrawer) && (
               <div className="flex flex-1 items-center justify-between">
                 <span>Videoconferências</span>
-                <span className="font-mono text-[9px] text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full">
-                  Novo
+                <span className="font-mono text-[9px] text-muted-foreground border border-border px-1.5 py-0.2 rounded-full">
+                  Em breve
                 </span>
               </div>
             )}
-          </Button>
+          </div>
 
           {/* Criador de Contratos */}
           <div
@@ -836,7 +824,6 @@ export default function DashboardPage() {
               <span className="text-muted-foreground/40">/</span>
               <span className="text-foreground font-semibold">
                 {activeTab === "documents" && "peticoes"}
-                {activeTab === "meeting" && "videoconferencia"}
                 {activeTab === "plans" && "planos"}
                 {activeTab === "profile" && "perfil"}
               </span>
@@ -1130,9 +1117,6 @@ export default function DashboardPage() {
               )}
             </div>
           )}
-
-          {/* ──── TAB: VIDEOCONFERÊNCIA ──── */}
-          {activeTab === "meeting" && <VideoconferenciaTab />}
 
           {/* ════ TAB 2: PLANOS DE ASSINATURA ════ */}
           {activeTab === "plans" && (

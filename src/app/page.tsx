@@ -414,22 +414,22 @@ export default function Home() {
 
           {/* Bento Grid Container (Subtle Balanced Spacing) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-            {/* Bento Card 1: Voz */}
+            {/* Bento Card 1: Voz & IA Forense */}
             <Card className="md:col-span-2 border-border/80 bg-card px-4 py-4.5 shadow-sm flex flex-col justify-center gap-2">
               <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20">
                 <Mic className="size-3.5" />
               </div>
               <div className="space-y-1">
                 <h3 className="text-xs sm:text-sm font-bold text-foreground tracking-tight">
-                  Assistente de Voz com IA Generativa
+                  Assistente de Voz e Redação com IA
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Converse naturalmente com a IA durante a reunião com seu cliente. Ela ouve, identifica artigos de lei aplicáveis e sugere estratégias processuais em tempo real na sua tela.
+                  Dite a narrativa do caso ou converse com a IA para estruturar peças completas. Ela identifica artigos de lei aplicáveis, organiza os fatos e redige os pedidos em tempo real.
                 </p>
                 <div className="pt-0.5">
                   <span className="inline-flex items-center gap-1.5 rounded border border-border/80 bg-muted/40 px-2 py-0.5 font-mono text-[9px] text-muted-foreground">
                     <span className="flex size-1.5 rounded-full bg-emerald-500" />
-                    <span>Gemini Live • Conversa Bidirecional</span>
+                    <span>Inteligência Jurídica • Voz e Texto</span>
                   </span>
                 </div>
               </div>
@@ -509,19 +509,19 @@ export default function Home() {
               Como Funciona
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground sm:whitespace-nowrap">
-              Da reunião ao protocolo em 3 etapas
+              Da narrativa ao protocolo em 3 etapas
             </h2>
             <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-              Fluxo simplificado para transformar atendimento em petição protocolada.
+              Fluxo simplificado para transformar o relato do caso em petição protocolada.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative rounded-xl border border-border/80 bg-card p-4 shadow-xs">
-              <div className="font-mono text-[10px] font-extrabold text-primary mb-2">01 / REUNIÃO</div>
-              <h4 className="text-sm font-bold text-foreground">Converse com seu cliente</h4>
+              <div className="font-mono text-[10px] font-extrabold text-primary mb-2">01 / NARRATIVA</div>
+              <h4 className="text-sm font-bold text-foreground">Relate ou dite o caso</h4>
               <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                Ative o modo assistente durante a reunião. A IA acompanha a conversa e já identifica teses, artigos e estratégias aplicáveis.
+                Cole o histórico dos fatos, mensagens de WhatsApp ou dite a narrativa por voz. A IA processa e identifica teses e dispositivos aplicáveis.
               </p>
             </div>
 
@@ -529,7 +529,7 @@ export default function Home() {
               <div className="font-mono text-[10px] font-extrabold text-primary mb-2">02 / GERAÇÃO</div>
               <h4 className="text-sm font-bold text-foreground">A IA redige a peça completa</h4>
               <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                Com base nos fatos narrados, a IA estrutura endereçamento, qualificação, fundamentação jurídica, pedidos e valor da causa.
+                Com base nos fatos, a IA estrutura endereçamento, qualificação, fundamentação jurídica, pedidos e valor da causa.
               </p>
             </div>
 
@@ -562,8 +562,8 @@ export default function Home() {
           <div className="space-y-3 max-w-3xl mx-auto">
             {[
               {
-                q: "Como funciona a IA de voz durante a reunião?",
-                a: "Você ativa o assistente de voz e a IA acompanha a conversa em tempo real. Enquanto seu cliente narra os fatos, ela identifica artigos de lei, jurisprudência aplicável e estratégias processuais — tudo aparecendo na sua tela, sem interromper a reunião."
+                q: "Como funciona a assistência de voz com a IA?",
+                a: "Você pode ditar fatos brutos e conversar diretamente com o assistente inteligente para pedir revisões, novos pedidos ou inclusão de teses doutrinárias e jurisprudenciais — a peça é atualizada instantaneamente na sua tela."
               },
               {
                 q: "Posso alterar a petição apenas conversando?",
