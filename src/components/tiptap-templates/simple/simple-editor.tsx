@@ -679,16 +679,12 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
         const parser = new DOMParser();
         const responseDoc = parser.parseFromString(cleaned, "text/html");
         const updates = Array.from(responseDoc.querySelectorAll('update'));
-        const insertsAfter = Array.from(responseDoc.querySelectorAll('insert_after, insertafter'));
-        const insertsBefore = Array.from(responseDoc.querySelectorAll('insert_before, insertbefore'));
-        const deletes = Array.from(responseDoc.querySelectorAll('delete, remove'));
 
-        if (updates.length > 0 || insertsAfter.length > 0 || insertsBefore.length > 0 || deletes.length > 0) {
+        if (updates.length > 0) {
           const currentHtml = editor.getHTML();
           const currentDoc = parser.parseFromString(currentHtml, "text/html");
-          let modified = false;
 
-          // 1. Processar atualizações de parágrafos existentes
+          let modified = false;
           updates.forEach(updateTag => {
             const id = updateTag.getAttribute('id');
             if (!id) return;
@@ -704,72 +700,14 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
             }
           });
 
-          // 2. Processar inserções logo após o parágrafo indicado (ex: abaixo do parágrafo 10)
-          insertsAfter.forEach(insertTag => {
-            const id = insertTag.getAttribute('id');
-            if (!id) return;
-
-            const targetNode = currentDoc.querySelector(`[id="${id}"]`);
-            if (targetNode) {
-              const children = Array.from(insertTag.children);
-              if (children.length > 0) {
-                children.forEach(child => {
-                  targetNode.after(child.cloneNode(true));
-                  modified = true;
-                });
-              } else if (insertTag.innerHTML.trim()) {
-                const newP = currentDoc.createElement('p');
-                newP.setAttribute('style', 'text-align: justify;');
-                newP.innerHTML = insertTag.innerHTML;
-                targetNode.after(newP);
-                modified = true;
-              }
-            }
-          });
-
-          // 3. Processar inserções antes do parágrafo indicado
-          insertsBefore.forEach(insertTag => {
-            const id = insertTag.getAttribute('id');
-            if (!id) return;
-
-            const targetNode = currentDoc.querySelector(`[id="${id}"]`);
-            if (targetNode) {
-              const children = Array.from(insertTag.children);
-              if (children.length > 0) {
-                children.forEach(child => {
-                  targetNode.before(child.cloneNode(true));
-                  modified = true;
-                });
-              } else if (insertTag.innerHTML.trim()) {
-                const newP = currentDoc.createElement('p');
-                newP.setAttribute('style', 'text-align: justify;');
-                newP.innerHTML = insertTag.innerHTML;
-                targetNode.before(newP);
-                modified = true;
-              }
-            }
-          });
-
-          // 4. Processar exclusões de parágrafos
-          deletes.forEach(deleteTag => {
-            const id = deleteTag.getAttribute('id');
-            if (!id) return;
-
-            const targetNode = currentDoc.querySelector(`[id="${id}"]`);
-            if (targetNode) {
-              targetNode.remove();
-              modified = true;
-            }
-          });
-
           if (modified) {
             const finalHtml = currentDoc.body.innerHTML;
             editor.commands.setContent(finalHtml);
             localStorage.setItem("extrajus_draft", finalHtml);
           }
         } else {
-          // Fallback se a IA retornar HTML direto sem tags de marcação
-          if (cleaned.length > 50 && !cleaned.includes('<update') && !cleaned.includes('<insert')) {
+          // Fallback se a IA não usar tags <update> (retornar o doc inteiro)
+          if (cleaned.length > 50 && !cleaned.includes('<update')) {
             editor.commands.setContent(cleaned);
             localStorage.setItem("extrajus_draft", cleaned);
           }
