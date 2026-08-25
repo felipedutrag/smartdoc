@@ -1,30 +1,100 @@
 import HTMLtoDOCX from 'html-to-docx';
 
+/**
+ * Converte e estiliza o HTML gerado pelo editor para os padrões forenses oficiais (ABNT / CNJ / Tribunais Brasileiros) no Word (.docx):
+ * - Fonte: Times New Roman, 12pt
+ * - Espaçamento entre linhas: 1,5
+ * - Margens: Superior 3cm, Esquerda 3cm, Inferior 2cm, Direita 2cm
+ * - Recuo de parágrafo de primeira linha: 1,25cm (36pt)
+ * - Citações doutrinárias/jurisprudenciais: Recuo à esquerda de 4cm (113pt), fonte 10pt, espaçamento simples
+ * - Títulos destacados em negrito com espaçamento adequado
+ * - Assinatura e preâmbulo perfeitamente diagramados
+ */
 export function compileWordHtml(title: string, rawHtml: string): string {
-  // Clear leading blank lines
-  let styledHtml = rawHtml.replace(/^(<p><\/p>|<p><br><\/p>|\s|<br>)+/gi, '').trim();
+  if (!rawHtml) return '';
 
-  // Force inline styles for Headings because html-to-docx sometimes ignores CSS classes for alignment
-  styledHtml = styledHtml.replace(/<h1/gi, '<h1 align="justify" style="text-align: justify; font-size: 12.0pt; font-weight: bold; text-transform: uppercase; margin-top: 0pt; margin-bottom: 18pt; color: #000000;"');
-  styledHtml = styledHtml.replace(/<h2/gi, '<h2 style="font-size: 12.0pt; font-weight: bold; margin-top: 14pt; margin-bottom: 6pt; color: #111827;"');
+  let html = rawHtml.trim();
 
-  // Customize blockquote style (Visual Law box)
-  styledHtml = styledHtml.replace(/<blockquote([^>]*)>/gi, (match, attrs) => {
-    if (attrs.includes('style="')) {
-      return `<blockquote${attrs.replace('style="', 'style="background-color: #faf6f0; border-left: 3px solid #d97706; padding: 10px 15px; margin: 15px 0; color: #1a1a1a; font-style: italic; ')}>`;
-    }
-    return `<blockquote style="background-color: #faf6f0; border-left: 3px solid #d97706; padding: 10px 15px; margin: 15px 0; color: #1a1a1a; font-style: italic;">`;
+  // Limpeza de tags vazias e spans residuais
+  html = html.replace(/<span[^>]*>/gi, '').replace(/<\/span>/gi, '');
+
+  // 1. Título da Ação Centralizado (ex: AÇÃO DE COBRANÇA C/C INDENIZAÇÃO)
+  html = html.replace(
+    /<h2([^>]*)style="[^"]*text-align:\s*center[^"]*"([^>]*)>([\s\S]*?)<\/h2>/gi,
+    '<p align="center" style="text-align: center; text-indent: 0.0pt; font-family: \'Times New Roman\', serif; font-size: 13.0pt; font-weight: bold; text-transform: uppercase; margin-top: 18.0pt; margin-bottom: 18.0pt; color: #000000;">$3</p>'
+  );
+
+  // 2. Títulos de Seções (I. DOS FATOS, II. DO DIREITO, III. DOS PEDIDOS)
+  html = html.replace(
+    /<h2([^>]*)>([\s\S]*?)<\/h2>/gi,
+    '<p style="text-align: left; text-indent: 0.0pt; font-family: \'Times New Roman\', serif; font-size: 12.0pt; font-weight: bold; text-transform: uppercase; margin-top: 18.0pt; margin-bottom: 8.0pt; color: #000000;">$2</p>'
+  );
+
+  html = html.replace(
+    /<h1([^>]*)>([\s\S]*?)<\/h1>/gi,
+    '<p style="text-align: left; text-indent: 0.0pt; font-family: \'Times New Roman\', serif; font-size: 12.0pt; font-weight: bold; text-transform: uppercase; margin-top: 18.0pt; margin-bottom: 8.0pt; color: #000000;">$2</p>'
+  );
+
+  // 3. Citações / Jurisprudência / Doutrina (Blockquotes com recuo forense de 4.0cm = 113pt)
+  html = html.replace(/<blockquote([^>]*)>([\s\S]*?)<\/blockquote>/gi, (_match, _attrs, inner) => {
+    const cleanInner = inner.replace(/<p[^>]*>/gi, '').replace(/<\/p>/gi, '<br/>');
+    return `<div style="margin-left: 113.0pt; margin-right: 0.0pt; margin-top: 10.0pt; margin-bottom: 10.0pt; padding-left: 12.0pt; border-left: 2.5pt solid #4b5563; font-family: 'Times New Roman', serif; font-size: 10.0pt; line-height: 1.15; font-style: italic; text-align: justify; color: #1f2937;">${cleanInner}</div>`;
   });
 
-  // Force justified alignment on all paragraphs and lists except center/right aligned ones
-  styledHtml = styledHtml.replace(/<(p|li)([^>]*)>/gi, (match, tag, attrs) => {
-    if (attrs.includes('text-align: center') || attrs.includes('text-align: right') || attrs.includes('align="center"') || attrs.includes('align="right"')) {
+  // 4. Divisores horizontais
+  html = html.replace(/<hr\s*\/?>/gi, '<p style="margin-top: 12.0pt; margin-bottom: 12.0pt; border-top: 1.0pt solid #d1d5db;"></p>');
+
+  // 5. Parágrafos com alinhamento central (Fechamento: Nestes termos, Local e Data, Linha de Assinatura, Advogado)
+  html = html.replace(
+    /<p([^>]*)style="[^"]*text-align:\s*center[^"]*"([^>]*)>([\s\S]*?)<\/p>/gi,
+    '<p align="center" style="text-align: center; text-indent: 0.0pt; font-family: \'Times New Roman\', serif; font-size: 12.0pt; line-height: 1.5; margin-bottom: 6.0pt; color: #000000;">$3</p>'
+  );
+
+  // 6. Parágrafos Justificados padrão
+  html = html.replace(/<p([^>]*)>([\s\S]*?)<\/p>/gi, (match, attrs, inner) => {
+    // Não mexer nos parágrafos centralizados já processados
+    if (attrs.includes('align="center"') || attrs.includes('text-align: center')) {
       return match;
     }
-    if (attrs.includes('style="')) {
-      return `<${tag}${attrs.replace('style="', 'align="justify" style="text-align: justify; line-height: 1.5; font-size: 11.5pt; color: #1a1a1a; ')}>`;
+
+    const trimmedInner = inner.trim();
+
+    // Endereçamento ao Juízo (primeiro parágrafo em caixa alta)
+    if (
+      trimmedInner.includes('EXCELENTÍSSIMO') ||
+      trimmedInner.includes('AO JUÍZO') ||
+      trimmedInner.includes('ILUSTRÍSSIMO')
+    ) {
+      return `<p align="justify" style="text-align: justify; text-indent: 0.0pt; font-family: 'Times New Roman', serif; font-size: 12.0pt; font-weight: bold; line-height: 1.5; margin-bottom: 18.0pt; color: #000000;">${trimmedInner}</p>`;
     }
-    return `<${tag}${attrs} align="justify" style="text-align: justify; line-height: 1.5; font-size: 11.5pt; color: #1a1a1a;">`;
+
+    // Subtítulos do Direito (ex: 1. Da Relação de Consumo)
+    if (
+      trimmedInner.startsWith('<strong>1.') ||
+      trimmedInner.startsWith('<strong>2.') ||
+      trimmedInner.startsWith('<strong>3.') ||
+      trimmedInner.startsWith('<strong>4.') ||
+      trimmedInner.startsWith('<strong>5.') ||
+      attrs.includes('font-weight: bold')
+    ) {
+      return `<p align="justify" style="text-align: justify; text-indent: 0.0pt; font-family: 'Times New Roman', serif; font-size: 12.0pt; font-weight: bold; line-height: 1.5; margin-top: 14.0pt; margin-bottom: 6.0pt; color: #000000;">${trimmedInner}</p>`;
+    }
+
+    // Alíneas de pedidos (ex: a) A concessão da justiça gratuita)
+    if (
+      trimmedInner.includes('<strong>a)') ||
+      trimmedInner.includes('<strong>b)') ||
+      trimmedInner.includes('<strong>c)') ||
+      trimmedInner.includes('<strong>d)') ||
+      trimmedInner.includes('<strong>e)') ||
+      trimmedInner.includes('<strong>f)') ||
+      trimmedInner.includes('<strong>g)')
+    ) {
+      return `<p align="justify" style="text-align: justify; text-indent: 20.0pt; font-family: 'Times New Roman', serif; font-size: 12.0pt; line-height: 1.5; margin-bottom: 6.0pt; color: #000000;">${trimmedInner}</p>`;
+    }
+
+    // Parágrafo padrão do corpo forense com recuo de 1,25cm (36pt)
+    return `<p align="justify" style="text-align: justify; text-indent: 36.0pt; font-family: 'Times New Roman', serif; font-size: 12.0pt; line-height: 1.5; margin-bottom: 8.0pt; color: #000000;">${trimmedInner}</p>`;
   });
 
   return `
@@ -32,76 +102,18 @@ export function compileWordHtml(title: string, rawHtml: string): string {
     <html>
     <head>
       <meta charset="utf-8">
-      <title>${title || 'Documento SmartDoc'}</title>
+      <title>${title || 'Petição Inicial'}</title>
       <style>
         body {
-          font-family: 'Cambria', 'Times New Roman', serif;
-          font-size: 11.5pt;
-          line-height: 1.5;
-          color: #1a1a1a;
-        }
-        h1 {
-          font-family: 'Cambria', 'Times New Roman', serif;
+          font-family: 'Times New Roman', serif;
           font-size: 12.0pt;
-          font-weight: bold;
-          text-align: justify;
-          text-transform: uppercase;
-          margin-top: 12.0pt;
-          margin-bottom: 18.0pt;
-          color: #000000;
-        }
-        h2 {
-          font-family: 'Cambria', 'Times New Roman', serif;
-          font-size: 13.0pt;
-          font-weight: bold;
-          margin-top: 18.0pt;
-          margin-bottom: 6.0pt;
-          color: #111827;
-        }
-        p {
-          font-family: 'Cambria', 'Times New Roman', serif;
-          text-align: justify;
-          margin-bottom: 8.0pt;
           line-height: 1.5;
-          font-size: 11.5pt;
-          color: #1a1a1a;
-        }
-        p:not([data-node-text-align="center"]):not([data-node-text-align="right"]):not(.align-center):not(.align-right):not(.no-indent) {
-          text-indent: 36.0pt;
-        }
-        blockquote {
-          background-color: #faf6f0;
-          border-left: 3.0pt solid #d97706;
-          padding: 8.0pt 12.0pt;
-          margin: 12.0pt 0.0pt;
-          font-style: italic;
-          font-family: 'Cambria', 'Times New Roman', serif;
-        }
-        blockquote p {
-          text-indent: 0.0pt !important;
-          margin-bottom: 4.0pt;
-        }
-        hr {
-          border: none;
-          border-top: 1.0pt solid #e5e7eb;
-          margin: 18.0pt 0.0pt;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 12.0pt;
-          margin-bottom: 12.0pt;
-        }
-        td, th {
-          border: 1.0pt solid #d1d5db;
-          padding: 8.0pt 10.0pt;
-          text-align: left;
-          vertical-align: top;
+          color: #000000;
         }
       </style>
     </head>
     <body>
-      ${styledHtml}
+      ${html}
     </body>
     </html>
   `;
@@ -109,18 +121,19 @@ export function compileWordHtml(title: string, rawHtml: string): string {
 
 export async function getWordBuffer(title: string, rawHtml: string): Promise<Buffer> {
   const cleanHtml = compileWordHtml(title, rawHtml);
-  
+
   const fileBuffer = await HTMLtoDOCX(cleanHtml, null, {
-    title: title || 'Documento SmartDoc',
-    font: 'Cambria',
+    title: title || 'Petição Inicial SmartDoc',
+    font: 'Times New Roman',
+    fontSize: 24, // 24 half-points = 12pt
     margins: {
-      top: 1440,
-      right: 1440,
-      bottom: 1440,
-      left: 1440
-    }
+      top: 1701,    // 3.0 cm (Padrão Forense ABNT / Tribunais)
+      left: 1701,   // 3.0 cm
+      bottom: 1134, // 2.0 cm
+      right: 1134,  // 2.0 cm
+    },
   });
-  
+
   return fileBuffer as unknown as Buffer;
 }
 

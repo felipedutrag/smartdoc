@@ -165,8 +165,8 @@ export default function EditorPage() {
         });
       }
 
-      // Intervalo entre blocos para criar o efeito realista de redação contínua
-      const delay = blocks[i].length > 250 ? 110 : 70;
+      // Intervalo refinado para permitir acompanhar a redação com naturalidade
+      const delay = blocks[i].length > 300 ? 220 : blocks[i].length > 100 ? 160 : 120;
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
 
