@@ -126,10 +126,10 @@ export default function Home() {
   };
 
   return (
-    <main className="relative flex min-h-screen w-full flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary">
+    <main className="relative flex min-h-screen w-full max-w-[100vw] overflow-x-hidden flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary">
       {/* ── Ambient Linear Subtle Grid ── */}
       <div
-        className="pointer-events-none fixed inset-0 z-0 opacity-25 dark:opacity-20 [transform:translateZ(0)]"
+        className="pointer-events-none fixed inset-0 z-0 opacity-25 dark:opacity-20 overflow-hidden [transform:translateZ(0)]"
         style={{
           backgroundImage: `
             radial-gradient(circle, var(--grid-color) 1px, transparent 1px),
@@ -141,7 +141,7 @@ export default function Home() {
       />
 
       {/* Top Ambient Glow Orb */}
-      <div className="pointer-events-none absolute -top-32 left-1/2 z-0 h-[400px] w-[800px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_50%_20%,var(--primary),transparent_70%)] opacity-15 blur-3xl [transform:translateZ(0)]" />
+      <div className="pointer-events-none absolute -top-32 left-1/2 z-0 h-[300px] sm:h-[400px] w-[90vw] max-w-[800px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_50%_20%,var(--primary),transparent_70%)] opacity-15 blur-3xl [transform:translateZ(0)]" />
 
       {/* ── Linear Navigation Bar (Fixed) ── */}
       <header className="fixed top-0 inset-x-0 z-50 flex w-full items-center justify-center border-b border-border/80 bg-background/90 px-4 sm:px-8 py-3 backdrop-blur-md shadow-xs transition-all [transform:translateZ(0)]">
@@ -378,52 +378,53 @@ export default function Home() {
       <section className="relative z-10 flex w-full justify-center px-4 pb-16">
         <div className="w-full max-w-4xl rounded-2xl border border-border/80 bg-card p-1.5 shadow-2xl">
           {/* Window Header / Browser Chrome */}
-          <div className="flex items-center justify-between border-b border-border/70 px-4 py-2 bg-muted/30 rounded-t-xl">
-            <div className="flex items-center gap-2">
-              <div className="flex gap-1.5">
+          <div className="flex items-center justify-between border-b border-border/70 px-3 sm:px-4 py-2 bg-muted/30 rounded-t-xl overflow-hidden gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="flex gap-1.5 shrink-0">
                 <div className="size-2 rounded-full bg-border" />
                 <div className="size-2 rounded-full bg-border" />
                 <div className="size-2 rounded-full bg-border" />
               </div>
-              <span className="ml-2 font-mono text-[10px] text-muted-foreground">
-                smartdoc.work/editor — Petição Inicial (Ação Indenizatória)
+              <span className="ml-1 sm:ml-2 font-mono text-[9px] sm:text-[10px] text-muted-foreground truncate">
+                smartdoc.work/editor — Petição Inicial
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-[9px] font-mono text-emerald-600 dark:text-emerald-400 gap-1">
+            <div className="flex items-center gap-2 shrink-0">
+              <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-[8px] sm:text-[9px] font-mono text-emerald-600 dark:text-emerald-400 gap-1 px-1.5 py-0.5">
                 <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Pronto para Protocolo</span>
+                <span className="hidden xs:inline">Pronto para Protocolo</span>
+                <span className="xs:hidden">Pronto</span>
               </Badge>
             </div>
           </div>
 
           {/* Sub Editor Toolbar */}
-          <div className="flex items-center justify-between border-b border-border/60 px-4 py-1.5 bg-muted/15 text-muted-foreground text-xs">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between border-b border-border/60 px-3 sm:px-4 py-1.5 bg-muted/15 text-muted-foreground text-xs overflow-hidden gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <div className="flex items-center gap-1 border-r border-border/60 pr-2">
-                <span className="font-semibold text-foreground text-[11px]">Padrão Forense</span>
-                <span className="text-[10px] font-mono opacity-60">12pt</span>
+                <span className="font-semibold text-foreground text-[10px] sm:text-[11px]">Padrão Forense</span>
+                <span className="text-[9px] sm:text-[10px] font-mono opacity-60">12pt</span>
               </div>
-              <div className="flex items-center gap-1.5 text-muted-foreground/70">
+              <div className="flex items-center gap-1 text-muted-foreground/70">
                 <span className="px-1 py-0.5 rounded font-bold hover:bg-muted text-[10px]">B</span>
                 <span className="px-1 py-0.5 rounded italic hover:bg-muted text-[10px]">I</span>
                 <span className="px-1 py-0.5 rounded underline hover:bg-muted text-[10px]">U</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-mono text-primary font-medium">
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="inline-flex items-center gap-1.5 text-[9px] sm:text-[10px] font-mono text-primary font-medium">
                 <span className="size-1.5 rounded-full bg-primary animate-ping" />
-                IA Redigindo em Tempo Real
+                <span>IA ao Vivo</span>
               </span>
             </div>
           </div>
 
           {/* Window Mockup Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-border/60 bg-background/60 rounded-b-xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-border/60 bg-background/60 rounded-b-xl overflow-hidden">
             {/* Left Document Editor Area */}
-            <div className="lg:col-span-8 p-6 sm:p-8 font-serif text-xs leading-relaxed text-foreground/90 space-y-3.5 bg-card/40">
+            <div className="lg:col-span-8 p-4 sm:p-8 font-serif text-xs leading-relaxed text-foreground/90 space-y-3.5 bg-card/40 break-words">
               <div className="text-center font-bold font-sans text-[11px] tracking-wider text-muted-foreground border-b border-border/40 pb-2">
                 EXCELENTÍSSIMO SENHOR DOUTOR JUIZ DE DIREITO DA 12ª VARA CÍVEL DA COMARCA DE SÃO PAULO/SP
               </div>
