@@ -22,36 +22,47 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [checkingSession, setCheckingSession] = useState(true);
-  const [hasValidSession, setHasValidSession] = useState(false);
+  const [tokenFound, setTokenFound] = useState(false);
 
   useEffect(() => {
-    async function initSession() {
+    async function establishSession() {
+      if (typeof window === "undefined") return;
+
       try {
-        // Se houver hash fragment do Supabase (#access_token=...&type=recovery), o client supabase detecta
+        const hash = window.location.hash;
+        if (hash) {
+          const hashParams = new URLSearchParams(hash.replace(/^#/, ""));
+          const accessToken = hashParams.get("access_token");
+          const refreshToken = hashParams.get("refresh_token");
+
+          if (accessToken) {
+            setTokenFound(true);
+            if (refreshToken) {
+              await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+              });
+            }
+          }
+        }
+
+        const searchParams = new URLSearchParams(window.location.search);
+        const code = searchParams.get("code");
+        if (code) {
+          setTokenFound(true);
+          await supabase.auth.exchangeCodeForSession(code);
+        }
+
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          setHasValidSession(true);
-        } else {
-          // Verifica se o evento de PASSWORD_RECOVERY dispara
-          const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-            if (event === "PASSWORD_RECOVERY" || currentSession) {
-              setHasValidSession(true);
-            }
-          });
-          setTimeout(() => {
-            setCheckingSession(false);
-          }, 1000);
-          return () => subscription.unsubscribe();
+          setTokenFound(true);
         }
       } catch (err) {
-        console.error("Session check error:", err);
-      } finally {
-        setCheckingSession(false);
+        console.warn("Aviso ao inicializar sessão de recuperação:", err);
       }
     }
 
-    initSession();
+    establishSession();
   }, [supabase]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -77,12 +88,57 @@ export default function ResetPasswordPage() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: password,
-      });
+      // 1. Tentar obter accessToken da hash ou da sessão
+      let rawAccessToken = "";
+      if (typeof window !== "undefined" && window.location.hash) {
+        const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+        rawAccessToken = hashParams.get("access_token") || "";
+        const refreshToken = hashParams.get("refresh_token") || "";
+        if (rawAccessToken && refreshToken) {
+          await supabase.auth.setSession({
+            access_token: rawAccessToken,
+            refresh_token: refreshToken,
+          });
+        }
+      }
 
-      if (error) {
-        throw error;
+      if (!rawAccessToken) {
+        const { data: { session } } = await supabase.auth.getSession();
+        rawAccessToken = session?.access_token || "";
+      }
+
+      // 2. Tentar atualizar diretamente no Supabase Client
+      let updated = false;
+      try {
+        const { error } = await supabase.auth.updateUser({
+          password: password,
+        });
+        if (!error) {
+          updated = true;
+        }
+      } catch (clientErr) {
+        console.warn("Client updateUser fallback:", clientErr);
+      }
+
+      // 3. Se falhar ou se não tiver sessão ativa no client, usar endpoint seguro de API com o accessToken
+      if (!updated) {
+        if (!rawAccessToken) {
+          throw new Error("Link de recuperação expirado ou inválido. Por favor, solicite um novo e-mail.");
+        }
+
+        const apiRes = await fetch("/api/auth/update-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            password: password,
+            accessToken: rawAccessToken,
+          }),
+        });
+
+        const apiData = await apiRes.json();
+        if (!apiRes.ok || apiData.error) {
+          throw new Error(apiData.error || "Não foi possível redefinir a senha.");
+        }
       }
 
       setSuccessMessage("Senha alterada com sucesso! Redirecionando para seu painel...");
