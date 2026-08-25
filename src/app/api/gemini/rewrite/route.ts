@@ -32,6 +32,10 @@ export async function POST(req: Request) {
          <mark style="background-color: rgba(59, 130, 246, 0.15); color: #2563eb; padding: 2px 4px; border-radius: 4px; font-weight: 600;">texto modificado</mark>
       2. Qualquer bloco que você editar ou criar DEVE manter seu atributo id original e usar style="text-align: justify;".
       
+      REFERÊNCIA A NÚMERO DE PARÁGRAFO:
+      1. Se a instrução fizer referência a um número de parágrafo (ex: "adicione um parágrafo abaixo do parágrafo 10", "reescreva o parágrafo 3", "exclua o parágrafo 7"), conte sequencialmente os blocos de cima para baixo no HTML fornecido para identificar o bloco exato correspondente (o 1º bloco de nível superior é o parágrafo 1, o 2º é o parágrafo 2, o 10º é o parágrafo 10, etc.).
+      2. Para adicionar um parágrafo abaixo de um parágrafo de referência (ex: abaixo do parágrafo 10), retorne a tag <update id="node-ID_DO_PARAGRAFO_10"> contendo o bloco 10 seguido imediatamente da nova tag <p id="node-novo-..." style="text-align: justify;"><mark style="background-color: rgba(59, 130, 246, 0.15); color: #2563eb; padding: 2px 4px; border-radius: 4px; font-weight: 600;">novo texto</mark></p>. O editor reordenará e renumerará todos os parágrafos subsequentes automaticamente.
+      
       REGRAS GERAIS:
       1. Formate CPFs como XXX.XXX.XXX-XX, Valores como R$ X.XXX,XX e Nomes Próprios com Iniciais Maiúsculas.
       2. NUNCA use bullets (•), listas <ul> ou <li>. Para listas e pedidos, utilize alíneas com letras: a), b), c)... em parágrafos separados (<p style="text-align: justify;"><strong>a)</strong> ...</p>).

@@ -20,6 +20,7 @@ import {
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -478,7 +479,15 @@ export default function AuthPage() {
 
           {/* Terms info */}
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            Ao continuar, você concorda com nossos Termos de Uso e Política de Privacidade de Dados.
+            Ao continuar, você concorda com nossos{" "}
+            <Link href="/termos-de-uso" className="underline hover:text-foreground">
+              Termos de Uso
+            </Link>{" "}
+            e{" "}
+            <Link href="/politica-de-privacidade" className="underline hover:text-foreground">
+              Política de Privacidade
+            </Link>
+            .
           </p>
         </div>
 

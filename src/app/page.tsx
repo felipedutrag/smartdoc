@@ -668,11 +668,20 @@ export default function Home() {
       </section>
 
       {/* ── FOOTER (Centralizado e Limpo) ── */}
-      <footer className="relative z-10 flex w-full flex-col items-center justify-center border-t border-border/60 px-6 py-6 text-xs text-muted-foreground text-center bg-muted/20">
+      <footer className="relative z-10 flex w-full flex-col sm:flex-row items-center justify-between gap-3 border-t border-border/60 px-6 py-6 text-xs text-muted-foreground bg-muted/20">
         <div className="flex items-center gap-2">
           <Scale className="size-3.5 text-primary" />
           <span className="font-semibold text-foreground">SmartDoc</span>
           <span>© {new Date().getFullYear()} — Tecnologia Jurídica com IA. Todos os direitos reservados.</span>
+        </div>
+        <div className="flex items-center gap-4 text-xs font-medium">
+          <Link href="/termos-de-uso" className="hover:text-foreground hover:underline transition-colors">
+            Termos de Uso
+          </Link>
+          <span>&bull;</span>
+          <Link href="/politica-de-privacidade" className="hover:text-foreground hover:underline transition-colors">
+            Política de Privacidade
+          </Link>
         </div>
       </footer>
     </main>
