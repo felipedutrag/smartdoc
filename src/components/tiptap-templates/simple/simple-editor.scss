@@ -49,63 +49,10 @@ body,
   line-height: 1.65;
   font-size: var(--editor-font-size, 17px);
   color: var(--text-primary);
-  counter-reset: doc-paragraph-counter;
   position: relative;
 
   .dark & {
     color: #d4d4d8;
-  }
-
-  // ── Régua de Numeração de Parágrafos Estilo IDE (Visual Only / Não vai para o Word) ──
-  > p,
-  > blockquote,
-  > h1,
-  > h2,
-  > h3,
-  > h4 {
-    counter-increment: doc-paragraph-counter;
-    position: relative;
-
-    &::before {
-      content: counter(doc-paragraph-counter);
-      position: absolute;
-      left: -2.85rem;
-      top: 0;
-      width: 2.1rem;
-      text-align: right;
-      font-family: var(--font-mono), "Fira Code", monospace;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      opacity: 0.38;
-      user-select: none;
-      -webkit-user-select: none;
-      pointer-events: none;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      line-height: 1.65;
-      letter-spacing: -0.03em;
-    }
-
-    &:hover::before {
-      opacity: 1;
-      color: var(--primary);
-      transform: translateX(-2px);
-    }
-  }
-
-  @media screen and (max-width: 860px) {
-    > p,
-    > blockquote,
-    > h1,
-    > h2,
-    > h3,
-    > h4 {
-      &::before {
-        left: -1.75rem;
-        width: 1.4rem;
-        font-size: 10px;
-      }
-    }
   }
 
   p, li {
