@@ -97,27 +97,31 @@ export async function POST(request: Request) {
         console.error("Erro ao atualizar pagamento no Supabase:", updateErr);
       }
 
-      // Ativar Plano do Usuário se for uma assinatura
-      if (payment?.user_id) {
-        let planToActivate = "Profissional Pro";
+      // Fallback para o usuário admin (felipedutra@outlook.com) caso seja um teste da GG Pix ou transação sem vínculo prévio
+      const ADMIN_FALLBACK_USER_ID = "b052ac7c-76f1-4184-9422-3ae26b6e26e5"; // felipedutra@outlook.com
+      const targetUserId = payment?.user_id || ADMIN_FALLBACK_USER_ID;
 
-        if (externalId && typeof externalId === "string") {
-          if (externalId.includes("individual")) {
-            planToActivate = "Individual";
-          } else if (externalId.includes("team")) {
-            planToActivate = "Boutique & Equipes";
-          } else if (externalId.includes("pro")) {
-            planToActivate = "Profissional Pro";
-          }
-        } else if (payload.amount) {
-          if (payload.amount === 9700) planToActivate = "Individual";
-          else if (payload.amount === 39700) planToActivate = "Boutique & Equipes";
-          else if (payload.amount === 19700) planToActivate = "Profissional Pro";
+      // Determinar plano a ser ativado
+      let planToActivate = "Profissional Pro";
+      if (externalId && typeof externalId === "string") {
+        if (externalId.includes("individual")) {
+          planToActivate = "Individual";
+        } else if (externalId.includes("team")) {
+          planToActivate = "Boutique & Equipes";
+        } else if (externalId.includes("pro")) {
+          planToActivate = "Profissional Pro";
         }
+      } else if (payload.amount) {
+        if (payload.amount === 9700) planToActivate = "Individual";
+        else if (payload.amount === 39700) planToActivate = "Boutique & Equipes";
+        else if (payload.amount === 19700) planToActivate = "Profissional Pro";
+      }
 
+      // Ativar Plano do Usuário (seja o dono da transação ou o admin de fallback)
+      if (targetUserId) {
         // 1. Atualizar user_metadata no Supabase Auth (funciona nativamente sempre)
         try {
-          await supabase.auth.admin.updateUserById(payment.user_id, {
+          await supabase.auth.admin.updateUserById(targetUserId, {
             user_metadata: { plan: planToActivate, plan_status: "active" }
           });
         } catch (authErr) {
@@ -132,12 +136,12 @@ export async function POST(request: Request) {
               plan: planToActivate,
               updated_at: new Date().toISOString(),
             })
-            .eq("id", payment.user_id);
+            .eq("id", targetUserId);
         } catch (profileErr) {
           console.warn("Aviso ao atualizar profiles:", profileErr);
         }
 
-        console.log(`Plano ${planToActivate} ativado com sucesso para o usuário ${payment.user_id}`);
+        console.log(`Plano ${planToActivate} ativado com sucesso para o usuário ${targetUserId} (felipedutra@outlook.com)`);
       }
 
       // Liberar documento avulso se houver
