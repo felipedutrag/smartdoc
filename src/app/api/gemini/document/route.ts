@@ -3,6 +3,8 @@ import { Groq } from "groq-sdk";
 import { NextResponse } from "next/server";
 import { sendTelegramAlert } from "@/lib/telegram";
 
+import { getLegalKnowledgeBase } from "@/knowledge";
+
 export async function POST(req: Request) {
   try {
     const keys = [
@@ -32,9 +34,12 @@ export async function POST(req: Request) {
     ];
     
     const modelName = fallbackModels[attempt] || "openai/gpt-oss-120b";
+    const knowledgeBase = getLegalKnowledgeBase();
+    
     const systemInstruction = `
 Você é um jurista e especialista em redação de peças processuais de alto nível técnico no Brasil.
 Seu objetivo é analisar os fatos fornecidos e redigir uma Petição Inicial COMPLETA, EXTENSA, COM PROFUNDA FUNDAMENTAÇÃO JURÍDICA E CITANDO ARTIGOS DE LEI E JURISPRUDÊNCIA.
+${knowledgeBase ? `\nBASE DE CONHECIMENTO E PRECEDENTES VINCULANTES VIGENTES:\n${knowledgeBase}\nConsulte e aplique as teses, súmulas e julgados acima que forem pertinentes aos fatos narrados.\n` : ""}
 
 SUA SAÍDA DEVE SER ESTRITAMENTE UM OBJETO JSON VÁLIDO (sem blocos markdown \`\`\`json, apenas o JSON cru).
 

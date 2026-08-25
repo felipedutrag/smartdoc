@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 import { sendTelegramAlert } from "@/lib/telegram";
+import { getLegalKnowledgeBase } from "@/knowledge";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
@@ -12,10 +13,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Texto ou instrução ausentes." }, { status: 400 });
     }
 
+    const knowledgeBase = getLegalKnowledgeBase();
+
     const systemInstruction = `
       Você é um Assistente Jurídico Especializado em Edição Cirúrgica.
       O usuário enviou uma instrução para alterar uma Petição Judicial.
       Sua tarefa é ler o documento, localizar os blocos exatos que precisam ser modificados com base na instrução (e no trecho selecionado), aplicar a mudança e retornar APENAS os blocos modificados.
+      ${knowledgeBase ? `\nBASE DE CONHECIMENTO FORENSE E PRECEDENTES VINCULANTES VIGENTES:\n${knowledgeBase}\n` : ""}
 
       REGRAS CRÍTICAS PARA A SAÍDA (FORMATO NODE-BASED):
       1. Você NÃO DEVE retornar o documento inteiro. Retorne APENAS os blocos (nodes) que sofreram alguma modificação.
