@@ -26,14 +26,14 @@ export async function POST(req: Request) {
     }
 
     const fallbackModels = [
-      "openai/gpt-oss-120b",     // Tentativa 0 (Principal - Groq GPT-OSS 120B)
-      "llama-3.3-70b-versatile", // Tentativa 1 (Fallback Groq Llama 3.3 70B)
-      "gemini-2.5-flash",        // Tentativa 2 (Fallback Gemini Flash)
-      "gemini-2.5-pro",          // Tentativa 3 (Fallback Gemini Pro)
-      "gemini-3.0-flash",        // Tentativa 4
+      "gemini-2.5-flash",        // Tentativa 0 (Principal - Gemini 2.5 Flash)
+      "gemini-2.5-pro",          // Tentativa 1 (Fallback Gemini Pro)
+      "openai/gpt-oss-120b",     // Tentativa 2 (Fallback Groq GPT-OSS 120B)
+      "llama-3.3-70b-versatile", // Tentativa 3 (Fallback Groq Llama 3.3 70B)
+      "gemini-3.0-flash",        // Tentativa 4 (Fallback Gemini 3.0 Flash)
     ];
     
-    const modelName = fallbackModels[attempt] || "openai/gpt-oss-120b";
+    const modelName = fallbackModels[attempt] || "gemini-2.5-flash";
     const knowledgeBase = getLegalKnowledgeBase(facts);
     
     const systemInstruction = `
