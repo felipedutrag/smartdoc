@@ -32,7 +32,17 @@ export default function AuthPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [mode, setMode] = useState<"login" | "register" | "forgot" | "reset">("login");
+  const [mode, setMode] = useState<"login" | "register" | "forgot" | "reset">(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const m = params.get("mode");
+      if (m === "register" || m === "forgot" || m === "reset") return m;
+      if (window.location.hash.includes("type=recovery") || window.location.hash.includes("access_token")) {
+        return "reset";
+      }
+    }
+    return "login";
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -41,7 +51,6 @@ export default function AuthPage() {
   // Form states
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [oab, setOab] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -49,10 +58,24 @@ export default function AuthPage() {
   const isMobile = isMobileRaw ?? false;
 
   useEffect(() => {
-    // Verificar se usuário já está logado
+    // Checar query params na URL (?mode=register, ?mode=forgot, ?mode=reset)
+    const params = new URLSearchParams(window.location.search);
+    const modeParam = params.get("mode");
+    const isRecoveryHash = typeof window !== "undefined" && window.location.hash.includes("type=recovery");
+
+    if (modeParam === "register" || modeParam === "forgot" || modeParam === "reset") {
+      setMode(modeParam);
+    } else if (isRecoveryHash) {
+      setMode("reset");
+    }
+
+    // Verificar se usuário já está logado (apenas se for login padrão)
     const checkUser = async () => {
+      const isRecovery = modeParam === "reset" || modeParam === "forgot" || isRecoveryHash || mode === "reset" || mode === "forgot";
+      if (isRecovery) return;
+
       const { data: { session } } = await supabase.auth.getSession();
-      if (session && mode !== "reset") {
+      if (session) {
         router.push("/dashboard");
       }
     };
@@ -64,13 +87,6 @@ export default function AuthPage() {
         setMode("reset");
       }
     });
-
-    // Checar query params na URL (?mode=register, ?mode=forgot, ?mode=reset)
-    const params = new URLSearchParams(window.location.search);
-    const modeParam = params.get("mode");
-    if (modeParam === "register" || modeParam === "forgot" || modeParam === "reset") {
-      setMode(modeParam);
-    }
 
     return () => {
       subscription.unsubscribe();
@@ -199,7 +215,6 @@ export default function AuthPage() {
             email: email.trim(),
             password: password,
             name: name.trim(),
-            oab: oab.trim(),
           }),
         });
 

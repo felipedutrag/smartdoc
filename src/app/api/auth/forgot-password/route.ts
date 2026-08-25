@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       type: "recovery",
       email: trimmedEmail,
       options: {
-        redirectTo: `${appUrl}/login?mode=reset`,
+        redirectTo: `${appUrl}/reset-password`,
       },
     });
 
