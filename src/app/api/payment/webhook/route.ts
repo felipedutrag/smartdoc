@@ -100,15 +100,34 @@ export async function POST(request: Request) {
         query = query.eq("ggpix_transaction_id", String(transactionId));
       }
 
-      const { data: payment, error: updateErr } = await query.select().single();
-
-      if (updateErr) {
-        console.error("Erro ao atualizar pagamento no Supabase:", updateErr);
+      let paymentRecord = null;
+      try {
+        const { data } = await query.select().maybeSingle();
+        paymentRecord = data;
+      } catch (err) {
+        console.warn("Aviso ao buscar transação existente:", err);
       }
 
-      // Fallback para o usuário admin (felipedutra@outlook.com) caso seja um teste da GG Pix ou transação sem vínculo prévio
+      // Fallback para o usuário admin (felipedutra@outlook.com) caso seja um teste da GG Pix ou transação avulsa
       const ADMIN_FALLBACK_USER_ID = "b052ac7c-76f1-4184-9422-3ae26b6e26e5"; // felipedutra@outlook.com
-      const targetUserId = payment?.user_id || ADMIN_FALLBACK_USER_ID;
+      const targetUserId = paymentRecord?.user_id || ADMIN_FALLBACK_USER_ID;
+
+      // Se a transação não existia previamente no banco (ex: teste manual do painel da GG Pix), registrar agora
+      if (!paymentRecord && (externalId || transactionId)) {
+        try {
+          await supabase.from("payments").insert({
+            user_id: targetUserId,
+            external_id: externalId || String(transactionId),
+            ggpix_transaction_id: transactionId ? String(transactionId) : null,
+            amount_cents: payload.amount ? Math.round(payload.amount * 100) : 100,
+            status: "PAID",
+            payer_name: payload.payer?.name || "Teste Painel GG Pix",
+            paid_at: payload.paidAt || new Date().toISOString(),
+          });
+        } catch (insertErr) {
+          console.warn("Aviso ao registrar pagamento de teste:", insertErr);
+        }
+      }
 
       // Determinar plano a ser ativado
       let planToActivate = "Profissional Pro";
@@ -154,11 +173,11 @@ export async function POST(request: Request) {
       }
 
       // Liberar documento avulso se houver
-      if (payment?.document_id) {
+      if (paymentRecord?.document_id) {
         await supabase
           .from("documents")
           .update({ is_paid: true })
-          .eq("id", payment.document_id);
+          .eq("id", paymentRecord.document_id);
       }
     } else if (status === "FAILED" || status === "CANCELED") {
       let query = supabase.from("payments").update({
