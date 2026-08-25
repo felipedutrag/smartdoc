@@ -92,10 +92,18 @@ O JSON DEVE SEGUIR RIGOROSAMENTE ESTA ESTRUTURA:
   }
 }
 
-REGRAS DE CONTEÚDO:
-1. NÃO invente dados de pessoas (nomes fictícios, CPFs, endereços) que não constem nos fatos. Use marcadores entre colchetes como [NOME DO AUTOR], [CPF DO RÉU], etc.
-2. A seção 'direito' deve conter múltiplos subtópicos com argumentação sólida e robusta.
-3. Não inclua markdown na resposta.
+REGRAS RÍGIDAS CONTRA ALUCINAÇÃO E SEGURANÇA JURÍDICA (100% GROUNDING):
+1. PROIBIÇÃO ABSOLUTA DE JURISPRUDÊNCIA / PRECEDENTES INVENTADOS:
+   - NUNCA invente números de acórdãos, números de RE, REsp, ADI, nomes de ministros/relatores inexistentes ou ementas forjadas.
+   - Ao citar jurisprudência, mencione apenas teses consolidadas ou Súmulas reais e vigentes (ex: Súmula Vinculante X do STF, Súmula Y do STJ/STF). Se não tiver certeza absoluta do número de um precedente específico, fundamente com a tese jurídica abstrata e os artigos de lei pertinentes, JAMAIS inventando dados de julgados.
+2. VERACIDADE LEGAL ESTATUTÁRIA:
+   - Cite exclusivamente artigos, parágrafos e incisos de diplomas legais reais e em vigor no Brasil (CF/88, CPC/15, CC/02, CDC, CLT, etc.). Nunca invente números de artigos ou leis inexistentes.
+3. GROUNDING ESTRITO NOS FATOS:
+   - Limite-se estritamente aos fatos e contexto narrados pelo usuário. NÃO invente dados de partes, testemunhas, endereços, valores, datas ou fatos adicionais que não constem na narrativa.
+   - Para qualquer dado ausente, use SEMPRE marcadores padronizados entre colchetes: [NOME DO AUTOR], [CPF/CNPJ], [VALOR DA CAUSA], [COMARCA/ESTADO], etc.
+4. RIGOR TÉCNICO FORENSE:
+   - A seção 'direito' deve conter múltiplos subtópicos com argumentação sólida, nexo causal e subsunção fático-jurídica impecável.
+5. Não inclua markdown na resposta.
 `;
 
     const prompt = `Fatos narrados para a elaboração da petição:\n${facts}`;
@@ -115,7 +123,7 @@ REGRAS DE CONTEÚDO:
         model: modelName,
         response_format: { type: "json_object" },
         max_tokens: 4096,
-        temperature: 0.2,
+        temperature: 0.1,
         stream: true,
       });
     } else {
@@ -127,7 +135,7 @@ REGRAS DE CONTEÚDO:
         generationConfig: {
           responseMimeType: "application/json",
           maxOutputTokens: 8192,
-          temperature: 0.2,
+          temperature: 0.1,
         }
       });
       const result = await model.generateContentStream(prompt);

@@ -36,6 +36,11 @@ export async function POST(req: Request) {
       1. Se a instrução fizer referência a um número de parágrafo (ex: "adicione um parágrafo abaixo do parágrafo 10", "reescreva o parágrafo 3", "exclua o parágrafo 7"), conte sequencialmente os blocos de cima para baixo no HTML fornecido para identificar o bloco exato correspondente (o 1º bloco de nível superior é o parágrafo 1, o 2º é o parágrafo 2, o 10º é o parágrafo 10, etc.).
       2. Para adicionar um parágrafo abaixo de um parágrafo de referência (ex: abaixo do parágrafo 10), retorne a tag <update id="node-ID_DO_PARAGRAFO_10"> contendo o bloco 10 seguido imediatamente da nova tag <p id="node-novo-..." style="text-align: justify;"><mark style="background-color: rgba(59, 130, 246, 0.15); color: #2563eb; padding: 2px 4px; border-radius: 4px; font-weight: 600;">novo texto</mark></p>. O editor reordenará e renumerará todos os parágrafos subsequentes automaticamente.
       
+      REGRAS RÍGIDAS CONTRA ALUCINAÇÃO E SEGURANÇA JURÍDICA (100% GROUNDING):
+      1. NUNCA invente julgados, números de processos, súmulas inexistentes, ministros relatores ou ementas forjadas.
+      2. Cite apenas artigos e leis reais e vigentes no ordenamento brasileiro.
+      3. Atenha-se estritamente aos fatos e comandos do usuário. Não invente detalhes fáticos não solicitados.
+      
       REGRAS GERAIS:
       1. Formate CPFs como XXX.XXX.XXX-XX, Valores como R$ X.XXX,XX e Nomes Próprios com Iniciais Maiúsculas.
       2. NUNCA use bullets (•), listas <ul> ou <li>. Para listas e pedidos, utilize alíneas com letras: a), b), c)... em parágrafos separados (<p style="text-align: justify;"><strong>a)</strong> ...</p>).
@@ -63,6 +68,9 @@ export async function POST(req: Request) {
     const model = genAI.getGenerativeModel({
       model: "gemini-3.1-flash-lite",
       systemInstruction: systemInstruction,
+      generationConfig: {
+        temperature: 0.1,
+      }
     });
 
     const result = await model.generateContentStream(prompt);
