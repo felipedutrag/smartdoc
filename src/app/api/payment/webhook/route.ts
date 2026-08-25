@@ -157,12 +157,20 @@ export async function POST(request: Request) {
           console.error("Erro ao atualizar user_metadata no Auth:", authErr);
         }
 
-        // 2. Atualizar tabela profiles (se a coluna plan existir no banco)
+        // 2. Atualizar tabela profiles com o plano e recarga de créditos
         try {
+          let petitionsLimit = 100;
+          if (planToActivate === "Individual") petitionsLimit = 30;
+          else if (planToActivate === "Boutique & Equipes") petitionsLimit = 300;
+
           await supabase
             .from("profiles")
             .update({
               plan: planToActivate,
+              plan_status: "active",
+              petitions_limit: petitionsLimit,
+              petitions_used: 0,
+              credits_reset_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
               updated_at: new Date().toISOString(),
             })
             .eq("id", targetUserId);
@@ -170,7 +178,7 @@ export async function POST(request: Request) {
           console.warn("Aviso ao atualizar profiles:", profileErr);
         }
 
-        console.log(`Plano ${planToActivate} ativado com sucesso para o usuário ${targetUserId} (felipedutra@outlook.com)`);
+        console.log(`Plano ${planToActivate} e créditos ativados com sucesso para o usuário ${targetUserId} (felipedutra@outlook.com)`);
 
         // 3. Enviar e-mail de confirmação de pagamento via Resend
         try {

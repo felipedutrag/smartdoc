@@ -85,6 +85,9 @@ interface UserProfile {
   email: string;
   oab?: string;
   plan?: string;
+  petitions_limit?: number;
+  petitions_used?: number;
+  credits_reset_at?: string;
 }
 
 export default function DashboardPage() {
@@ -491,8 +494,20 @@ export default function DashboardPage() {
           })
         });
 
+        if (createRes.status === 403) {
+          const errData = await createRes.json();
+          setIsSubmitting(false);
+          alert(errData.error || "Limite mensal de petições atingido. Escolha um plano para continuar gerando peças.");
+          setIsModalOpen(false);
+          setActiveTab("plans");
+          return;
+        }
+
         if (createRes.ok) {
           const createData = await createRes.json();
+          if (createData.credits) {
+            setProfile(prev => prev ? { ...prev, petitions_used: createData.credits.used } : null);
+          }
           if (createData.document?.id) {
             docId = createData.document.id;
           }
@@ -824,6 +839,50 @@ export default function DashboardPage() {
 
       {/* Sidebar Footer */}
       <div className="border-t border-border/80 p-2.5 space-y-2 bg-muted/20">
+        {/* Credits Status Widget (Linear Style) */}
+        {(sidebarOpen || isDrawer) && (
+          <div className="rounded-xl border border-border/80 bg-card/80 p-2.5 space-y-1.5 shadow-xs">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="font-semibold text-foreground flex items-center gap-1.5">
+                <Scale className="size-3 text-primary" />
+                <span>Petições no Mês</span>
+              </span>
+              <span className="font-mono text-[10px] font-bold text-foreground">
+                {profile?.petitions_used ?? 0} / {profile?.petitions_limit ?? 30}
+              </span>
+            </div>
+            
+            {/* Progress Bar */}
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  ((profile?.petitions_used ?? 0) / (profile?.petitions_limit ?? 30)) >= 0.9
+                    ? "bg-destructive"
+                    : ((profile?.petitions_used ?? 0) / (profile?.petitions_limit ?? 30)) >= 0.7
+                    ? "bg-amber-500"
+                    : "bg-primary"
+                }`}
+                style={{
+                  width: `${Math.min(100, Math.round(((profile?.petitions_used ?? 0) / (profile?.petitions_limit ?? 30)) * 100))}%`,
+                }}
+              />
+            </div>
+            
+            <div className="flex items-center justify-between text-[9px] text-muted-foreground font-mono">
+              <span>{Math.max(0, (profile?.petitions_limit ?? 30) - (profile?.petitions_used ?? 0))} restantes</span>
+              <button
+                onClick={() => {
+                  setActiveTab("plans");
+                  if (isDrawer) setMobileDrawerOpen(false);
+                }}
+                className="text-primary hover:underline font-sans font-semibold cursor-pointer"
+              >
+                + Créditos
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* User Card */}
         <div className={`flex items-center gap-2.5 rounded-lg p-2 ${(sidebarOpen || isDrawer) ? "" : "justify-center"}`}>
           <Avatar className="size-7 border border-border/70 shrink-0">
@@ -1205,17 +1264,30 @@ export default function DashboardPage() {
               </div>
 
               {/* Status do Plano Atual (Linear Style) */}
-              <div className="flex items-center justify-between rounded-xl border border-primary/30 bg-primary/5 p-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-primary/30 bg-primary/5 p-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
-                    <Crown className="size-4.5" />
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
+                    <Crown className="size-5" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-foreground">Seu Plano Atual: {profile?.plan || "Pro Trial"}</div>
-                    <div className="text-[11px] text-muted-foreground">Modelos avançados e exportação DOCX ilimitada</div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-foreground">Plano Atual: {profile?.plan || "Pro Trial"}</span>
+                      <Badge className="bg-primary text-primary-foreground text-[10px] font-bold">Ativo</Badge>
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      Franquia mensal: <strong className="text-foreground">{profile?.petitions_limit ?? 30} petições</strong> ({Math.max(0, (profile?.petitions_limit ?? 30) - (profile?.petitions_used ?? 0))} restantes neste ciclo)
+                    </div>
                   </div>
                 </div>
-                <Badge className="bg-primary text-primary-foreground text-xs font-bold">Ativo</Badge>
+
+                <div className="flex items-center gap-3 sm:border-l sm:border-border/60 sm:pl-4">
+                  <div className="text-right">
+                    <div className="font-mono text-xs font-bold text-foreground">
+                      {profile?.petitions_used ?? 0} / {profile?.petitions_limit ?? 30}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">Petições Utilizadas</div>
+                  </div>
+                </div>
               </div>
 
               {/* Grade de Planos (Linear Style) */}

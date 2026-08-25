@@ -55,6 +55,42 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { title, action_type, facts, content_html, status = "draft" } = body;
 
+    // 1. Verificar perfil e limite de créditos do usuário
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("plan, plan_status, petitions_limit, petitions_used, credits_reset_at")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const limit = profile?.petitions_limit ?? 30;
+    let used = profile?.petitions_used ?? 0;
+    const resetAt = profile?.credits_reset_at ? new Date(profile.credits_reset_at) : null;
+
+    // Se o ciclo de 30 dias expirou, resetar automaticamente a contagem de uso
+    if (resetAt && new Date() > resetAt) {
+      used = 0;
+      await supabase
+        .from("profiles")
+        .update({
+          petitions_used: 0,
+          credits_reset_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        })
+        .eq("id", user.id);
+    }
+
+    // Trava de limite de petições
+    if (used >= limit) {
+      return NextResponse.json(
+        {
+          error: `Você atingiu o limite de ${limit} petições do seu plano neste mês. Faça upgrade ou renove sua assinatura para continuar gerando peças.`,
+          code: "CREDIT_LIMIT_REACHED",
+          credits: { used, limit },
+        },
+        { status: 403 }
+      );
+    }
+
+    // 2. Inserir documento
     const { data, error } = await supabase
       .from("documents")
       .insert({
@@ -74,7 +110,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ document: data }, { status: 201 });
+    // 3. Incrementar contador de créditos utilizados
+    await supabase
+      .from("profiles")
+      .update({
+        petitions_used: used + 1,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", user.id);
+
+    return NextResponse.json(
+      {
+        document: data,
+        credits: { used: used + 1, limit },
+      },
+      { status: 201 }
+    );
   } catch (err: any) {
     return NextResponse.json({ error: err?.message || "Erro interno" }, { status: 500 });
   }
