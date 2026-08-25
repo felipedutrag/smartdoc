@@ -273,13 +273,13 @@ export default function AuthPage() {
 
             <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground">
               {mode === "login" && "Acesse seu escritório digital"}
-              {mode === "register" && "Crie sua conta e comece a advogar com IA"}
+              {mode === "register" && "Crie sua conta agora"}
               {mode === "forgot" && "Recuperação de Senha"}
               {mode === "reset" && "Definir Nova Senha"}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
               {mode === "login" && "Suas petições, assistente de voz e documentos aguardam você."}
-              {mode === "register" && "Advogados utilizam IA forense para redigir peças em minutos, não horas."}
+              {mode === "register" && "Redija petições em minutos, não em horas."}
               {mode === "forgot" && "Informe seu e-mail para receber o link seguro de redefinição."}
               {mode === "reset" && "Digite sua nova senha de acesso abaixo."}
             </p>
