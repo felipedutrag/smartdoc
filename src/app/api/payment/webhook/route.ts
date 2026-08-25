@@ -29,18 +29,28 @@ function validateWebhookSignature(rawBody: string, signature: string, secret: st
   }
 }
 
+export async function GET() {
+  return NextResponse.json({
+    status: "ok",
+    message: "GG Pix Webhook endpoint is active and listening for POST callbacks.",
+  });
+}
+
 export async function POST(request: Request) {
+  console.log("===> [WEBHOOK INCOMING] Recebida chamada POST no webhook");
   try {
     const rawBody = await request.text();
     const signature = request.headers.get("x-webhook-signature");
     const authHeader = request.headers.get("authorization");
+
+    console.log("===> [WEBHOOK BODY]:", rawBody);
 
     // 1. Validação por Bearer Token no Header de Autorização
     const expectedBearer = process.env.GGPIX_BEARER_TOKEN || "83380259fd8ead3107b71f27e2c8f7ab4d22528bbe3e6f102c8014b48baecd98";
     if (expectedBearer && authHeader) {
       const token = authHeader.replace(/^Bearer\s+/i, "").trim();
       if (token !== expectedBearer) {
-        console.warn("Webhook: Bearer token inválido.");
+        console.warn("Webhook: Bearer token inválido. Recebido:", token);
         return NextResponse.json({ error: "Invalid Bearer Token" }, { status: 401 });
       }
     }
