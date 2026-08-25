@@ -86,6 +86,11 @@ body,
   p {
     margin-bottom: 1rem;
     margin-top: 0;
+
+    // O primeiro parágrafo é sempre o endereçamento ao Juízo -> Respiro forense automático
+    &:first-child {
+      margin-bottom: 2.5rem !important;
+    }
   }
 
   h1, h2, h3, h4 {
