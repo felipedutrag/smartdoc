@@ -11,8 +11,16 @@ export async function POST(request: Request) {
     }
 
     const trimmedEmail = email.trim();
+    const rawOrigin = request.headers.get("origin") || request.headers.get("referer") || process.env.NEXT_PUBLIC_APP_URL || "https://smartdoc.work";
+    let appUrl = "https://smartdoc.work";
+    try {
+      const parsed = new URL(rawOrigin);
+      appUrl = `${parsed.protocol}//${parsed.host}`;
+    } catch {
+      appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://smartdoc.work").replace(/\/$/, "");
+    }
+
     const supabaseAdmin = createAdminClient();
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://smartdoc.work";
 
     // Gera o link seguro de recuperação via Supabase Admin
     const { data, error } = await supabaseAdmin.auth.admin.generateLink({

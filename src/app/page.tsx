@@ -66,7 +66,27 @@ export default function Home() {
 
   useEffect(() => {
     const supabase = createClient();
+
+    // Se o usuário cair na home com token de recuperação, direciona direto para /reset-password
+    if (typeof window !== "undefined") {
+      const hash = window.location.hash;
+      const search = window.location.search;
+      if (hash.includes("type=recovery") || search.includes("type=recovery") || search.includes("mode=reset")) {
+        router.replace(`/reset-password${hash}`);
+        return;
+      }
+    }
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        router.replace("/reset-password");
+      }
+    });
+
     const checkUser = async () => {
+      if (typeof window !== "undefined" && window.location.hash.includes("type=recovery")) {
+        return;
+      }
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         router.replace("/dashboard");
@@ -81,6 +101,10 @@ export default function Home() {
     } else {
       setIsDark(false);
     }
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [router]);
 
   const toggleTheme = () => {
