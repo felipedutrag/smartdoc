@@ -837,6 +837,41 @@ export default function DashboardPage() {
             <User className="size-3.5 shrink-0" />
             {(sidebarOpen || isDrawer) && <span>Meu Perfil</span>}
           </Button>
+
+          {/* Separador Sutil */}
+          <div className="my-1 border-t border-border/40" />
+
+          {/* Termos de Uso */}
+          <Link
+            href="/termos-de-uso"
+            target="_blank"
+            className={`flex items-center text-xs h-8 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/40 font-normal ${(sidebarOpen || isDrawer) ? "justify-start gap-2.5 px-2.5" : "justify-center px-0"}`}
+            title="Termos de Uso"
+          >
+            <FileText className="size-3.5 shrink-0 text-muted-foreground" />
+            {(sidebarOpen || isDrawer) && (
+              <div className="flex flex-1 items-center justify-between">
+                <span>Termos de Uso</span>
+                <ExternalLink className="size-3 text-muted-foreground/60" />
+              </div>
+            )}
+          </Link>
+
+          {/* Política de Privacidade */}
+          <Link
+            href="/politica-de-privacidade"
+            target="_blank"
+            className={`flex items-center text-xs h-8 rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/40 font-normal ${(sidebarOpen || isDrawer) ? "justify-start gap-2.5 px-2.5" : "justify-center px-0"}`}
+            title="Política de Privacidade"
+          >
+            <ShieldCheck className="size-3.5 shrink-0 text-muted-foreground" />
+            {(sidebarOpen || isDrawer) && (
+              <div className="flex flex-1 items-center justify-between">
+                <span>Privacidade & LGPD</span>
+                <ExternalLink className="size-3 text-muted-foreground/60" />
+              </div>
+            )}
+          </Link>
         </nav>
       </div>
 
