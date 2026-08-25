@@ -20,12 +20,15 @@ import {
   AlignJustify,
   FileCheck,
   Radio,
-  Gavel
+  Gavel,
+  Menu,
+  X
 } from "lucide-react";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -37,6 +40,7 @@ export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [typedConclusion, setTypedConclusion] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isMobileRaw = useIsBreakpoint("max", 768);
   const isMobile = isMobileRaw ?? false;
@@ -140,24 +144,24 @@ export default function Home() {
       <div className="pointer-events-none absolute -top-32 left-1/2 z-0 h-[400px] w-[800px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_50%_20%,var(--primary),transparent_70%)] opacity-15 blur-3xl [transform:translateZ(0)]" />
 
       {/* ── Linear Navigation Bar (Fixed) ── */}
-      <nav className="fixed top-0 inset-x-0 z-50 flex w-full items-center justify-center border-b border-border/80 bg-background/90 px-3 sm:px-8 py-2.5 sm:py-3 backdrop-blur-md shadow-xs transition-all [transform:translateZ(0)]">
-        <div className="flex w-full max-w-5xl items-center justify-between gap-2">
+      <header className="fixed top-0 inset-x-0 z-50 flex w-full items-center justify-center border-b border-border/80 bg-background/90 px-4 sm:px-8 py-3 backdrop-blur-md shadow-xs transition-all [transform:translateZ(0)]">
+        <div className="flex w-full max-w-5xl items-center justify-between gap-4">
           {/* Brand Logo */}
-          <Link href="/" className="group flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <Link href="/" className="group flex items-center gap-2 shrink-0">
             <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 border border-primary/20 text-primary transition-transform group-hover:scale-105">
               <Scale className="size-4" />
             </div>
             <div className="flex items-center text-sm font-bold tracking-tight">
               <span>SMART</span>
               <span className="text-primary font-black ml-0.5">DOC</span>
-              <span className="hidden xs:inline-block ml-1.5 sm:ml-2 rounded border border-border/80 bg-muted/60 px-1.5 py-0.2 font-mono text-[8px] sm:text-[9px] font-semibold text-muted-foreground uppercase tracking-widest">
+              <span className="ml-2 rounded border border-border/80 bg-muted/60 px-1.5 py-0.2 font-mono text-[9px] font-semibold text-muted-foreground uppercase tracking-widest">
                 2.0
               </span>
             </div>
           </Link>
 
           {/* Center Links (Desktop only) */}
-          <div className="hidden md:flex items-center text-xs font-medium text-muted-foreground">
+          <nav className="hidden md:flex items-center text-xs font-medium text-muted-foreground">
             <a href="#inicio" className="px-3 py-1 transition-colors hover:text-foreground">
               Início
             </a>
@@ -173,16 +177,51 @@ export default function Home() {
             <a href="#faq" className="px-3 py-1 transition-colors hover:text-foreground">
               FAQ
             </a>
-          </div>
+          </nav>
 
-          {/* Right Actions */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Right Actions (Desktop) */}
+          <div className="hidden sm:flex items-center gap-2 shrink-0">
             <Button
               variant="ghost"
               size="icon-xs"
               onClick={toggleTheme}
               aria-label="Alternar tema"
-              className="size-7 sm:size-8 rounded-md border border-border/60 text-muted-foreground hover:text-foreground"
+              className="size-8 rounded-md border border-border/60 text-muted-foreground hover:text-foreground"
+            >
+              {isDark ? (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </svg>
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+              )}
+            </Button>
+
+            <Link
+              href="/login"
+              className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "text-xs font-medium text-muted-foreground hover:text-foreground h-8 px-3 rounded-md")}
+            >
+              Entrar
+            </Link>
+
+            <Link
+              href="/register"
+              className={cn(buttonVariants({ size: "sm" }), "text-xs font-semibold bg-primary text-primary-foreground h-8 px-3.5 rounded-md shadow-sm hover:opacity-90 whitespace-nowrap")}
+            >
+              Começar Agora
+            </Link>
+          </div>
+
+          {/* Mobile Right Controls: Theme + Hamburger Drawer */}
+          <div className="flex sm:hidden items-center gap-1.5 shrink-0">
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={toggleTheme}
+              aria-label="Alternar tema"
+              className="size-8 rounded-md border border-border/60 text-muted-foreground hover:text-foreground"
             >
               {isDark ? (
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -195,23 +234,84 @@ export default function Home() {
               )}
             </Button>
 
-            <Link
-              href="/login"
-              className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "text-xs font-medium text-muted-foreground hover:text-foreground h-7 sm:h-8 px-2 sm:px-3 rounded-md")}
-            >
-              Entrar
-            </Link>
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger render={
+                <Button variant="outline" size="icon-xs" className="size-8 rounded-md border-border/70 text-foreground">
+                  <Menu className="size-4" />
+                </Button>
+              } />
+              <SheetContent side="right" className="w-[280px] p-6 bg-card/95 border-l border-border flex flex-col justify-between backdrop-blur-xl">
+                <div className="space-y-6">
+                  {/* Brand inside Drawer */}
+                  <div className="flex items-center gap-2">
+                    <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 border border-primary/20 text-primary">
+                      <Scale className="size-4" />
+                    </div>
+                    <div className="flex items-center text-sm font-bold tracking-tight text-foreground">
+                      <span>SMART</span>
+                      <span className="text-primary font-black ml-0.5">DOC</span>
+                      <span className="ml-2 rounded border border-border/80 bg-muted/60 px-1.5 py-0.2 font-mono text-[8px] font-semibold text-muted-foreground uppercase">
+                        2.0
+                      </span>
+                    </div>
+                  </div>
 
-            <Link
-              href="/register"
-              className={cn(buttonVariants({ size: "sm" }), "text-xs font-semibold bg-primary text-primary-foreground h-7 sm:h-8 px-2.5 sm:px-3.5 rounded-md shadow-sm hover:opacity-90 whitespace-nowrap")}
-            >
-              <span className="hidden xs:inline">Começar Agora</span>
-              <span className="xs:hidden">Criar Conta</span>
-            </Link>
+                  {/* Navigation Links */}
+                  <nav className="flex flex-col space-y-3 pt-2">
+                    <a
+                      href="#inicio"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-sm font-medium text-muted-foreground hover:text-foreground py-1 transition-colors"
+                    >
+                      Início
+                    </a>
+                    <a
+                      href="#recursos"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-sm font-medium text-muted-foreground hover:text-foreground py-1 transition-colors"
+                    >
+                      Recursos
+                    </a>
+                    <a
+                      href="#como-funciona"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-sm font-medium text-muted-foreground hover:text-foreground py-1 transition-colors"
+                    >
+                      Como Funciona
+                    </a>
+                    <a
+                      href="#faq"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-sm font-medium text-muted-foreground hover:text-foreground py-1 transition-colors"
+                    >
+                      FAQ
+                    </a>
+                  </nav>
+                </div>
+
+                {/* Bottom Actions inside Drawer */}
+                <div className="space-y-2.5 pt-6 border-t border-border/70">
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full justify-center text-xs font-semibold h-9 rounded-lg border-border")}
+                  >
+                    Entrar na Conta
+                  </Link>
+
+                  <Link
+                    href="/register"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={cn(buttonVariants({ size: "sm" }), "w-full justify-center text-xs font-semibold bg-primary text-primary-foreground h-9 rounded-lg shadow-sm hover:opacity-90")}
+                  >
+                    Começar Agora
+                  </Link>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
-      </nav>
+      </header>
 
       {/* ── HERO SECTION ── */}
       <section id="inicio" className="relative z-10 flex w-full flex-col items-center px-4 pt-24 sm:pt-32 pb-12 text-center">

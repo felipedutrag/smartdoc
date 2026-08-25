@@ -510,7 +510,8 @@ export default function EditorPage() {
           hasActiveEdit={hasActiveEdit}
         />
 
-        {/* ── Botão Flutuante Gemini Voice (Beta) no Canto Inferior Direito ── */}
+        {/* ── Botão Flutuante Gemini Voice (Beta) - Ocultado Temporariamente ── */}
+        {/*
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
           {isVoiceActive && (
             <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-background/95 px-3 py-1.5 text-xs shadow-lg backdrop-blur-md animate-in fade-in slide-in-from-bottom-2">
@@ -559,6 +560,7 @@ export default function EditorPage() {
             </div>
           </button>
         </div>
+        */}
       </div>
     </main>
   );
