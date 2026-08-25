@@ -40,7 +40,8 @@ import {
   CheckCheck,
   QrCode,
   Loader2,
-  Zap
+  Zap,
+  X
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
@@ -136,6 +137,34 @@ export default function DashboardPage() {
   const [pixSuccess, setPixSuccess] = useState(false);
   const [copiedPix, setCopiedPix] = useState(false);
 
+  // Toast de Pagamento Recebido (Linear Style)
+  const [paymentToast, setPaymentToast] = useState<{ show: boolean; title: string; message: string; planName?: string; time?: string } | null>(null);
+
+  const triggerPaymentToast = (planName: string) => {
+    setPaymentToast({
+      show: true,
+      title: "Pagamento Recebido!",
+      message: `Sua assinatura do plano ${planName} foi confirmada e está 100% ativa.`,
+      planName,
+      time: "Agora mesmo"
+    });
+
+    setNotifications(prev => [
+      {
+        id: String(Date.now()),
+        title: `Pagamento Aprovado (${planName})`,
+        description: `Sua assinatura do plano ${planName} está ativa com sucesso via Webhook.`,
+        time: "Agora",
+        read: false,
+      },
+      ...prev
+    ]);
+
+    setTimeout(() => {
+      setPaymentToast(prev => prev ? { ...prev, show: false } : null);
+    }, 7000);
+  };
+
   const handleOpenPixModal = async (plan: { id: string; name: string; price: number; description: string }) => {
     setSelectedPlan(plan);
     setIsPixModalOpen(true);
@@ -176,7 +205,7 @@ export default function DashboardPage() {
     if (!isPixModalOpen || !pixData?.externalId || pixSuccess) return;
 
     const externalId = pixData.externalId;
-    const planName = selectedPlan?.name;
+    const planName = selectedPlan?.name || "Profissional Pro";
 
     // Criar canal único por ID de transação para evitar colisões
     const paymentChannel = supabase
@@ -193,9 +222,8 @@ export default function DashboardPage() {
           console.log("[Webhook Realtime] Pagamento confirmado:", payload);
           if (payload.new && (payload.new.status === "PAID" || payload.new.status === "COMPLETE")) {
             setPixSuccess(true);
-            if (planName) {
-              setProfile((prev) => prev ? { ...prev, plan: planName } : null);
-            }
+            setProfile((prev) => prev ? { ...prev, plan: planName } : null);
+            triggerPaymentToast(planName);
           }
         }
       )
@@ -205,6 +233,54 @@ export default function DashboardPage() {
       supabase.removeChannel(paymentChannel);
     };
   }, [isPixModalOpen, pixData?.externalId, pixSuccess, selectedPlan?.name]);
+
+  // Ouvinte global em tempo real para pagamentos e atualizações de plano do usuário (mesmo com modal fechado)
+  useEffect(() => {
+    if (!profile?.id) return;
+
+    const userPaymentChannel = supabase
+      .channel(`user_payments_${profile.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "payments",
+          filter: `user_id=eq.${profile.id}`,
+        },
+        (payload) => {
+          if (payload.new && (payload.new.status === "PAID" || payload.new.status === "COMPLETE")) {
+            const plan = profile.plan || "Profissional Pro";
+            triggerPaymentToast(plan);
+          }
+        }
+      )
+      .subscribe();
+
+    const userProfileChannel = supabase
+      .channel(`user_profile_plan_${profile.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "profiles",
+          filter: `id=eq.${profile.id}`,
+        },
+        (payload) => {
+          if (payload.new?.plan && payload.new.plan !== profile.plan) {
+            setProfile((prev) => prev ? { ...prev, plan: payload.new.plan } : null);
+            triggerPaymentToast(payload.new.plan);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(userPaymentChannel);
+      supabase.removeChannel(userProfileChannel);
+    };
+  }, [profile?.id, profile?.plan]);
 
   const handleCopyPix = () => {
     if (pixData?.pixCode) {
@@ -1668,6 +1744,47 @@ export default function DashboardPage() {
           ) : null}
         </DialogContent>
       </Dialog>
+
+      {/* ── Toast Flutuante de Pagamento Recebido (Linear / Modern Dark UI) ── */}
+      {paymentToast?.show && (
+        <div className="fixed bottom-5 right-5 z-50 flex max-w-sm w-full animate-in fade-in slide-in-from-bottom-5 duration-300">
+          <div className="flex w-full items-start gap-3 rounded-2xl border border-emerald-500/40 bg-card/95 p-4 shadow-2xl backdrop-blur-xl ring-1 ring-emerald-500/20">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+              <CheckCircle2 className="size-5" />
+            </div>
+
+            <div className="flex-1 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-foreground">
+                  {paymentToast.title}
+                </span>
+                <span className="font-mono text-[10px] text-emerald-500 font-semibold">
+                  Ao Vivo
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                {paymentToast.message}
+              </p>
+              <div className="pt-1 flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  <Zap className="size-3" />
+                  <span>Plano Ativo</span>
+                </span>
+                <span className="text-[10px] text-muted-foreground/60 font-mono">
+                  {paymentToast.time || "Agora"}
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setPaymentToast(null)}
+              className="text-muted-foreground hover:text-foreground text-xs p-1 rounded-md transition-colors cursor-pointer"
+            >
+              <X className="size-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
