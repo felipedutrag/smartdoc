@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const GGPIX_API_URL = "https://ggpixapi.com/api/v1/pix/in";
 
@@ -72,9 +73,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: data?.message || data?.error || "Falha ao gerar Pix na GG Pix" }, { status: 500 });
     }
 
-    // Salvar transação no banco de dados do Supabase
+    // Salvar transação no banco de dados do Supabase usando Admin Client (bypassa RLS)
     try {
-      const supabase = await createClient();
+      const supabaseAdmin = createAdminClient();
       const insertData: Record<string, any> = {
         user_id: userId,
         document_id: documentId,
@@ -87,9 +88,11 @@ export async function POST(request: Request) {
         payer_email: userEmail,
       };
 
-      const { error: insertErr } = await supabase.from("payments").insert(insertData);
+      const { error: insertErr } = await supabaseAdmin.from("payments").insert(insertData);
       if (insertErr) {
         console.error("Erro ao registrar pagamento no Supabase:", insertErr);
+      } else {
+        console.log("Pagamento registrado com sucesso no Supabase:", externalId);
       }
     } catch (dbErr) {
       console.error("Erro ao registrar pagamento no Supabase:", dbErr);
