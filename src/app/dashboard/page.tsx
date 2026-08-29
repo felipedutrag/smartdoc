@@ -47,7 +47,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
-import { SmartDocLogo } from "@/components/brand-logo";
+import { SmartDocLogo, SmartDocBrand } from "@/components/brand-logo";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -731,17 +731,12 @@ export default function DashboardPage() {
       <div>
         {/* Sidebar Header */}
         <div className="flex h-14 items-center justify-between border-b border-border/70 px-4">
-          <Link href="/" className="flex items-center gap-2 overflow-hidden text-sm font-bold tracking-tight">
-            <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary">
-              <SmartDocLogo className="size-3.5" />
-            </div>
-            {(sidebarOpen || isDrawer) && (
-              <div className="flex items-center">
-                <span className="tracking-tight">SMART</span>
-                <span className="text-primary font-black ml-0.5">DOC</span>
-                <span className="ml-2 rounded-full border border-border/80 bg-muted/60 px-1.5 py-0.2 font-mono text-[8px] font-semibold text-muted-foreground uppercase">
-                  PRO
-                </span>
+          <Link href="/" className="flex items-center overflow-hidden transition-transform hover:opacity-95">
+            {(sidebarOpen || isDrawer) ? (
+              <SmartDocBrand size="md" badge="PRO" />
+            ) : (
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/25 shadow-xs">
+                <SmartDocLogo className="size-4" />
               </div>
             )}
           </Link>

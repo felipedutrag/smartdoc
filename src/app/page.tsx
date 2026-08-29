@@ -28,7 +28,7 @@ import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { SmartDocLogo } from "@/components/brand-logo";
+import { SmartDocLogo, SmartDocBrand } from "@/components/brand-logo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -128,7 +128,7 @@ export default function Home() {
 
   return (
     <main className="relative flex min-h-screen w-full max-w-[100vw] overflow-x-hidden flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary">
-      {/* ── Ambient Linear Subtle Grid ── */}
+      {/* ── Ambient Grid ── */}
       <div
         className="pointer-events-none fixed inset-0 z-0 opacity-25 dark:opacity-20 overflow-hidden [transform:translateZ(0)]"
         style={{
@@ -141,24 +141,25 @@ export default function Home() {
         }}
       />
 
-      {/* Top Ambient Glow Orb */}
-      <div className="pointer-events-none absolute -top-32 left-1/2 z-0 h-[300px] sm:h-[400px] w-[90vw] max-w-[800px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_50%_20%,var(--primary),transparent_70%)] opacity-15 blur-3xl [transform:translateZ(0)]" />
+      {/* Top Ambient Glow Orb (Primário Central) */}
+      <div className="animate-glow-pulse pointer-events-none absolute -top-32 left-1/2 z-0 h-[400px] w-[90vw] max-w-[900px] -translate-x-1/2 blur-3xl [transform:translateZ(0)]"
+        style={{ background: "radial-gradient(ellipse at 50% 20%, color-mix(in srgb, var(--primary) 30%, transparent), transparent 70%)" }}
+      />
+      {/* Orb Secundário Esquerdo */}
+      <div className="animate-glow-pulse delay-300 pointer-events-none absolute top-64 -left-40 z-0 h-[320px] w-[320px] blur-3xl opacity-20"
+        style={{ background: "radial-gradient(ellipse, #f59e0b 0%, transparent 70%)" }}
+      />
+      {/* Orb Secundário Direito */}
+      <div className="animate-glow-pulse delay-500 pointer-events-none absolute top-96 -right-40 z-0 h-[280px] w-[280px] blur-3xl opacity-15"
+        style={{ background: "radial-gradient(ellipse, #ea580c 0%, transparent 70%)" }}
+      />
 
       {/* ── Linear Navigation Bar (Fixed) ── */}
       <header className="fixed top-0 inset-x-0 z-50 flex w-full items-center justify-center border-b border-border/80 bg-background/90 px-4 sm:px-8 py-3 backdrop-blur-md shadow-xs transition-all [transform:translateZ(0)]">
         <div className="flex w-full max-w-5xl items-center justify-between gap-4">
           {/* Brand Logo */}
-          <Link href="/" className="group flex items-center gap-2 shrink-0">
-            <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 border border-primary/20 text-primary transition-transform group-hover:scale-105">
-              <SmartDocLogo className="size-4" />
-            </div>
-            <div className="flex items-center text-sm font-bold tracking-tight">
-              <span>SMART</span>
-              <span className="text-primary font-black ml-0.5">DOC</span>
-              <span className="ml-2 rounded border border-border/80 bg-muted/60 px-1.5 py-0.2 font-mono text-[9px] font-semibold text-muted-foreground uppercase tracking-widest">
-                2.0
-              </span>
-            </div>
+          <Link href="/" className="group flex items-center shrink-0 transition-transform hover:opacity-95">
+            <SmartDocBrand size="md" badge="2.0" />
           </Link>
 
           {/* Center Links (Desktop only) */}
@@ -244,18 +245,7 @@ export default function Home() {
               <SheetContent side="right" className="w-[280px] p-6 bg-card/95 border-l border-border flex flex-col justify-between backdrop-blur-xl">
                 <div className="space-y-6">
                   {/* Brand inside Drawer */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 border border-primary/20 text-primary">
-                      <Scale className="size-4" />
-                    </div>
-                    <div className="flex items-center text-sm font-bold tracking-tight text-foreground">
-                      <span>SMART</span>
-                      <span className="text-primary font-black ml-0.5">DOC</span>
-                      <span className="ml-2 rounded border border-border/80 bg-muted/60 px-1.5 py-0.2 font-mono text-[8px] font-semibold text-muted-foreground uppercase">
-                        2.0
-                      </span>
-                    </div>
-                  </div>
+                  <SmartDocBrand size="md" />
 
                   {/* Navigation Links */}
                   <nav className="flex flex-col space-y-3 pt-2">
@@ -315,50 +305,51 @@ export default function Home() {
       </header>
 
       {/* ── HERO SECTION ── */}
-      <section id="inicio" className="relative z-10 flex w-full flex-col items-center px-4 pt-24 sm:pt-32 pb-12 text-center">
+      <section id="inicio" className="relative z-10 flex w-full flex-col items-center px-4 pt-24 sm:pt-36 pb-12 text-center">
         <div className="flex w-full max-w-4xl flex-col items-center mx-auto">
-          {/* Micro Linear Badge */}
-          <div className="mb-5 inline-flex items-center gap-2 rounded-md border border-border/80 bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground shadow-xs">
-            <span className="flex size-1.5 rounded-full bg-primary animate-pulse" />
-            <span className="text-foreground font-semibold">SmartDoc 2.0</span>
-            <span className="text-muted-foreground/40">•</span>
-            <span>IA de Voz Jurídica</span>
-            <ChevronRight className="size-3 text-muted-foreground" />
+
+          {/* Micro Linear Badge — animado */}
+          <div className="animate-slide-up opacity-0 [animation-fill-mode:forwards] mb-5 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/8 px-3.5 py-1.5 text-xs font-medium text-amber-600 dark:text-amber-400 shadow-xs backdrop-blur-sm">
+            <span className="flex size-1.5 rounded-full bg-amber-500 animate-pulse" />
+            <span className="font-semibold">SmartDoc 2.0</span>
+            <span className="text-amber-500/40">•</span>
+            <span className="text-foreground/60">IA de Voz Jurídica</span>
+            <ChevronRight className="size-3" />
           </div>
 
-          {/* Main Title Objective & High Contrast */}
-          <h1 className="mb-4 text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15] max-w-4xl mx-auto">
-            Sua Assistente Jurídica <br className="hidden sm:inline" />
-            <span className="text-primary font-black">
-              com IA de Voz
+          {/* Main Title — animado com delay */}
+          <h1 className="animate-slide-up opacity-0 [animation-fill-mode:forwards] delay-200 mb-5 text-4xl sm:text-6xl font-black tracking-tight text-foreground leading-[1.1] max-w-4xl mx-auto">
+            Sua Assistente Jurídica<br className="hidden sm:inline" />
+            <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600 bg-clip-text text-transparent">
+              {" "}com IA de Voz
             </span>
           </h1>
 
-          {/* Subtitle Objective */}
-          <p className="mb-6 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed text-muted-foreground font-normal">
+          {/* Subtitle */}
+          <p className="animate-slide-up opacity-0 [animation-fill-mode:forwards] delay-300 mb-8 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed text-muted-foreground font-normal">
             Converse naturalmente com a IA para redigir, alterar e aperfeiçoar petições inteiras — por voz ou texto. Pronta para protocolo judicial em minutos.
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-3">
+          {/* CTA Buttons — animados */}
+          <div className="animate-slide-up opacity-0 [animation-fill-mode:forwards] delay-400 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/register"
-              className={cn(buttonVariants({ size: "default" }), "h-11 px-6 text-xs sm:text-sm font-bold bg-primary text-primary-foreground rounded-xl shadow-md hover:opacity-90 gap-1.5")}
+              className={cn(buttonVariants({ size: "default" }), "h-11 px-7 text-sm font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl shadow-lg hover:opacity-90 hover:shadow-orange-500/25 hover:shadow-xl transition-all gap-2")}
             >
-              <span>Experimentar</span>
-              <ArrowRight className="size-3.5" />
+              <span>Experimentar Grátis</span>
+              <ArrowRight className="size-4" />
             </Link>
 
             <Link
               href="/login"
-              className={cn(buttonVariants({ variant: "outline", size: "default" }), "h-11 px-5 text-xs sm:text-sm font-semibold border-border/80 rounded-xl bg-card")}
+              className={cn(buttonVariants({ variant: "outline", size: "default" }), "h-11 px-5 text-sm font-semibold border-border/80 rounded-xl bg-card/80 backdrop-blur hover:bg-card")}
             >
               <span>Acessar Meu Painel</span>
             </Link>
           </div>
 
-          {/* Sub Micro Badges */}
-          <div className="mt-8 flex flex-wrap justify-center gap-6 text-[11px] text-muted-foreground">
+          {/* Social Proof Micro Tags */}
+          <div className="animate-fade-in opacity-0 [animation-fill-mode:forwards] delay-700 mt-8 flex flex-wrap justify-center gap-5 text-[11px] text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="size-3.5 text-emerald-500" />
               <span>Assistente de voz com IA generativa</span>
@@ -377,14 +368,15 @@ export default function Home() {
 
       {/* ── PRODUCT SHOWCASE (Interactive Editor Window) ── */}
       <section className="relative z-10 flex w-full justify-center px-4 pb-16">
-        <div className="w-full max-w-4xl rounded-2xl border border-border/80 bg-card p-1.5 shadow-2xl">
+        {/* Card com shimmer border animado */}
+        <div className="shimmer-card animate-slide-up-slow opacity-0 [animation-fill-mode:forwards] w-full max-w-4xl rounded-2xl border border-border/80 bg-card p-1.5 shadow-2xl">
           {/* Window Header / Browser Chrome */}
           <div className="flex items-center justify-between border-b border-border/70 px-3 sm:px-4 py-2 bg-muted/30 rounded-t-xl overflow-hidden gap-2">
             <div className="flex items-center gap-2 min-w-0">
               <div className="flex gap-1.5 shrink-0">
-                <div className="size-2 rounded-full bg-border" />
-                <div className="size-2 rounded-full bg-border" />
-                <div className="size-2 rounded-full bg-border" />
+                <div className="size-2 rounded-full bg-red-400/60" />
+                <div className="size-2 rounded-full bg-amber-400/60" />
+                <div className="size-2 rounded-full bg-emerald-400/60" />
               </div>
               <span className="ml-1 sm:ml-2 font-mono text-[9px] sm:text-[10px] text-muted-foreground truncate">
                 smartdoc.work/editor — Petição Inicial
@@ -771,8 +763,7 @@ export default function Home() {
       {/* ── FOOTER (Centralizado e Limpo) ── */}
       <footer className="relative z-10 flex w-full flex-col sm:flex-row items-center justify-between gap-3 border-t border-border/60 px-6 py-6 text-xs text-muted-foreground bg-muted/20">
         <div className="flex items-center gap-2">
-          <SmartDocLogo className="size-3.5 text-primary" />
-          <span className="font-semibold text-foreground">SmartDoc</span>
+          <SmartDocBrand size="sm" showIcon={true} />
           <span>© {new Date().getFullYear()} — Tecnologia Jurídica com IA. Todos os direitos reservados.</span>
         </div>
         <div className="flex items-center gap-4 text-xs font-medium">

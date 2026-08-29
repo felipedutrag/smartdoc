@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { SmartDocLogo, SmartDocBrand } from "@/components/brand-logo";
 
 export default function AuthPage() {
   const router = useRouter();

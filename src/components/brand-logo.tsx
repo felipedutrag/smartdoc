@@ -71,19 +71,37 @@ export function SmartDocLogo({ className = "size-5", ...props }: React.SVGProps<
   );
 }
 
-// Variação Caneta Tinteiro Inclinada a 45 Graus (Em Posição de Redação)
-export function SmartDocPenWriting({ className = "size-5", ...props }: React.SVGProps<SVGSVGElement>) {
+// Componente Unificado de Marca com Tipografia Moderna e Ouro da Caneta
+interface SmartDocBrandProps {
+  size?: "sm" | "md" | "lg";
+  badge?: string;
+  className?: string;
+  showIcon?: boolean;
+}
+
+export function SmartDocBrand({ size = "md", badge, className = "", showIcon = true }: SmartDocBrandProps) {
+  const iconSize = size === "sm" ? "size-3.5" : size === "lg" ? "size-5" : "size-4";
+  const boxSize = size === "sm" ? "size-6" : size === "lg" ? "size-8" : "size-7";
+  const textSize = size === "sm" ? "text-xs" : size === "lg" ? "text-lg" : "text-sm";
+
   return (
-    <svg
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      {...props}
-    >
-      <g transform="rotate(45 16 16)">
-        <SmartDocLogo />
-      </g>
-    </svg>
+    <div className={`inline-flex items-center gap-1.5 shrink-0 select-none ${className}`}>
+      {showIcon && (
+        <div className={`flex ${boxSize} shrink-0 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/25 shadow-xs`}>
+          <SmartDocLogo className={iconSize} />
+        </div>
+      )}
+      <div className={`flex items-center ${textSize} tracking-tight leading-none`}>
+        <span className="text-foreground font-black tracking-tight">SMART</span>
+        <span className="bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent font-black tracking-tighter ml-0.5">
+          DOC
+        </span>
+        {badge && (
+          <span className="ml-1.5 rounded-full border border-border/80 bg-muted/60 px-1.5 py-0.2 font-mono text-[8px] font-bold text-muted-foreground uppercase tracking-wider">
+            {badge}
+          </span>
+        )}
+      </div>
+    </div>
   );
 }
