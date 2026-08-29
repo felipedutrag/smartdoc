@@ -88,6 +88,26 @@ export async function POST(request: Request) {
 
     // 3. Processar Confirmação de Pagamento
     if (status === "COMPLETE" || status === "PAID" || status === "COMPLETED" || status === "payment.succeeded") {
+      // 1. Verificar idempotência: se o pagamento já foi confirmado anteriormente, ignora retry
+      let existingRecord = null;
+      try {
+        let checkQuery = supabase.from("payments").select("*");
+        if (externalId) {
+          checkQuery = checkQuery.eq("external_id", externalId);
+        } else if (transactionId) {
+          checkQuery = checkQuery.eq("ggpix_transaction_id", String(transactionId));
+        }
+        const { data } = await checkQuery.maybeSingle();
+        existingRecord = data;
+      } catch (err) {
+        console.warn("Aviso ao verificar pagamento existente:", err);
+      }
+
+      if (existingRecord?.status === "PAID") {
+        console.log(`[WEBHOOK IDEMPOTENCY] Pagamento ${externalId || transactionId} já foi processado anteriormente. Ignorando duplicata.`);
+        return NextResponse.json({ success: true, message: "Pagamento já processado" });
+      }
+
       let query = supabase.from("payments").update({
         status: "PAID",
         paid_at: payload.paidAt || new Date().toISOString(),
@@ -104,9 +124,9 @@ export async function POST(request: Request) {
       let paymentRecord = null;
       try {
         const { data } = await query.select().maybeSingle();
-        paymentRecord = data;
+        paymentRecord = data || existingRecord;
       } catch (err) {
-        console.warn("Aviso ao buscar transação existente:", err);
+        console.warn("Aviso ao atualizar transação existente:", err);
       }
 
       // Fallback para o usuário admin (felipedutra@outlook.com) caso seja um teste da GG Pix ou transação avulsa
