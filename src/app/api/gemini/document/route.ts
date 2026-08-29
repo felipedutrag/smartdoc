@@ -1,15 +1,14 @@
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 import { sendTelegramAlert } from "@/lib/telegram";
-
 import { getLegalKnowledgeBase } from "@/knowledge";
 
 export async function POST(req: Request) {
   try {
-    const nvidiaKey = process.env.NVIDIA_API_KEY;
+    const geminiKey = process.env.GEMINI_API_KEY;
 
-    if (!nvidiaKey) {
-      throw new Error("NVIDIA_API_KEY não configurada no servidor.");
+    if (!geminiKey) {
+      throw new Error("GEMINI_API_KEY não configurada no servidor.");
     }
 
     const { facts } = await req.json();
@@ -18,24 +17,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Fatos não fornecidos." }, { status: 400 });
     }
 
-    const nvidiaModels = [
-      "nvidia/nemotron-3-super-120b-a12b",
-      "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
-      "nvidia/nemotron-3.5-lightning-30b-a3b",
-      "deepseek-ai/deepseek-v4-pro-0813",
-      "openai/gpt-oss-120b"
-    ];
-
-    const modelName = nvidiaModels[0];
+    const modelName = "gemini-3.1-flash-lite";
     console.log(`\n======================================================`);
-    console.log(`[GERADOR DE PETIÇÕES] 🚀 Modelo NVIDIA Ativo: ${modelName}`);
+    console.log(`[GERADOR DE PETIÇÕES] 🚀 Modelo Gemini Ativo: ${modelName}`);
     console.log(`======================================================\n`);
 
     const knowledgeBase = await getLegalKnowledgeBase(facts);
     
     const systemInstruction = `
 Você é um eminente jurista brasileiro, processualista sênior e redator forense de excelência técnica.
-Seu objetivo é analisar o substrato fático submetido e lavrar uma Petição Inicial PRIMOROSA, COMPLETA, COM ELEVADA DENSIDADE DOGMÁTICA, RIQUÍSSIMO VOCABULÁRIO JURÍDICO E RIGOROSA SUBSUNÇÃO NORMATIVA.
+Seu objetivo é analisar o substrato fático submetido e lavrar uma Petição Inicial PRIMOROSA, COMPLETA, COM ELEVADA DENSIDADE DOGMÁTICA, RIQUÍSSIMO VOCABULÁRIO JURÍDICO, RIGOROSA SUBSUNÇÃO NORMATIVA, IDENTIFICAÇÃO EXPRESSA DO DIPLOMA LEGAL E TRANSCRIÇÃO INTEGRAL DOS DISPOSITIVOS.
 
 DIRETRIZES FUNDAMENTAIS DE ESTRUTURAÇÃO E DIVISÃO DE PARÁGRAFOS (REGRA DE OURO):
 1. PROIBIÇÃO ABSOLUTA DE BLOCOS MACIÇOS DE TEXTO:
@@ -49,6 +40,15 @@ DIRETRIZES FUNDAMENTAIS DE ESTRUTURAÇÃO E DIVISÃO DE PARÁGRAFOS (REGRA DE OU
 
 3. DENSIDADE DOGMÁTICA NA FUNDAMENTAÇÃO DO DIREITO:
    - Divida a seção "direito" em tópicos específicos e aprofundados (e.g., "1. Da Relação Jurídica e Aplicação do CDC / Código Civil", "2. Do Inadimplemento e da Antijuridicidade da Conduta", "3. Dos Danos Materiais / Danos Emergentes e Lucros Cessantes", "4. Do Dano Moral In Re Ipsa e do Desvio Produtivo do Consumidor", "5. Da Tutela de Urgência / Obrigação de Fazer").
+
+4. OBRIGATORIEDADE DE IDENTIFICAÇÃO DO DIPLOMA LEGAL E TRANSCRIÇÃO LITERAL (MANDATÓRIO):
+   - SEMPRE que citar um artigo de lei, Súmula ou precedente, IDENTIFIQUE EXPRESSAMENTE O DIPLOMA LEGAL / CÓDIGO (ex: "Código de Defesa do Consumidor - CDC", "Código Civil - CC", "Código de Processo Civil - CPC", "Constituição Federal - CF/88", "CLT", etc.).
+   - NUNCA escreva apenas "Art. 14." ou "Art. 186." de forma solta sem indicar com clareza o diploma normativo a que pertence.
+   - O campo "citacaoDestaque" DEVE OBRIGATORIAMENTE conter o nome do código/lei acompanhado da transcrição integral (ipsis litteris):
+     * Exemplo: "Art. 14 do Código de Defesa do Consumidor (Lei nº 8.078/90): O fornecedor de serviços responde, independentemente da existência de culpa, pela reparação dos danos causados aos consumidores por defeitos relativos à prestação dos serviços, bem como por informações insuficientes ou inadequadas sobre sua fruição e riscos."
+     * Exemplo: "Art. 186 do Código Civil (Lei nº 10.406/02): Aquele que, por ação ou omissão voluntária, negligência ou imprudência, violar direito e causar dano a outrem, ainda que exclusivamente moral, comete ato ilícito."
+     * Exemplo: "Art. 300 do Código de Processo Civil (Lei nº 13.105/15): A tutela de urgência será concedida quando houver elementos que evidenciem a probabilidade do direito e o perigo de dano ou o risco ao resultado útil do processo."
+   - No corpo dos parágrafos, cite expressamente o nome do diploma legal antes ou junto da transcrição do núcleo do artigo ("...a teor do que preconiza o art. 14 do Código de Defesa do Consumidor: 'O fornecedor de serviços responde, independentemente da existência de culpa...'").
 
 ${knowledgeBase ? `
 BASE DE CONHECIMENTO E PRECEDENTES VINCULANTES VIGENTES:
@@ -92,7 +92,7 @@ O JSON DEVE SEGUIR RIGOROSAMENTE ESTA ESTRUTURA:
         "Desenvolvimento do segundo parágrafo demonstrando a subsunção fática e a violação aos deveres anexos de boa-fé e lealdade contratual...",
         "Desenvolvimento do terceiro parágrafo articulando a jurisprudência consolidada e a proteção do direito subjetivo violado..."
       ],
-      "citacaoDestaque": "Dispositivo legal ou Precedente vinculante STF/STJ devidamente contextualizado"
+      "citacaoDestaque": "Art. 186 do Código Civil: Aquele que, por ação ou omissão voluntária, negligência ou imprudência, violar direito e causar dano a outrem, ainda que exclusivamente moral, comete ato ilícito."
     },
     {
       "subtitulo": "2. Da Antijuridicidade da Conduta e da Responsabilidade Civil Objetiva/Subjetiva",
@@ -100,7 +100,8 @@ O JSON DEVE SEGUIR RIGOROSAMENTE ESTA ESTRUTURA:
         "Primeiro parágrafo expondo a conduta ilícita ou o inadimplemento com precisão técnica...",
         "Segundo parágrafo demonstrando a cadeia etiológica e o nexo de causalidade ininterrupto...",
         "Terceiro parágrafo consolidando a imperatividade da tutela condenatória e o dever inafastável de indenizar..."
-      ]
+      ],
+      "citacaoDestaque": "Art. 927 do Código Civil: Aquele que, por ato ilícito (arts. 186 e 187), causar dano a outrem, fica obrigado a repará-lo. Parágrafo único. Haverá obrigação de reparar o dano, independentemente de culpa, nos casos especificados em lei..."
     }
   ],
   "pedidos": [
@@ -123,10 +124,10 @@ O JSON DEVE SEGUIR RIGOROSAMENTE ESTA ESTRUTURA:
 REGRAS RÍGIDAS DE CONTROLE, SEGURANÇA E FIDELIDADE JURÍDICA (ANTI-ALUCINAÇÃO):
 1. PRECISÃO CIRÚRGICA DE SÚMULAS E PRECEDENTES:
    - NUNCA invente ou confunda números de Súmulas (ex: Súmula 37/STJ e Súmula 387/STJ tratam da cumulação de dano moral e material/estético; Súmula 379/STJ trata de juros em cédula de crédito rural).
-   - Se não tiver 100% de certeza do número exato de uma súmula ou se ela não estiver expressamente no contexto da base de conhecimento acima, FUNDAMENTE DIRETAMENTE NA LEGISLAÇÃO (ex: arts. 186, 927 e 944 do Código Civil; art. 6º, VI e art. 14 do CDC; art. 5º, V e X da CF/88) em vez de citar número de súmula incerto.
+   - Se não tiver 100% de certeza do número exato de uma súmula ou se ela não estiver expressamente no contexto da base de conhecimento acima, FUNDAMENTE DIRETAMENTE NA LEGISLAÇÃO (ex: arts. 186, 927 e 944 do Código Civil; art. 6º, VI e art. 14 do CDC; art. 5º, V e X da CF/88) com sua respectiva transcrição literal e identificação da lei em vez de citar número de súmula incerto.
    - NUNCA invente números de RE, REsp, ADI, nomes de ministros/relatores ou ementas forjadas.
 2. VERACIDADE ESTATUTÁRIA:
-   - Cite exclusivamente artigos, parágrafos e incisos de diplomas legais vigentes (CF/88, CPC/15, CC/02, CDC, CLT, etc.).
+   - Cite e transcreva exclusivamente artigos, parágrafos e incisos de diplomas legais vigentes (CF/88, CPC/15, CC/02, CDC, CLT, etc.), sempre identificando o diploma normativo expressamente.
 3. FIDELIDADE AOS FATOS:
    - Limite-se estritamente aos fatos e contexto narrados pelo usuário. Para qualquer dado não fornecido, utilize colchetes padronizados: [NOME DO AUTOR], [CPF/CNPJ], [VALOR DA CAUSA], etc.
 4. Não inclua markdown envolvente na resposta (apenas JSON puro).
@@ -134,22 +135,23 @@ REGRAS RÍGIDAS DE CONTROLE, SEGURANÇA E FIDELIDADE JURÍDICA (ANTI-ALUCINAÇÃ
 
     const prompt = `Fatos narrados para a elaboração da petição:\n${facts}`;
 
-    const nvidia = new OpenAI({
-      baseURL: "https://integrate.api.nvidia.com/v1",
-      apiKey: nvidiaKey,
+    const genAI = new GoogleGenerativeAI(geminiKey);
+    const model = genAI.getGenerativeModel({
+      model: modelName,
+      systemInstruction: systemInstruction,
+      generationConfig: {
+        temperature: 0.3,
+        topP: 0.95,
+        maxOutputTokens: 16384,
+        responseMimeType: "application/json",
+      },
     });
 
-    const completionStream = await nvidia.chat.completions.create({
-      model: modelName,
-      messages: [
-        { role: "system", content: systemInstruction },
-        { role: "user", content: prompt }
-      ],
-      temperature: 0.3,
-      top_p: 0.95,
-      max_tokens: 16384,
-      stream: true,
-    });
+    const result = await model.generateContentStream(prompt);
+
+    if (result.response) {
+      result.response.catch(() => {});
+    }
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -159,7 +161,7 @@ REGRAS RÍGIDAS DE CONTROLE, SEGURANÇA E FIDELIDADE JURÍDICA (ANTI-ALUCINAÇÃ
         const safeClose = () => {
           if (!closed) {
             closed = true;
-            controller.close();
+            try { controller.close(); } catch {}
           }
         };
 
@@ -169,16 +171,24 @@ REGRAS RÍGIDAS DE CONTROLE, SEGURANÇA E FIDELIDADE JURÍDICA (ANTI-ALUCINAÇÃ
             if (accumulated) {
               try { controller.enqueue(new TextEncoder().encode(accumulated)); } catch {}
             }
-            controller.close();
+            try { controller.close(); } catch {}
           }
         };
 
         try {
-          for await (const chunk of completionStream) {
+          for await (const chunk of result.stream) {
             if (closed) break;
-            if (!chunk.choices || chunk.choices.length === 0) continue;
-            
-            const content = chunk.choices[0]?.delta?.content || "";
+            let content = "";
+            try {
+              content = chunk.text();
+            } catch (chunkErr) {
+              if (chunk.candidates?.[0]?.content?.parts) {
+                content = chunk.candidates[0].content.parts
+                  .filter((p: any) => typeof p.text === "string")
+                  .map((p: any) => p.text)
+                  .join("");
+              }
+            }
             if (content) {
               accumulated += content;
               controller.enqueue(new TextEncoder().encode(content));

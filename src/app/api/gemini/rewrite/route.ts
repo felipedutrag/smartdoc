@@ -1,5 +1,4 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { Groq } from "groq-sdk";
 import { NextResponse } from "next/server";
 import { sendTelegramAlert } from "@/lib/telegram";
 import { getLegalKnowledgeBase } from "@/knowledge";
@@ -12,12 +11,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Texto ou instrução ausentes." }, { status: 400 });
     }
 
-    const groqKey = process.env.GROQ_API_KEY;
     const geminiKey = process.env.GEMINI_API_KEY;
 
-    if (!groqKey && !geminiKey) {
-      return NextResponse.json({ error: "Nenhuma chave de IA configurada para reescrita." }, { status: 500 });
+    if (!geminiKey) {
+      return NextResponse.json({ error: "Chave GEMINI_API_KEY não configurada no servidor." }, { status: 500 });
     }
+
+    const modelName = "gemini-3.1-flash-lite";
+    console.log(`\n======================================================`);
+    console.log(`[EDITOR / REESCRITA] 🚀 Modelo Gemini Ativo: ${modelName}`);
+    console.log(`======================================================\n`);
 
     const knowledgeBase = await getLegalKnowledgeBase(`${instruction} ${selectedText || ""}`);
 
@@ -44,78 +47,50 @@ REGRAS RÍGIDAS DE SAÍDA:
       prompt += `\n\nTRECHO SELECIONADO PELO USUÁRIO (A alteração deve ser aplicada estritamente sobre ou em relação a este trecho):\n"${selectedText}"`;
     }
 
-    let resultStream: any;
-    let isGroq = false;
-
-    // Prioridade 1: Groq LPU (Ultra-rápido, ~500ms TTFT)
-    if (groqKey) {
-      try {
-        console.log("[REWRITE] ⚡ Disparando edição ultra-rápida via Groq LPU (GPT-OSS 120B)...");
-        const groq = new Groq({ apiKey: groqKey });
-        resultStream = await groq.chat.completions.create({
-          model: "openai/gpt-oss-120b",
-          messages: [
-            { role: "system", content: systemInstruction },
-            { role: "user", content: prompt }
-          ],
-          temperature: 0.1,
-          max_tokens: 3000,
-          stream: true,
-        });
-        isGroq = true;
-      } catch (groqErr) {
-        console.warn("[REWRITE] Falha na tentativa Groq, caindo para Gemini:", groqErr);
+    const genAI = new GoogleGenerativeAI(geminiKey);
+    const model = genAI.getGenerativeModel({
+      model: modelName,
+      systemInstruction: systemInstruction,
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 8192,
       }
-    }
+    });
 
-    // Fallback: Gemini Flash
-    if (!resultStream && geminiKey) {
-      console.log("[REWRITE] 🔄 Disparando edição via Gemini Flash...");
-      const genAI = new GoogleGenerativeAI(geminiKey);
-      const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
-        systemInstruction: systemInstruction,
-        generationConfig: {
-          temperature: 0.1,
-          maxOutputTokens: 4096,
-        }
-      });
-      const result = await model.generateContentStream(prompt);
-      resultStream = result.stream;
-      isGroq = false;
-    }
+    const result = await model.generateContentStream(prompt);
 
-    if (!resultStream) {
-      throw new Error("Não foi possível inicializar nenhum modelo de IA para reescrita.");
+    if (result.response) {
+      result.response.catch(() => {});
     }
 
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          if (isGroq) {
-            for await (const chunk of resultStream) {
-              const content = chunk.choices[0]?.delta?.content || "";
-              if (content) {
-                controller.enqueue(new TextEncoder().encode(content));
+          for await (const chunk of result.stream) {
+            let chunkText = "";
+            try {
+              chunkText = chunk.text();
+            } catch (chunkErr) {
+              if (chunk.candidates?.[0]?.content?.parts) {
+                chunkText = chunk.candidates[0].content.parts
+                  .filter((p: any) => typeof p.text === "string")
+                  .map((p: any) => p.text)
+                  .join("");
               }
             }
-          } else {
-            for await (const chunk of resultStream) {
-              const chunkText = chunk.text();
-              if (chunkText) {
-                controller.enqueue(new TextEncoder().encode(chunkText));
-              }
+            if (chunkText) {
+              controller.enqueue(new TextEncoder().encode(chunkText));
             }
           }
-          controller.close();
+          try { controller.close(); } catch {}
         } catch (e: any) {
-          console.error("Stream rewrite error:", e);
+          console.error(`Stream rewrite error (${modelName}):`, e);
           sendTelegramAlert(
             `🔴 *SmartDoc — Falha na API de Reescrita*\n\n` +
             `*Erro:* \`${e?.message || String(e)}\`\n` +
             `*Horário:* ${new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}`
           ).catch(console.error);
-          controller.error(e);
+          try { controller.error(e); } catch {}
         }
       },
     });

@@ -55,6 +55,7 @@ export async function POST(request: Request) {
       payerDocument: body.customerDocument || "00000000000",
       externalId,
       webhookUrl,
+      ...(amountCents < 500 ? { isTest: true } : {}),
     };
 
     const response = await fetch(GGPIX_API_URL, {

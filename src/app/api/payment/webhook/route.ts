@@ -138,7 +138,7 @@ export async function POST(request: Request) {
 
       if (
         (externalId && (externalId.includes("pack_10") || externalId.includes("start") || externalId.includes("pack_start"))) ||
-        paidAmount === 4700 || payload.amount === 47
+        paidAmount === 4700 || payload.amount === 47 || paidAmount === 500 || payload.amount === 5 || paidAmount === 100 || payload.amount === 1 || paidAmount === 4700 || payload.amount === 47
       ) {
         creditsToAdd = 10;
         packName = "Pacote Inicial (10 Petições)";

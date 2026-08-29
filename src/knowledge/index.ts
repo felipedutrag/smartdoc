@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@supabase/supabase-js";
 
 export interface KnowledgeMatch {
@@ -11,39 +11,36 @@ export interface KnowledgeMatch {
 }
 
 /**
- * Busca Semântica Vetorial no Supabase (pgvector)
+ * Busca Semântica Vetorial no Supabase (pgvector) com Gemini Embeddings
  */
 export async function searchSemanticLegalKnowledge(queryOrFacts: string, maxResults: number = 3): Promise<string> {
-  const nvidiaKey = process.env.NVIDIA_API_KEY;
+  const geminiKey = process.env.GEMINI_API_KEY;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (nvidiaKey && supabaseUrl && supabaseServiceKey) {
+  if (geminiKey && supabaseUrl && supabaseServiceKey) {
     try {
-      const nvidia = new OpenAI({
-        baseURL: "https://integrate.api.nvidia.com/v1",
-        apiKey: nvidiaKey,
-      });
-
+      const genAI = new GoogleGenerativeAI(geminiKey);
+      const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-      // Gera o embedding da query
-      const embRes = await nvidia.embeddings.create({
-        model: "nvidia/nemotron-3-embed-1b",
-        input: [queryOrFacts.slice(0, 3000)],
-      });
+      // Gera o embedding da query com dimensao 2048
+      const embRes = await embeddingModel.embedContent({
+        content: { parts: [{ text: queryOrFacts.slice(0, 3000) }] },
+        outputDimensionality: 2048
+      } as any);
 
-      const queryEmbedding = embRes.data[0].embedding;
+      const queryEmbedding = embRes.embedding.values;
 
       // Executa busca vetorial por similaridade de cosseno
       const { data, error } = await supabase.rpc("match_legal_knowledge", {
         query_embedding: queryEmbedding,
-        match_threshold: 0.40,
+        match_threshold: 0.35,
         match_count: maxResults,
       });
 
       if (!error && data && data.length > 0) {
-        console.log(`[RAG VETORIAL] 🧠 Encontradas ${data.length} teses por similaridade semântica.`);
+        console.log(`[RAG VETORIAL] 🧠 Encontradas ${data.length} teses por similaridade semântica (Gemini).`);
         let output = "\n=== PRECEDENTES E TESES PERTINENTES LOCALIZADOS NA BASE (BUSCA SEMÂNTICA STF/STJ) ===\n";
         for (const item of data) {
           output += `\n[Fonte: ${item.source} | Similaridade: ${Math.round((item.similarity || 0) * 100)}%]\n${item.content}\n`;

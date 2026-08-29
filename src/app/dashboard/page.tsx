@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import React, { useState, useEffect } from "react";
+import { ProcessosClient } from "./processos/processos-client";
 import {
   FileText,
   Plus,
@@ -101,7 +102,7 @@ export default function DashboardPage() {
   // Layout & Navigation State
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"documents" | "plans" | "profile">("documents");
+  const [activeTab, setActiveTab] = useState<"documents" | "plans" | "profile" | "processos">("documents");
 
   // User & Data State
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -716,6 +717,24 @@ export default function DashboardPage() {
             {(sidebarOpen || isDrawer) && <span>Minhas Petições</span>}
           </Button>
 
+          {/* Processos Esaj */}
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setActiveTab("processos");
+              if (isDrawer) setMobileDrawerOpen(false);
+            }}
+            className={`w-full text-xs h-8.5 rounded-lg transition-colors ${(sidebarOpen || isDrawer) ? "justify-start gap-2.5 px-2.5" : "justify-center px-0"} ${
+              activeTab === "processos"
+                ? "bg-muted/80 text-foreground font-semibold border border-border/60"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/40 font-normal"
+            }`}
+            title="Processos Esaj"
+          >
+            <Scale className="size-3.5 shrink-0 text-primary" />
+            {(sidebarOpen || isDrawer) && <span>Processos Esaj</span>}
+          </Button>
+
           {/* Videoconferências (Em Breve) */}
           <div
             className={`flex items-center w-full text-xs h-8.5 rounded-lg opacity-50 cursor-not-allowed ${(sidebarOpen || isDrawer) ? "justify-start gap-2.5 px-2.5" : "justify-center px-0"} text-muted-foreground`}
@@ -774,22 +793,6 @@ export default function DashboardPage() {
               <div className="flex flex-1 items-center justify-between">
                 <span>Assinatura Digital</span>
                 <span className="font-mono text-[9px] bg-muted border border-border/60 px-1.5 py-0.2 rounded-full">
-                  Em Breve
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Acompanhamento Processual */}
-          <div
-            className={`flex items-center w-full text-xs h-8.5 rounded-lg opacity-50 cursor-not-allowed ${(sidebarOpen || isDrawer) ? "justify-start gap-2.5 px-2.5" : "justify-center px-0"} text-muted-foreground`}
-            title="Acompanhamento Processual (Em Breve)"
-          >
-            <Activity className="size-3.5 shrink-0" />
-            {(sidebarOpen || isDrawer) && (
-              <div className="flex flex-1 items-center justify-between">
-                <span className="truncate max-w-[125px]">Acomp. Processual</span>
-                <span className="font-mono text-[9px] bg-muted border border-border/60 px-1.5 py-0.2 rounded-full shrink-0">
                   Em Breve
                 </span>
               </div>
@@ -1298,6 +1301,24 @@ export default function DashboardPage() {
             </div>
           )}
 
+          {/* ════ TAB: PROCESSOS ════ */}
+          {activeTab === "processos" && (
+            <div className="space-y-6">
+              <div className="border-b border-border/60 pb-4">
+                <h1 className="text-lg font-bold tracking-tight text-foreground flex items-center gap-2">
+                  <span>Acompanhamento Processual IA</span>
+                  <span className="font-mono text-[10px] text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full font-normal">
+                    Novo
+                  </span>
+                </h1>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Raspagem automática de andamentos no e-SAJ e e-Proc.
+                </p>
+              </div>
+              <ProcessosClient />
+            </div>
+          )}
+          
           {/* ════ TAB 2: CRÉDITOS & PACOTES DE PETIÇÃO ════ */}
           {activeTab === "plans" && (
             <div className="space-y-6">
@@ -1349,10 +1370,10 @@ export default function DashboardPage() {
                   <div>
                     <div className="flex items-center justify-between">
                       <span className="font-mono text-[10px] text-muted-foreground uppercase border border-border px-2 py-0.5 rounded-md">Start</span>
-                      <span className="font-mono text-[10px] text-muted-foreground">R$ 4,70/petição</span>
+                      <span className="font-mono text-[10px] text-muted-foreground">R$ 0,10/petição</span>
                     </div>
                     <div className="mt-3 text-2xl font-extrabold text-foreground">
-                      R$ 47
+                      R$ 1,00
                     </div>
                     <div className="mt-1 text-xs font-bold text-primary">
                       10 Petições
@@ -1374,8 +1395,8 @@ export default function DashboardPage() {
                     onClick={() => handleOpenPixModal({
                       id: "pack_10",
                       name: "Inicial (10 Petições)",
-                      price: 47.00,
-                      description: "Pacote Inicial SmartDoc - 10 Créditos de Petição",
+                      price: 1.00,
+                      description: "Pacote Inicial SmartDoc - 10 Créditos de Petição (Teste)",
                     })}
                     className="mt-5 w-full text-xs h-9 border-border font-semibold hover:bg-muted/80 gap-1.5"
                   >
