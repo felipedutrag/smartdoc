@@ -42,6 +42,103 @@ export default function EditorPage() {
   const [isDownloading, setIsDownloading] = useState(false);
 
   const [editQueue, setEditQueue] = useState<string[]>([]);
+  const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "unsaved">("saved");
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Função centralizada e segura para persistir no Supabase
+  const saveToDatabase = useCallback(async (html: string) => {
+    if (!html || html.trim() === "<p></p>") return;
+
+    let docId = currentDocId;
+
+    // Se ainda não tem docId, tenta buscar do localStorage/URL ou cria no banco
+    if (!docId && typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      docId = params.get("id");
+    }
+
+    setSaveStatus("saving");
+
+    try {
+      if (docId) {
+        await fetch(`/api/documents/${docId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            content_html: html,
+            status: "draft",
+          }),
+        });
+        setSaveStatus("saved");
+      } else {
+        // Cria documento se não existia
+        const facts = (typeof window !== "undefined" ? localStorage.getItem("extrajus_facts") : "") || "Petição Inicial";
+        const res = await fetch("/api/documents", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: facts.slice(0, 70).replace(/\n/g, " ") + "...",
+            facts,
+            status: "draft",
+            content_html: html,
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.document?.id) {
+            setCurrentDocId(data.document.id);
+          }
+        }
+        setSaveStatus("saved");
+      }
+    } catch (err) {
+      console.error("Falha ao salvar petição no banco:", err);
+      setSaveStatus("unsaved");
+    }
+  }, [currentDocId]);
+
+  // Handler de mudanças no editor (humana com debounce de 5s, IA instantâneo)
+  const lastHtmlRef = useRef<string>("");
+
+  const handleContentChange = useCallback((html: string, source: "human" | "ai") => {
+    lastHtmlRef.current = html;
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+
+    if (source === "ai") {
+      console.log("[AUTO-SAVE] ⚡ Salvamento imediato por alteração da IA...");
+      saveToDatabase(html);
+    } else {
+      setSaveStatus("unsaved");
+      console.log("[AUTO-SAVE] ⏳ Alteração humana detectada. Aguardando 5s de inatividade...");
+      saveTimeoutRef.current = setTimeout(() => {
+        console.log("[AUTO-SAVE] 💾 Salvando alterações humanas após 5s...");
+        saveToDatabase(html);
+      }, 5000);
+    }
+  }, [saveToDatabase]);
+
+  // Garantia de integridade: salva imediatamente se o usuário tentar fechar a aba
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (saveTimeoutRef.current && lastHtmlRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+        saveToDatabase(lastHtmlRef.current);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      if (saveTimeoutRef.current && lastHtmlRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+        saveToDatabase(lastHtmlRef.current);
+      }
+    };
+  }, [saveToDatabase]);
 
   useEffect(() => {
     if (!isRewriting && editQueue.length > 0) {
@@ -144,7 +241,12 @@ export default function EditorPage() {
   const hasTriggeredGen = React.useRef(false);
 
   // Efeito de digitação suave / Progressive Stream Typewriter
-  const startTypewriterStream = async (blocks: string[], fullHtml: string, docId: string | null) => {
+  const startTypewriterStream = async (
+    blocks: string[], 
+    fullHtml: string, 
+    docId: string | null,
+    meta?: { title?: string; summary?: string; actionType?: string }
+  ) => {
     // 1. Limpar o rascunho anterior e garantir posição no topo absoluto da página
     localStorage.setItem("extrajus_draft", "");
     window.dispatchEvent(new Event("storage_extrajus_draft"));
@@ -190,15 +292,20 @@ export default function EditorPage() {
     window.dispatchEvent(new Event("storage_extrajus_draft"));
     setIsTypewriting(false);
 
-    // Salva a versão final no banco de dados
+    // Salva a versão final no banco de dados com título profissional e resumo gerado pela IA
     if (docId) {
+      const payload: Record<string, any> = {
+        content_html: fullHtml,
+        status: "draft",
+      };
+      if (meta?.title) payload.title = meta.title;
+      if (meta?.summary) payload.summary = meta.summary;
+      if (meta?.actionType) payload.action_type = meta.actionType;
+
       fetch(`/api/documents/${docId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content_html: fullHtml,
-          status: "draft",
-        })
+        body: JSON.stringify(payload)
       }).catch(console.error);
     }
   };
@@ -299,10 +406,16 @@ export default function EditorPage() {
             const blocks = getPeticaoBlocks(parsedJson);
             const renderedHtml = renderPeticaoJsonToHtml(parsedJson);
 
+            const meta = {
+              title: parsedJson.titulo || parsedJson.partes?.tipoAcao || undefined,
+              summary: parsedJson.resumo || undefined,
+              actionType: parsedJson.partes?.tipoAcao || undefined,
+            };
+
             isComplete = true;
 
             // Inicia o efeito progressivo de redação ao vivo
-            await startTypewriterStream(blocks, renderedHtml, docId);
+            await startTypewriterStream(blocks, renderedHtml, docId, meta);
           } catch (jsonErr) {
             console.warn("JSON ainda incompleto ou inválido na tentativa:", retryCount + 1, jsonErr);
             retryCount++;
@@ -456,14 +569,37 @@ export default function EditorPage() {
           setIsRewriting={setIsRewriting}
           isPaid={true}
           onActiveEditChange={setHasActiveEdit}
+          onContentChange={handleContentChange}
           leftContent={
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft size={14} />
-              <span>Painel</span>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft size={14} />
+                <span>Painel</span>
+              </Link>
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground pl-1">
+                {saveStatus === "saving" && (
+                  <span className="flex items-center gap-1 text-primary">
+                    <Loader2 className="size-3 animate-spin" />
+                    <span>Salvando...</span>
+                  </span>
+                )}
+                {saveStatus === "saved" && (
+                  <span className="flex items-center gap-1 text-emerald-500 font-medium">
+                    <span className="size-1.5 rounded-full bg-emerald-500" />
+                    <span>Salvo</span>
+                  </span>
+                )}
+                {saveStatus === "unsaved" && (
+                  <span className="flex items-center gap-1 text-amber-500/80">
+                    <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
+                    <span>Alterações pendentes...</span>
+                  </span>
+                )}
+              </div>
+            </div>
           }
         >
           {!isGenerating && !isTypewriting && (

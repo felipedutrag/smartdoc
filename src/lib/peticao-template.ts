@@ -1,4 +1,6 @@
 export interface PeticaoDocumentJson {
+  titulo?: string;
+  resumo?: string;
   cabecalho: {
     enderecamento: string;
   };
@@ -139,9 +141,13 @@ export function getPeticaoBlocks(data: PeticaoDocumentJson): string[] {
     );
   }
 
-  const valorCausa = fechamento?.valorCausa?.trim() || "R$ [Valor da Causa]";
+  let valorCausa = fechamento?.valorCausa?.trim() || "R$ [Valor da Causa]";
+  // Remove prefixos redundantes caso a IA já tenha retornado "Dá-se à causa o valor de..."
+  valorCausa = valorCausa.replace(/^d[aá]-se\s+[aà]\s+causa\s+o\s+valor\s+de\s+/i, "").replace(/^d[aá]-se\s+o\s+valor\s+de\s+/i, "").trim();
+  if (!valorCausa.endsWith(".")) valorCausa += ".";
+
   blocks.push(
-    `<p style="text-align: justify; font-weight: 500;">Dá-se à causa o valor de ${valorCausa}.</p>`
+    `<p style="text-align: justify; font-weight: 500;">Dá-se à causa o valor de ${valorCausa}</p>`
   );
 
   blocks.push("<br/>");

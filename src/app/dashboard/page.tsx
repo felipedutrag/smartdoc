@@ -72,6 +72,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 interface DocumentItem {
   id: string;
   title: string;
+  summary?: string;
   action_type: string;
   status: "draft" | "generating" | "completed" | "archived";
   is_paid: boolean;
@@ -1273,6 +1274,12 @@ export default function DashboardPage() {
                         <h3 className="line-clamp-2 mt-2.5 text-xs font-bold leading-snug text-foreground group-hover:text-primary transition-colors">
                           {doc.title}
                         </h3>
+
+                        {doc.summary && (
+                          <p className="line-clamp-2 mt-1.5 text-[11px] leading-relaxed text-muted-foreground">
+                            {doc.summary}
+                          </p>
+                        )}
                       </div>
 
                       <div className="mt-4 flex items-center justify-between font-mono text-[10px] text-muted-foreground border-t border-border/50 pt-2.5">

@@ -50,6 +50,9 @@ body,
   font-size: var(--editor-font-size, 17px);
   color: var(--text-primary);
   position: relative;
+  tab-size: 6;
+  -moz-tab-size: 6;
+  white-space: pre-wrap;
 
   .dark & {
     color: #d4d4d8;
@@ -58,6 +61,7 @@ body,
   p, li {
     font-family: inherit;
     font-size: inherit !important;
+    white-space: pre-wrap;
   }
 
   // Remove blue selection background and default mark highlights

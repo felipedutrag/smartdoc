@@ -30,6 +30,7 @@ import { Subscript } from "@tiptap/extension-subscript"
 import { Superscript } from "@tiptap/extension-superscript"
 import { Selection } from "@tiptap/extensions"
 import { NodeIdExtension } from "@/components/tiptap-extension/node-id-extension"
+import { TabIndentExtension } from "@/components/tiptap-extension/tab-indent-extension"
 
 // --- UI Primitives ---
 import { Button } from "@/components/tiptap-ui-primitive/button"
@@ -406,7 +407,8 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
   isRewriting?: boolean,
   setIsRewriting?: (isRewriting: boolean) => void,
   isPaid?: boolean,
-  onActiveEditChange?: (active: boolean) => void
+  onActiveEditChange?: (active: boolean) => void,
+  onContentChange?: (html: string, source: "human" | "ai") => void
 }>(({
   children,
   leftContent,
@@ -420,7 +422,8 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
   isRewriting: isRewritingProp,
   setIsRewriting: setIsRewritingProp,
   isPaid = false,
-  onActiveEditChange
+  onActiveEditChange,
+  onContentChange
 }, ref) => {
   const isMobileRaw = useIsBreakpoint()
   const isMobile = isMobileRaw ?? false;
@@ -459,28 +462,6 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
   const editor = useEditor({
     immediatelyRender: false,
     editable: editable,
-    editorProps: {
-      attributes: {
-        autocomplete: "off",
-        autocorrect: "off",
-        autocapitalize: "off",
-        "aria-label": "Main content area, start typing to enter text.",
-        class: "simple-editor",
-      },
-      handlePaste: () => false,
-      handleDrop: () => !editable,
-      handleDOMEvents: {
-        copy: (view, event) => {
-          return false;
-        },
-        cut: (view, event) => {
-          return false;
-        },
-        contextmenu: (view, event) => {
-          return false;
-        }
-      },
-    },
     extensions: [
       StarterKit.configure({
         horizontalRule: false,
@@ -500,6 +481,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
       Subscript,
       Selection,
       NodeIdExtension,
+      TabIndentExtension,
       ImageUploadNode.configure({
         accept: "image/*",
         maxSize: MAX_FILE_SIZE,
@@ -508,10 +490,28 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
         onError: (error) => console.error("Upload failed:", error),
       }),
     ],
+    editorProps: {
+      attributes: {
+        autocomplete: "off",
+        autocorrect: "off",
+        autocapitalize: "off",
+        "aria-label": "Main content area, start typing to enter text.",
+        class: "simple-editor",
+      },
+      handlePaste: () => false,
+      handleDrop: () => !editable,
+      handleDOMEvents: {
+        copy: () => false,
+        cut: () => false,
+        contextmenu: () => false
+      },
+    },
     onUpdate: ({ editor }) => {
-      // Optional: save to localstorage as user types
+      // Save to localstorage as user types
       if (editable) {
-        localStorage.setItem("extrajus_draft", editor.getHTML());
+        const html = editor.getHTML();
+        localStorage.setItem("extrajus_draft", html);
+        onContentChange?.(html, "human");
       }
       setContentVersion(prev => prev + 1);
     }
@@ -720,12 +720,14 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
             const finalHtml = currentDoc.body.innerHTML;
             editor.commands.setContent(finalHtml);
             localStorage.setItem("extrajus_draft", finalHtml);
+            onContentChange?.(finalHtml, "ai");
           }
         } else {
           // Fallback se a IA retornar o documento completo ou trecho direto
           if (cleaned.length > 50 && !cleaned.includes('<update')) {
             editor.commands.setContent(cleaned);
             localStorage.setItem("extrajus_draft", cleaned);
+            onContentChange?.(cleaned, "ai");
           }
         }
       }
@@ -743,6 +745,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
     const cleanHtml = html.replace(/<mark[^>]*>([\s\S]*?)<\/mark>/gi, "$1");
     editor.commands.setContent(cleanHtml);
     localStorage.setItem("extrajus_draft", cleanHtml);
+    onContentChange?.(cleanHtml, "human");
     setPreAiEditContent(null);
   };
 

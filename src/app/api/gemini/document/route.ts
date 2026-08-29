@@ -1,5 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { Groq } from "groq-sdk";
+import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import { sendTelegramAlert } from "@/lib/telegram";
 
@@ -7,62 +6,65 @@ import { getLegalKnowledgeBase } from "@/knowledge";
 
 export async function POST(req: Request) {
   try {
-    const keys = [
-      process.env.GEMINI_API_KEY,
-      process.env.GEMINI_AUDIO_API_KEY,
-    ].filter(Boolean) as string[];
+    const nvidiaKey = process.env.NVIDIA_API_KEY;
 
-    const apiKey = keys.length > 0 ? keys[0] : "";
-    const groqKey = process.env.GROQ_API_KEY;
-
-    if (!apiKey && !groqKey) {
-      throw new Error("Nenhuma API Key encontrada (Nem Gemini, nem Groq).");
+    if (!nvidiaKey) {
+      throw new Error("NVIDIA_API_KEY não configurada no servidor.");
     }
 
-    const { facts, continueFrom, attempt = 0 } = await req.json();
+    const { facts } = await req.json();
 
     if (!facts) {
       return NextResponse.json({ error: "Fatos não fornecidos." }, { status: 400 });
     }
 
-    const fallbackModels = [
-      "gemini-2.5-flash",        // Tentativa 0 (Principal - Gemini 2.5 Flash)
-      "gemini-2.5-pro",          // Tentativa 1 (Fallback Gemini Pro)
-      "openai/gpt-oss-120b",     // Tentativa 2 (Fallback Groq GPT-OSS 120B)
-      "llama-3.3-70b-versatile", // Tentativa 3 (Fallback Groq Llama 3.3 70B)
-      "gemini-3.0-flash",        // Tentativa 4 (Fallback Gemini 3.0 Flash)
+    const nvidiaModels = [
+      "nvidia/nemotron-3-super-120b-a12b",
+      "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+      "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "deepseek-ai/deepseek-v4-pro-0813",
+      "openai/gpt-oss-120b"
     ];
-    
-    const modelName = fallbackModels[attempt] || "gemini-2.5-flash";
-    const knowledgeBase = getLegalKnowledgeBase(facts);
+
+    const modelName = nvidiaModels[0];
+    console.log(`\n======================================================`);
+    console.log(`[GERADOR DE PETIÇÕES] 🚀 Modelo NVIDIA Ativo: ${modelName}`);
+    console.log(`======================================================\n`);
+
+    const knowledgeBase = await getLegalKnowledgeBase(facts);
     
     const systemInstruction = `
 Você é um eminente jurista brasileiro, processualista sênior e redator forense de excelência técnica.
 Seu objetivo é analisar o substrato fático submetido e lavrar uma Petição Inicial PRIMOROSA, COMPLETA, COM ELEVADA DENSIDADE DOGMÁTICA, RIQUÍSSIMO VOCABULÁRIO JURÍDICO E RIGOROSA SUBSUNÇÃO NORMATIVA.
 
-DIRETRIZES ESTILÍSTICAS E DE REDAÇÃO FORENSE:
-1. VERNÁCULO JURÍDICO CLÁSSICO E SOFISTICADO:
-   - Empregue estilo escorreito, polido e assertivo, com terminologia técnica precisa (e.g., "emoldura-se", "consectário lógico", "imperativo de justiça", "relação sinagmática", "pretensão resistida", "lesão a direito subjetivo", "dignidade da pessoa humana", "tutela jurisdicional efetiva").
-   - Utilize conectivos clássicos de articulação argumentativa forense: *Nesse diapasão, Nessa toada, De igual sorte, Por consectário, Sob essa ótica, Impende registrar, Calha gizar, Sobressai cristalino, Revela-se inarredável*.
-   - Estruture a argumentação em silogismos impecáveis (Premissa Maior: a norma e a tese dos tribunais superiores; Premissa Menor: o evento fático lesivo; Conclusão: a obrigação inafastável de indenizar / adimplir / acolher o pedido).
+DIRETRIZES FUNDAMENTAIS DE ESTRUTURAÇÃO E DIVISÃO DE PARÁGRAFOS (REGRA DE OURO):
+1. PROIBIÇÃO ABSOLUTA DE BLOCOS MACIÇOS DE TEXTO:
+   - NUNCA aglutine teses distintas em um único parágrafo longo.
+   - Cada parágrafo do array "paragrafos" deve conter entre 3 e 6 linhas bem estruturadas, desenvolvendo UMA ideia jurídica central com começo, meio e fim.
+   - Em cada seção do "direito", forneça de 3 a 5 parágrafos encadeados logicamente (e.g., 1º Parágrafo: A premissa normativa geral; 2º Parágrafo: A subsunção do fato ao tipo legal; 3º Parágrafo: O nexo de causalidade e a antijuridicidade; 4º Parágrafo: A consequência jurídica indeclinável / dever de indenizar ou cumprir).
+
+2. VERNÁCULO JURÍDICO CLÁSSICO E SOFISTICADO:
+   - Empregue estilo escorreito, polido e assertivo, com terminologia técnica precisa (e.g., "emoldura-se", "consectário lógico", "imperativo de justiça", "relação sinagmática", "pretensão resistida", "lesão a direito subjetivo", "dignidade da pessoa humana", "tutela jurisdicional efetiva", "etiologia do dano", "dever anexo de conduta", "boa-fé objetiva").
+   - Utilize conectivos clássicos de articulação argumentativa forense: *Nesse diapasão, Nessa toada, De igual sorte, Por consectário, Sob essa ótica, Impende registrar, Calha gizar, Sobressai cristalino, Revela-se inarredável, Com efeito, Lado outro*.
+
+3. DENSIDADE DOGMÁTICA NA FUNDAMENTAÇÃO DO DIREITO:
+   - Divida a seção "direito" em tópicos específicos e aprofundados (e.g., "1. Da Relação Jurídica e Aplicação do CDC / Código Civil", "2. Do Inadimplemento e da Antijuridicidade da Conduta", "3. Dos Danos Materiais / Danos Emergentes e Lucros Cessantes", "4. Do Dano Moral In Re Ipsa e do Desvio Produtivo do Consumidor", "5. Da Tutela de Urgência / Obrigação de Fazer").
 
 ${knowledgeBase ? `
 BASE DE CONHECIMENTO E PRECEDENTES VINCULANTES VIGENTES:
 ${knowledgeBase}
 
 DIRETRIZES DE USO DA JURISPRUDÊNCIA (STF / STJ):
-1. SUBSUNÇÃO ANALÍTICA E RATIO DECIDENDI (NÃO TRANSCREVER MECANICAMENTE):
-   - Jamais se limite a colar ementas desprovidas de contexto.
-   - Disseque a *ratio decidendi* do precedente, demonstrando com erudição e clareza como o fundamento determinante consagrado pelo STF/STJ abarca perfeitamente a situação jurídica do autor e afasta teses contrárias.
-   - Faça referência solene aos julgados (e.g., "Em julgamento paradigmático de Repercussão Geral sob o Tema X, o Pretório Excelso firmou o entendimento de que...", "Nesse sentido, a jurisprudência sumulada da Suprema Corte sedimentou...").
-2. PRECISÃO TÉCNICA E GROUNDING RIGOROSO:
-   - Use exclusivamente os precedentes e teses existentes na base de conhecimento ou teses firmadas de conhecimento público inequívoco.
+1. SUBSUNÇÃO ANALÍTICA E RATIO DECIDENDI:
+   - Disseque a *ratio decidendi* do precedente, demonstrando com erudição e clareza como o fundamento determinante abarca perfeitamente a situação jurídica do autor.
 ` : ""}
 
 SUA SAÍDA DEVE SER ESTRITAMENTE UM OBJETO JSON VÁLIDO (sem blocos markdown \`\`\`json, apenas o JSON cru).
 
 O JSON DEVE SEGUIR RIGOROSAMENTE ESTA ESTRUTURA:
 {
+  "titulo": "Título Jurídico Curto e Elegante da Ação (ex: Ação de Indenização por Danos Morais c/c Reparação Material)",
+  "resumo": "Resumo sintético e claro em 1 ou 2 frases sobre os fatos e a tese jurídica central da peça...",
   "cabecalho": {
     "enderecamento": "EXCELENTÍSSIMO(A) SENHOR(A) DOUTOR(A) JUIZ(A) DE DIREITO DA ___ VARA CÍVEL DA COMARCA DE [CIDADE/ESTADO]"
   },
@@ -84,17 +86,20 @@ O JSON DEVE SEGUIR RIGOROSAMENTE ESTA ESTRUTURA:
   ],
   "direito": [
     {
-      "subtitulo": "1. Da Relação Jurídica e do Quadro Normativo Aplicável",
+      "subtitulo": "1. Do Quadro Normativo e da Relação Jurídica de Regência",
       "paragrafos": [
-        "Articulação doutrinária e legal densa acerca da incidência dos institutos de regência (CF/88, CC, CDC, CPC, CLT etc.)...",
-        "Desenvolvimento do nexo fático-substantivo demonstrando a subsunção cristalina dos fatos à proteção legal e à ratio decidendi dos Tribunais Superiores..."
+        "Desenvolvimento do primeiro parágrafo estabelecendo a moldura jurídica e a incidência dos dispositivos legais pertinentes (CF/88, CC, CDC etc.)...",
+        "Desenvolvimento do segundo parágrafo demonstrando a subsunção fática e a violação aos deveres anexos de boa-fé e lealdade contratual...",
+        "Desenvolvimento do terceiro parágrafo articulando a jurisprudência consolidada e a proteção do direito subjetivo violado..."
       ],
       "citacaoDestaque": "Dispositivo legal ou Precedente vinculante STF/STJ devidamente contextualizado"
     },
     {
-      "subtitulo": "2. Do Dever Jurídico e da Responsabilidade Civil / Obrigacional",
+      "subtitulo": "2. Da Antijuridicidade da Conduta e da Responsabilidade Civil Objetiva/Subjetiva",
       "paragrafos": [
-        "Exposição robusta sobre a antijuridicidade da conduta da Ré, a configuração do dano injusto e a imperatividade da tutela condenatória..."
+        "Primeiro parágrafo expondo a conduta ilícita ou o inadimplemento com precisão técnica...",
+        "Segundo parágrafo demonstrando a cadeia etiológica e o nexo de causalidade ininterrupto...",
+        "Terceiro parágrafo consolidando a imperatividade da tutela condenatória e o dever inafastável de indenizar..."
       ]
     }
   ],
@@ -106,7 +111,7 @@ O JSON DEVE SEGUIR RIGOROSAMENTE ESTA ESTRUTURA:
   ],
   "fechamento": {
     "provas": "Protesta provar o alegado por todos os meios de prova em direito admitidos, sem exceção de nenhum, notadamente documental, testemunhal, pericial e o depoimento pessoal do representante legal da Ré.",
-    "valorCausa": "Dá-se à causa o valor de R$ [Valor da Causa]",
+    "valorCausa": "R$ [Valor da Causa]",
     "localData": "[Comarca/UF], [Data por Extenso]",
     "advogado": {
       "nome": "[Nome do Advogado]",
@@ -115,10 +120,11 @@ O JSON DEVE SEGUIR RIGOROSAMENTE ESTA ESTRUTURA:
   }
 }
 
-REGRAS RÍGIDAS DE CONTROLE E SEGURANÇA JURÍDICA:
-1. DIALÉTICA E ELEGÂNCIA ARGUMENTATIVA:
-   - Evite frases curtas e telegráficas. Desenvolva argumentos sólidos, demonstrando erudição, autoridade jurídica e fluência vocabular.
-   - NUNCA invente números de acórdãos, números de RE, REsp, ADI, nomes de relatores inexistentes ou ementas forjadas. Use apenas precedentes reais e vigentes.
+REGRAS RÍGIDAS DE CONTROLE, SEGURANÇA E FIDELIDADE JURÍDICA (ANTI-ALUCINAÇÃO):
+1. PRECISÃO CIRÚRGICA DE SÚMULAS E PRECEDENTES:
+   - NUNCA invente ou confunda números de Súmulas (ex: Súmula 37/STJ e Súmula 387/STJ tratam da cumulação de dano moral e material/estético; Súmula 379/STJ trata de juros em cédula de crédito rural).
+   - Se não tiver 100% de certeza do número exato de uma súmula ou se ela não estiver expressamente no contexto da base de conhecimento acima, FUNDAMENTE DIRETAMENTE NA LEGISLAÇÃO (ex: arts. 186, 927 e 944 do Código Civil; art. 6º, VI e art. 14 do CDC; art. 5º, V e X da CF/88) em vez de citar número de súmula incerto.
+   - NUNCA invente números de RE, REsp, ADI, nomes de ministros/relatores ou ementas forjadas.
 2. VERACIDADE ESTATUTÁRIA:
    - Cite exclusivamente artigos, parágrafos e incisos de diplomas legais vigentes (CF/88, CPC/15, CC/02, CDC, CLT, etc.).
 3. FIDELIDADE AOS FATOS:
@@ -128,39 +134,22 @@ REGRAS RÍGIDAS DE CONTROLE E SEGURANÇA JURÍDICA:
 
     const prompt = `Fatos narrados para a elaboração da petição:\n${facts}`;
 
-    const isGroq = modelName.includes("llama") || modelName.includes("mixtral") || modelName.includes("gemma") || modelName.includes("openai/");
+    const nvidia = new OpenAI({
+      baseURL: "https://integrate.api.nvidia.com/v1",
+      apiKey: nvidiaKey,
+    });
 
-    let resultStream: any;
-
-    if (isGroq) {
-      if (!groqKey) throw new Error("GROQ_API_KEY não está definida para usar os modelos Groq.");
-      const groq = new Groq({ apiKey: groqKey });
-      resultStream = await groq.chat.completions.create({
-        messages: [
-          { role: "system", content: systemInstruction },
-          { role: "user", content: prompt }
-        ],
-        model: modelName,
-        response_format: { type: "json_object" },
-        max_tokens: 4096,
-        temperature: 0.3,
-        stream: true,
-      });
-    } else {
-      if (!apiKey) throw new Error("GEMINI_API_KEY não está definida para usar os modelos Gemini.");
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({
-        model: modelName,
-        systemInstruction,
-        generationConfig: {
-          responseMimeType: "application/json",
-          maxOutputTokens: 8192,
-          temperature: 0.3,
-        }
-      });
-      const result = await model.generateContentStream(prompt);
-      resultStream = result.stream;
-    }
+    const completionStream = await nvidia.chat.completions.create({
+      model: modelName,
+      messages: [
+        { role: "system", content: systemInstruction },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.3,
+      top_p: 0.95,
+      max_tokens: 16384,
+      stream: true,
+    });
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -177,32 +166,22 @@ REGRAS RÍGIDAS DE CONTROLE E SEGURANÇA JURÍDICA:
         const safeError = (e: unknown) => {
           if (!closed) {
             closed = true;
-            // Flush whatever we have before closing so the client can retry from here
             if (accumulated) {
               try { controller.enqueue(new TextEncoder().encode(accumulated)); } catch {}
             }
-            controller.close(); // Close gracefully instead of erroring
+            controller.close();
           }
         };
 
         try {
-          if (isGroq) {
-            for await (const chunk of resultStream) {
-              if (closed) break;
-              const content = chunk.choices[0]?.delta?.content || "";
-              if (content) {
-                accumulated += content;
-                controller.enqueue(new TextEncoder().encode(content));
-              }
-            }
-          } else {
-            for await (const chunk of resultStream) {
-              if (closed) break;
-              const chunkText = chunk.text();
-              if (chunkText) {
-                accumulated += chunkText;
-                controller.enqueue(new TextEncoder().encode(chunkText));
-              }
+          for await (const chunk of completionStream) {
+            if (closed) break;
+            if (!chunk.choices || chunk.choices.length === 0) continue;
+            
+            const content = chunk.choices[0]?.delta?.content || "";
+            if (content) {
+              accumulated += content;
+              controller.enqueue(new TextEncoder().encode(content));
             }
           }
           safeClose();
@@ -224,7 +203,6 @@ REGRAS RÍGIDAS DE CONTROLE E SEGURANÇA JURÍDICA:
     const message = error instanceof Error ? error.message : "Erro desconhecido";
     console.error("Document API Error:", message);
 
-    // Enviar alerta de erro via Telegram
     sendTelegramAlert(
       `🔴 *SmartDoc — Falha na Geração da Petição*\n\n` +
       `*Erro:* \`${message}\`\n` +

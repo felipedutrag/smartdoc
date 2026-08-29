@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
     let query = supabase
       .from("documents")
-      .select("id, title, action_type, status, is_paid, word_count, created_at, updated_at")
+      .select("id, title, summary, action_type, status, is_paid, word_count, created_at, updated_at")
       .eq("user_id", user.id)
       .order("updated_at", { ascending: false });
 
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { title, action_type, facts, content_html, status = "draft" } = body;
+    const { title, action_type, facts, content_html, summary, status = "draft" } = body;
 
     // 1. Verificar saldo de créditos de petição do usuário
     const { data: profile } = await supabase
@@ -86,6 +86,7 @@ export async function POST(request: Request) {
         title: title || "Petição Inicial sem Título",
         action_type: action_type || "Petição Inicial",
         facts: facts || "",
+        summary: summary || null,
         content_html: content_html || "",
         status,
         word_count: content_html ? content_html.replace(/<[^>]*>/g, " ").split(/\s+/).filter(Boolean).length : 0,

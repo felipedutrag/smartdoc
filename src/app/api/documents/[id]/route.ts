@@ -52,6 +52,7 @@ export async function PATCH(
     };
 
     if (body.title !== undefined) updates.title = body.title;
+    if (body.summary !== undefined) updates.summary = body.summary;
     if (body.action_type !== undefined) updates.action_type = body.action_type;
     if (body.facts !== undefined) updates.facts = body.facts;
     if (body.content_html !== undefined) {
