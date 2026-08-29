@@ -541,7 +541,7 @@ export default function Home() {
                   Exportação Word Forense
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Baixe a peça com tipografia, margens e formatação nos padrões judiciais. Pronta para protocolo.
+                  Baixe a peça com tipografia, margens e formatação nos padrões judiciais.
                 </p>
                 <div className="pt-0.5">
                   <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
@@ -562,7 +562,7 @@ export default function Home() {
                   Refinamento Inteligente de Teses
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Selecione qualquer trecho da petição para reescrever, fortalecer argumentos, aprofundar jurisprudências ou ajustar pedidos instantaneamente.
+                  Selecione qualquer trecho da petição para reescrever instantaneamente.
                 </p>
                 <div className="pt-0.5">
                   <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
