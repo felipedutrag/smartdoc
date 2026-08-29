@@ -12,6 +12,7 @@ import Link from "next/link";
 
 import { LoadingOverlay } from "@/components/editor/LoadingOverlay";
 import { FloatingAiBar } from "@/components/editor/FloatingAiBar";
+import { DispositivosMapeados } from "@/components/editor/DispositivosMapeados";
 import { renderPeticaoJsonToHtml, getPeticaoBlocks, PeticaoDocumentJson } from "@/lib/peticao-template";
 
 export default function EditorPage() {
@@ -44,6 +45,7 @@ export default function EditorPage() {
   const [editQueue, setEditQueue] = useState<string[]>([]);
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [editorHtml, setEditorHtml] = useState<string>("");
 
   // Função centralizada e segura para persistir no Supabase
   const saveToDatabase = useCallback(async (html: string) => {
@@ -102,6 +104,7 @@ export default function EditorPage() {
 
   const handleContentChange = useCallback((html: string, source: "human" | "ai") => {
     lastHtmlRef.current = html;
+    setEditorHtml(html);
 
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
@@ -455,6 +458,7 @@ export default function EditorPage() {
             if (data.document.content_html) {
               localStorage.setItem("extrajus_draft", data.document.content_html);
               window.dispatchEvent(new Event("storage_extrajus_draft"));
+              setEditorHtml(data.document.content_html);
             }
             if (data.document.facts) {
               localStorage.setItem("extrajus_facts", data.document.facts);
@@ -578,7 +582,15 @@ export default function EditorPage() {
         </div>
       )}
 
+      {/* ── Layout principal: editor + sidebar de dispositivos ── */}
       <div className="w-full pb-20">
+        {/* Sidebar de Dispositivos — fixo à direita no desktop */}
+        {!isGenerating && !isTypewriting && (
+          <div className="hidden xl:block fixed top-24 right-4 z-40 w-64 2xl:w-72">
+            <DispositivosMapeados editorHtml={editorHtml} />
+          </div>
+        )}
+
         <SimpleEditor
           ref={editorRef}
           editable={!isTypewriting && !isGenerating}
