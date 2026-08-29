@@ -29,8 +29,6 @@ export async function POST(req: Request) {
       );
     }
 
-    const modelName = "gemini-2.5-flash";
-
     const systemInstruction = `
 Você é o Auditor Jurídico Forense Sênior e Validador Anti-Alucinação do SmartDoc.
 Sua missão é realizar uma auditoria implacável (double check) em todas as citações normativas, jurisprudenciais e doutrinárias presentes na petição judicial.
@@ -81,31 +79,56 @@ Sem blocos markdown adicionais (\`\`\`json), apenas o JSON array puro.
         : ""
     }Analise e gere o relatório JSON de validação:`;
 
+    const FALLBACK_MODELS = [
+      "gemini-2.5-flash",
+      "gemini-3.5-flash",
+      "gemini-2.5-flash-lite",
+      "gemini-3.5-flash-lite",
+      "gemini-3.1-flash-lite",
+    ];
+
     const genAI = new GoogleGenerativeAI(geminiKey);
-    const model = genAI.getGenerativeModel({
-      model: modelName,
-      systemInstruction: systemInstruction,
-      generationConfig: {
-        temperature: 0.1,
-        maxOutputTokens: 4096,
-        responseMimeType: "application/json",
-      },
-    });
+    let auditResults: CitationAuditItem[] = [];
+    let lastError: any = null;
 
-    const result = await model.generateContent(prompt);
-    const rawText = result.response?.text() || "[]";
+    for (const modelName of FALLBACK_MODELS) {
+      try {
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          systemInstruction: systemInstruction,
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 4096,
+            responseMimeType: "application/json",
+          },
+        });
 
-    let cleanJson = rawText.trim();
-    if (cleanJson.startsWith("```json")) {
-      cleanJson = cleanJson.replace(/^```json/, "").replace(/```$/, "").trim();
-    } else if (cleanJson.startsWith("```")) {
-      cleanJson = cleanJson.replace(/^```/, "").replace(/```$/, "").trim();
+        const result = await model.generateContent(prompt);
+        const rawText = result.response?.text() || "[]";
+
+        let cleanJson = rawText.trim();
+        if (cleanJson.startsWith("```json")) {
+          cleanJson = cleanJson.replace(/^```json/, "").replace(/```$/, "").trim();
+        } else if (cleanJson.startsWith("```")) {
+          cleanJson = cleanJson.replace(/^```/, "").replace(/```$/, "").trim();
+        }
+
+        const parsed = JSON.parse(cleanJson);
+        auditResults = Array.isArray(parsed) ? parsed : [];
+        lastError = null;
+        break; // Sucesso
+      } catch (err: any) {
+        lastError = err;
+        console.warn(`[VALIDATE CITATIONS] Falha no modelo ${modelName}:`, err?.message || err);
+      }
     }
 
-    const auditResults: CitationAuditItem[] = JSON.parse(cleanJson);
+    if (lastError && auditResults.length === 0) {
+      throw lastError;
+    }
 
     return NextResponse.json({
-      results: Array.isArray(auditResults) ? auditResults : [],
+      results: auditResults,
       auditedAt: new Date().toISOString(),
     });
   } catch (error: any) {

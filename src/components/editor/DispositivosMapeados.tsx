@@ -272,7 +272,8 @@ export function DispositivosMapeados({ editorHtml }: DispositivosMapeadosProps) 
       });
 
       if (!res.ok) {
-        throw new Error("Falha na validação de citações.");
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || errJson.details || "Falha na validação de citações.");
       }
 
       const data = await res.json();
