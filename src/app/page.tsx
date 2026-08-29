@@ -402,7 +402,9 @@ export default function Home() {
                   <span className="font-bold text-foreground">JOÃO DA SILVA</span>, brasileiro, solteiro, analista de sistemas, portador do RG nº 12.345.678-9 SSP/SP e inscrito no CPF sob o nº ***.123.456-**, residente e domiciliado na Rua das Flores, nº 100, São Paulo/SP, por intermédio de seu advogado constituído, vem, respeitosamente, perante Vossa Excelência, propor a presente:
                 </div>
 
-                <div className="text-center font-sans font-bold text-xs sm:text-sm text-primary py-2 tracking-tight">
+                <div className="h-2" />
+
+                <div className="text-center font-sans font-bold text-xs sm:text-sm text-primary py-1 tracking-tight">
                   AÇÃO DE OBRIGAÇÃO DE FAZER C/C REPARAÇÃO POR DANOS MORAIS E MATERIAIS COM TUTELA DE URGÊNCIA
                 </div>
 

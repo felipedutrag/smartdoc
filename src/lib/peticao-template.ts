@@ -77,26 +77,32 @@ export function getPeticaoBlocks(data: PeticaoDocumentJson): string[] {
   const reuNome = partes?.reu?.nome || "[NOME DO RÉU]";
   const reuQualif = partes?.reu?.qualificacao || "[nacionalidade/tipo], inscrito no CPF/CNPJ nº [Número], com endereço em [Endereço]";
 
-  // Autor (Pular 1 linha antes do nome da ação)
+  // Autor
   blocks.push(
-    `<p style="text-align: justify; margin-top: 0; margin-bottom: 1.25rem;"><strong>${autorNome}</strong>, ${autorQualif}, por seu advogado que esta subscreve, vem, mui respeitosamente, perante Vossa Excelência, propor a presente</p>`
+    `<p style="text-align: justify;"><strong>${autorNome}</strong>, ${autorQualif}, por seu advogado que esta subscreve, vem, mui respeitosamente, perante Vossa Excelência, propor a presente</p>`
   );
+
+  // Linha pulada antes do nome da ação (editável)
+  blocks.push(`<p><br></p>`);
 
   // Nome da Ação (Centralizado)
   blocks.push(
-    `<h2 style="text-align: center; text-transform: uppercase; margin: 1.5rem 0; font-family: inherit; font-size: 1.25rem; font-weight: bold;">${tipoAcao}</h2>`
+    `<h2 style="text-align: center; text-transform: uppercase;">${tipoAcao}</h2>`
   );
 
-  // Linha pulada obrigatória após o nome da ação
+  // Linha pulada após o nome da ação (editável)
   blocks.push(`<p><br></p>`);
 
-  // Réu (Pular 2 linhas após o réu antes do primeiro título)
+  // Réu
   blocks.push(
-    `<p style="text-align: justify; margin-top: 1.25rem; margin-bottom: 2.25rem;">em face de <strong>${reuNome}</strong>, ${reuQualif}, pelos fatos e fundamentos jurídicos que passa a expor:</p>`
+    `<p style="text-align: justify;">em face de <strong>${reuNome}</strong>, ${reuQualif}, pelos fatos e fundamentos jurídicos que passa a expor:</p>`
   );
 
+  // Linha pulada antes dos fatos (editável)
+  blocks.push(`<p><br></p>`);
+
   // 3. Dos Fatos
-  blocks.push(`<h2 style="text-align: left; margin-top: 2rem; margin-bottom: 1rem;">I. DOS FATOS</h2>`);
+  blocks.push(`<h2 style="text-align: left;">I. DOS FATOS</h2>`);
   if (Array.isArray(fatos) && fatos.length > 0) {
     for (const fato of fatos) {
       if (fato?.trim()) {
