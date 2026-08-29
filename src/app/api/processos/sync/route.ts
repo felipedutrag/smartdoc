@@ -262,6 +262,15 @@ export async function POST(req: Request) {
       ];
     }
 
+    // Detectar se o processo foi remetido/migrado para o e-Proc do tribunal
+    const isMigratedToEproc = movimentos.some(m => 
+      m.descricao.toLowerCase().includes('migração para outro sistema') ||
+      m.descricao.toLowerCase().includes('sistema eproc') ||
+      m.descricao.toLowerCase().includes('tramitar eletronicamente no sistema eproc')
+    );
+
+    const statusFinal = isMigratedToEproc ? 'Migrado para e-Proc TJSP' : 'Acompanhando';
+
     let pId = processo_id;
 
     if (!pId) {
@@ -271,7 +280,7 @@ export async function POST(req: Request) {
         tribunal: tribunalName,
         partes: partes.substring(0, 250),
         assunto: assunto.substring(0, 250),
-        status: 'Acompanhando',
+        status: statusFinal,
         ultima_atualizacao: new Date().toISOString(),
       }).select().single();
 
@@ -283,6 +292,7 @@ export async function POST(req: Request) {
         tribunal: tribunalName,
         partes: partes.substring(0, 250),
         assunto: assunto.substring(0, 250),
+        status: statusFinal,
         ultima_atualizacao: new Date().toISOString(),
       }).eq('id', pId);
     }

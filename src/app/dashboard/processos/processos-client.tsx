@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, RefreshCcw, Search, Scale, ChevronDown, ChevronUp, Loader2, Clock, Trash2 } from "lucide-react";
+import { Plus, RefreshCcw, Search, Scale, ChevronDown, ChevronUp, Loader2, Clock, Trash2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -180,6 +180,24 @@ export function ProcessosClient() {
                       </Button>
                     </div>
                   </div>
+
+                  {/* AVISO DE MIGRAÇÃO PARA E-PROC SE APLICÁVEL */}
+                  {(p.status?.includes('e-Proc') || ultimaMov?.descricao?.toLowerCase().includes('migração para outro sistema') || ultimaMov?.descricao?.toLowerCase().includes('sistema eproc')) && (
+                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                      <div className="text-amber-700 dark:text-amber-300 font-medium">
+                        ⚠️ <strong>Processo Migrado para o e-Proc:</strong> O TJSP encerrou as atualizações no e-SAJ e transferiu a tramitação eletrônica para o novo portal e-Proc.
+                      </div>
+                      <a
+                        href={`https://eproc1g.tjsp.jus.br/eproc/externo_controlador.php?acao=processo_selecionar&sigla_orgao_processo=TJSP&num_processo=${p.numero_processo.replace(/\D/g, "")}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-800 dark:text-amber-200 font-semibold px-3 py-1.5 rounded-md transition-colors shrink-0"
+                      >
+                        <span>Abrir no e-Proc TJSP</span>
+                        <ExternalLink className="size-3.5" />
+                      </a>
+                    </div>
+                  )}
 
                   {/* ÚLTIMA MOVIMENTAÇÃO SEMPRE VISÍVEL */}
                   {ultimaMov ? (
