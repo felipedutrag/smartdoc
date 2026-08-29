@@ -2,16 +2,31 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import * as cheerio from 'cheerio';
 
-function parseTribunal(numero: string) {
-  const clean = numero.replace(/\D/g, '');
-  if (clean.length !== 20) return 'DESCONHECIDO';
+function sanitizeAndPadCnj(numero: string): { formatted: string; clean: string; tribunal: string } {
+  let clean = numero.replace(/\D/g, '');
+  if (clean.length > 0 && clean.length < 20) {
+    clean = clean.padStart(20, '0');
+  }
   
+  let formatted = numero;
+  if (clean.length === 20) {
+    formatted = clean.replace(/^(\d{7})(\d{2})(\d{4})(\d{1})(\d{2})(\d{4})$/, '$1-$2.$3.$4.$5.$6');
+  }
+
   const j = clean.substring(13, 14);
   const tr = clean.substring(14, 16);
-  
-  if (j === '8' && tr === '26') return 'TJSP (e-SAJ)';
-  if (j === '4' && tr === '04') return 'TRF4 (e-Proc)';
-  return 'TRIBUNAL GENÉRICO';
+
+  let tribunal = 'TRIBUNAL REGIONAL / ESTADUAL';
+  if (j === '8' && tr === '26') tribunal = 'TJSP (e-SAJ)';
+  else if (j === '8' && tr === '24') tribunal = 'TJSC (e-Proc)';
+  else if (j === '8' && tr === '21') tribunal = 'TJRS (e-Proc)';
+  else if (j === '8' && tr === '19') tribunal = 'TJRJ (PJe)';
+  else if (j === '8' && tr === '13') tribunal = 'TJMG (e-Proc)';
+  else if (j === '4' && tr === '04') tribunal = 'TRF4 (e-Proc)';
+  else if (j === '4' && tr === '02') tribunal = 'TRF2 (e-Proc)';
+  else if (j === '4' && tr === '03') tribunal = 'TRF3 (PJe)';
+
+  return { formatted, clean, tribunal };
 }
 
 async function scrapeEsajHttp(numero_processo: string) {
@@ -33,6 +48,10 @@ async function scrapeEsajHttp(numero_processo: string) {
   const html = await response.text();
   const $ = cheerio.load(html);
 
+  // Verificar se há mensagens de erro ou processo não encontrado
+  const tribunalMsg = $('#mensagemRetorno, .mensagemErro, #spwTabelaMensagem, .spwMensagem').text().replace(/\s+/g, ' ').trim();
+  const notFound = tribunalMsg.includes('Não existem informações disponíveis') || tribunalMsg.includes('não foi encontrado');
+
   // 1. Extrair Partes
   let partes = '';
   const partesRows = $('#tablePartesPrincipais tr');
@@ -46,7 +65,7 @@ async function scrapeEsajHttp(numero_processo: string) {
   }
 
   // 2. Extrair Assunto
-  const assunto = $('#assuntoProcesso').text().replace(/\s+/g, ' ').trim() || 'Assunto não informado';
+  const assunto = $('#assuntoProcesso').text().replace(/\s+/g, ' ').trim();
 
   // 3. Extrair Movimentações
   const movimentos: Array<{ data: string; descricao: string }> = [];
@@ -59,10 +78,22 @@ async function scrapeEsajHttp(numero_processo: string) {
     }
   });
 
+  if (notFound && !partes && !assunto) {
+    return {
+      partes: 'Processo não encontrado ou sob Segredo de Justiça',
+      assunto: 'Sem informações públicas no tribunal',
+      movimentos: [
+        { data: new Date().toLocaleDateString('pt-BR'), descricao: 'Tribunal informou: Não existem informações públicas para os parâmetros fornecidos.' }
+      ],
+      notFound: true,
+    };
+  }
+
   return {
     partes: partes || 'Partes não disponíveis',
     assunto: assunto || 'Assunto não disponível',
     movimentos: movimentos.slice(0, 25),
+    notFound: false,
   };
 }
 
@@ -76,19 +107,24 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const numero_processo = body.numero_processo;
+    const rawNumero = body.numero_processo;
     const processo_id = body.processo_id;
 
-    if (!numero_processo) {
+    if (!rawNumero) {
       return NextResponse.json({ error: 'Número do processo obrigatório' }, { status: 400 });
     }
 
-    const tribunal = parseTribunal(numero_processo);
+    const { formatted: numero_processo, clean, tribunal } = sanitizeAndPadCnj(rawNumero);
+
+    if (clean.length !== 20) {
+      return NextResponse.json({ error: 'Número CNJ inválido. O processo deve conter 20 dígitos numéricos.' }, { status: 400 });
+    }
+
     let partes = 'Partes não encontradas';
     let assunto = 'Assunto não encontrado';
     let movimentos: Array<{ data: string; descricao: string }> = [];
 
-    if (tribunal === 'TJSP (e-SAJ)') {
+    if (tribunal.includes('e-SAJ')) {
       try {
         const scraped = await scrapeEsajHttp(numero_processo);
         partes = scraped.partes;
@@ -98,13 +134,18 @@ export async function POST(req: Request) {
         console.error('Erro ao consultar e-SAJ via HTTP:', err);
         throw new Error(err?.message || 'Falha ao consultar tribunal');
       }
-    } else {
-      // Fallback genérico para outros tribunais
-      partes = 'Autor (Exemplo) | Réu (Exemplo)';
-      assunto = 'Ação de Cobrança / Indenizatória';
+    } else if (tribunal.includes('e-Proc')) {
+      partes = 'Consulta e-Proc (Aguardando Integração DataJud/CNJ)';
+      assunto = 'Processo Justiça Federal / Estadual e-Proc';
       movimentos = [
-        { data: new Date().toLocaleDateString('pt-BR'), descricao: 'Processo distribuído e autuado no tribunal.' },
-        { data: new Date().toLocaleDateString('pt-BR'), descricao: 'Aguardando citação da parte ré.' },
+        { data: new Date().toLocaleDateString('pt-BR'), descricao: 'Processo cadastrado para acompanhamento no sistema e-Proc.' },
+        { data: new Date().toLocaleDateString('pt-BR'), descricao: 'Aguardando publicação do diário oficial.' },
+      ];
+    } else {
+      partes = 'Autor (Aguardando Sincronização) | Réu';
+      assunto = 'Ação Cível / Especializada';
+      movimentos = [
+        { data: new Date().toLocaleDateString('pt-BR'), descricao: 'Processo cadastrado para monitoramento contínuo.' }
       ];
     }
 
@@ -131,6 +172,8 @@ export async function POST(req: Request) {
       pId = procInsert.id;
     } else {
       await supabase.from('processos').update({
+        numero_processo,
+        tribunal,
         partes: partes.substring(0, 250),
         assunto: assunto.substring(0, 250),
         ultima_atualizacao: new Date().toISOString(),
@@ -138,7 +181,6 @@ export async function POST(req: Request) {
     }
 
     if (pId) {
-      // Inserção Incremental: só insere novos andamentos
       const { data: existingMovs } = await supabase
         .from('movimentacoes_processuais')
         .select('data_movimentacao, descricao')
@@ -161,7 +203,7 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ success: true, processo_id: pId, movimentos });
+    return NextResponse.json({ success: true, processo_id: pId, numero_processo, movimentos });
   } catch (error: any) {
     console.error('API error sync:', error);
     return NextResponse.json({ error: error.message || 'Erro interno ao consultar tribunal' }, { status: 500 });
