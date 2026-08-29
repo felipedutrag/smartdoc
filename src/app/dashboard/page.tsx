@@ -1551,7 +1551,6 @@ export default function DashboardPage() {
                       <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Reset mensal a cada 30 dias</li>
                       <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Exportação Word (.docx)</li>
                       <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Acompanhamento Processual Esaj</li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Suporte prioritário via WhatsApp</li>
                     </ul>
                   </div>
 
@@ -1593,7 +1592,6 @@ export default function DashboardPage() {
                       <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Reset mensal a cada 30 dias</li>
                       <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Exportação Word (.docx)</li>
                       <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Acompanhamento Processual Esaj</li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Gerente de conta dedicado VIP</li>
                     </ul>
                   </div>
 
