@@ -8,38 +8,31 @@
     font-style: inherit;
   }
 
-  > h1:first-child,
-  > h2:first-child,
-  > h3:first-child,
-  > h4:first-child,
-  > .ProseMirror-widget + h1,
-  > .ProseMirror-widget + h2,
-  > .ProseMirror-widget + h3,
-  > .ProseMirror-widget + h4 {
-    margin-top: 0;
-  }
-
   h1 {
-    font-size: 1.5em;
+    font-size: 1.4em;
     font-weight: 700;
-    margin-top: 3em;
+    margin-top: 1.25rem;
+    margin-bottom: 0.75rem;
   }
 
   h2 {
     font-size: 1.25em;
     font-weight: 700;
-    margin-top: 2.5em;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
   }
 
   h3 {
-    font-size: 1.125em;
+    font-size: 1.1em;
     font-weight: 600;
-    margin-top: 2em;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   h4 {
     font-size: 1em;
     font-weight: 600;
-    margin-top: 2em;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
   }
 }

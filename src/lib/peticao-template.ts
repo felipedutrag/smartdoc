@@ -53,10 +53,10 @@ export function getPeticaoBlocks(data: PeticaoDocumentJson): string[] {
 
   const blocks: string[] = [];
 
-  // 1. Endereçamento (Juízo) - Pular 4 linhas abaixo
+  // 1. Endereçamento (Juízo) - Espaçamento forense padrão abaixo do juízo
   if (cabecalho?.enderecamento) {
     blocks.push(
-      `<p style="text-align: justify; line-height: 1.5; margin-bottom: 2rem;"><strong>${cabecalho.enderecamento}</strong></p>`
+      `<p style="text-align: justify; line-height: 1.5; margin-bottom: 3.5rem;"><strong>${cabecalho.enderecamento}</strong></p>`
     );
   }
 

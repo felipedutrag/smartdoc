@@ -735,7 +735,7 @@ export default function DashboardPage() {
             {(sidebarOpen || isDrawer) ? (
               <SmartDocBrand size="md" badge="PRO" />
             ) : (
-              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/25 shadow-xs">
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 border border-primary/25 shadow-xs text-primary">
                 <SmartDocLogo className="size-4" />
               </div>
             )}

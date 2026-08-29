@@ -71,7 +71,8 @@ export function useGeminiLive(
   const [micError, setMicError] = useState<string | null>(null);
   const [audioLevel, setAudioLevel] = useState(0);
 
-  const sessionIdRef = useRef(`extrajus_live_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`);
+  const [sessionId, setSessionId] = useState<string>(() => `extrajus_live_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`);
+  const sessionIdRef = useRef(sessionId);
   const resumptionHandleRef = useRef<string | null>(null);
   const sessionRestoredRef = useRef(false);
   const documentIdRef = useRef(documentId);
@@ -81,11 +82,16 @@ export function useGeminiLive(
     const saved = loadVoiceSession(documentId);
     if (saved) {
       setMessages(saved.history || []);
-      if (saved.sessionId) sessionIdRef.current = saved.sessionId;
+      if (saved.sessionId) {
+        sessionIdRef.current = saved.sessionId;
+        setSessionId(saved.sessionId);
+      }
       if (saved.resumptionHandle) resumptionHandleRef.current = saved.resumptionHandle;
     } else {
       setMessages([]);
-      sessionIdRef.current = `extrajus_live_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const newId = `extrajus_live_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      sessionIdRef.current = newId;
+      setSessionId(newId);
       resumptionHandleRef.current = null;
     }
     sessionRestoredRef.current = true;
@@ -643,7 +649,9 @@ export function useGeminiLive(
   const clearHistory = useCallback(() => {
     setMessages([]);
     resumptionHandleRef.current = null;
-    sessionIdRef.current = `extrajus_live_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const newId = `extrajus_live_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    sessionIdRef.current = newId;
+    setSessionId(newId);
     localStorage.removeItem(getSessionKey(documentIdRef.current));
     localStorage.removeItem('extrajus_chat_history');
   }, []);
@@ -662,6 +670,6 @@ export function useGeminiLive(
     toggleMute,
     micError,
     audioLevel,
-    sessionId: sessionIdRef.current,
+    sessionId,
   };
 }

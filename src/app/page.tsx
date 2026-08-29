@@ -309,10 +309,10 @@ export default function Home() {
         <div className="flex w-full max-w-4xl flex-col items-center mx-auto">
 
           {/* Micro Linear Badge — animado */}
-          <div className="animate-slide-up opacity-0 [animation-fill-mode:forwards] mb-5 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/8 px-3.5 py-1.5 text-xs font-medium text-amber-600 dark:text-amber-400 shadow-xs backdrop-blur-sm">
-            <span className="flex size-1.5 rounded-full bg-amber-500 animate-pulse" />
+          <div className="animate-slide-up opacity-0 [animation-fill-mode:forwards] mb-5 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1.5 text-xs font-medium text-primary shadow-xs backdrop-blur-sm">
+            <span className="flex size-1.5 rounded-full bg-primary animate-pulse" />
             <span className="font-semibold">SmartDoc 2.0</span>
-            <span className="text-amber-500/40">•</span>
+            <span className="text-primary/40">•</span>
             <span className="text-foreground/60">IA de Voz Jurídica</span>
             <ChevronRight className="size-3" />
           </div>
@@ -320,7 +320,7 @@ export default function Home() {
           {/* Main Title — animado com delay */}
           <h1 className="animate-slide-up opacity-0 [animation-fill-mode:forwards] delay-200 mb-5 text-4xl sm:text-6xl font-black tracking-tight text-foreground leading-[1.1] max-w-4xl mx-auto">
             Sua Assistente Jurídica<br className="hidden sm:inline" />
-            <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600 bg-clip-text text-transparent">
+            <span className="text-primary">
               {" "}com IA de Voz
             </span>
           </h1>
@@ -334,7 +334,7 @@ export default function Home() {
           <div className="animate-slide-up opacity-0 [animation-fill-mode:forwards] delay-400 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/register"
-              className={cn(buttonVariants({ size: "default" }), "h-11 px-7 text-sm font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl shadow-lg hover:opacity-90 hover:shadow-orange-500/25 hover:shadow-xl transition-all gap-2")}
+              className={cn(buttonVariants({ size: "default" }), "h-11 px-7 text-sm font-bold bg-primary text-primary-foreground rounded-xl shadow-lg hover:opacity-90 transition-all gap-2")}
             >
               <span>Experimentar Grátis</span>
               <ArrowRight className="size-4" />

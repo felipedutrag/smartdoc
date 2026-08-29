@@ -31,6 +31,8 @@ import { Superscript } from "@tiptap/extension-superscript"
 import { Selection } from "@tiptap/extensions"
 import { NodeIdExtension } from "@/components/tiptap-extension/node-id-extension"
 import { TabIndentExtension } from "@/components/tiptap-extension/tab-indent-extension"
+import { AiAutocompleteExtension } from "@/components/tiptap-extension/ai-autocomplete-extension"
+
 
 // --- UI Primitives ---
 import { Button } from "@/components/tiptap-ui-primitive/button"
@@ -85,6 +87,7 @@ import { useCursorVisibility } from "@/hooks/use-cursor-visibility"
 
 // --- Components ---
 import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle"
+import { SmartDocBrand } from "@/components/brand-logo"
 import Link from "next/link"
 
 // --- Lib ---
@@ -125,18 +128,9 @@ const MainToolbarContent = ({
   if (isMobile === true) {
     return (
       <div style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-        {/* Left side: Logo padronizado */}
-        <Link href="/" className="group flex items-center gap-2 no-underline">
-          <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 border border-primary/20 text-primary transition-transform group-hover:scale-105">
-            <Scale className="size-4" />
-          </div>
-          <div className="flex items-center text-sm font-bold tracking-tight text-foreground">
-            <span>SMART</span>
-            <span className="text-primary font-black ml-0.5">DOC</span>
-            <span className="ml-2 rounded border border-border/80 bg-muted/60 px-1.5 py-0.2 font-mono text-[9px] font-semibold text-muted-foreground uppercase tracking-widest">
-              2.0
-            </span>
-          </div>
+        {/* Left side: Logo oficial */}
+        <Link href="/dashboard" className="group flex items-center gap-2 no-underline hover:opacity-85 transition-opacity">
+          <SmartDocBrand size="sm" badge="PRO" />
         </Link>
 
         {/* Right side: Font size + Theme Toggle */}
@@ -234,7 +228,7 @@ const MainToolbarContent = ({
         {/* Center: Logo padronizado da landing page */}
         <Link
           href="/dashboard"
-          className="group no-underline"
+          className="group hover:opacity-85 transition-opacity"
           style={{
             position: "absolute",
             left: "50%",
@@ -242,19 +236,10 @@ const MainToolbarContent = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 8,
           }}
+          title="Ir para o Painel"
         >
-          <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 border border-primary/20 text-primary transition-transform group-hover:scale-105">
-            <Scale className="size-4" />
-          </div>
-          <div className="flex items-center text-sm font-bold tracking-tight text-foreground">
-            <span>SMART</span>
-            <span className="text-primary font-black ml-0.5">DOC</span>
-            <span className="ml-2 rounded border border-border/80 bg-muted/60 px-1.5 py-0.2 font-mono text-[9px] font-semibold text-muted-foreground uppercase tracking-widest">
-              2.0
-            </span>
-          </div>
+          <SmartDocBrand size="sm" badge="PRO" />
         </Link>
 
         {isMobile === false && (
@@ -471,7 +456,10 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
         },
       }),
       HorizontalRule,
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      TextAlign.configure({
+        types: ["heading", "paragraph"],
+        defaultAlignment: "justify",
+      }),
       TaskList,
       TaskItem.configure({ nested: true }),
       Highlight.configure({ multicolor: true }),
@@ -687,31 +675,71 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
           let modified = false;
           updates.forEach(updateTag => {
             const id = updateTag.getAttribute('id');
-            const action = updateTag.getAttribute('action'); // 'delete', 'replace', etc.
+            const action = updateTag.getAttribute('action') || 'replace';
             if (!id) return;
 
             const targetNode = currentDoc.querySelector(`[id="${id}"]`);
-            if (targetNode) {
-              if (action === 'delete' || updateTag.getAttribute('delete') === 'true' || updateTag.innerHTML.trim() === '') {
-                targetNode.remove();
-                modified = true;
-              } else {
-                // Se a tag <update> contém múltiplos filhos (ex: o nó original + um novo parágrafo inserido)
-                const children = Array.from(updateTag.children);
+            if (!targetNode) return;
+
+            if (action === 'delete' || updateTag.getAttribute('delete') === 'true') {
+              targetNode.remove();
+              modified = true;
+              return;
+            }
+
+            const children = Array.from(updateTag.children);
+
+            if (action === 'insert-after') {
+              const parent = targetNode.parentNode;
+              if (parent) {
                 if (children.length > 0) {
-                  // Substitui o targetNode por todos os filhos do updateTag
-                  const parent = targetNode.parentNode;
-                  if (parent) {
-                    children.forEach(child => {
-                      parent.insertBefore(child.cloneNode(true), targetNode);
-                    });
-                    parent.removeChild(targetNode);
-                    modified = true;
-                  }
+                  let refNode = targetNode.nextSibling;
+                  children.forEach(child => {
+                    parent.insertBefore(child.cloneNode(true), refNode);
+                  });
                 } else if (updateTag.textContent?.trim()) {
-                  targetNode.innerHTML = updateTag.innerHTML;
+                  const newP = currentDoc.createElement('p');
+                  newP.style.textAlign = 'justify';
+                  newP.innerHTML = updateTag.innerHTML;
+                  parent.insertBefore(newP, targetNode.nextSibling);
+                }
+                modified = true;
+              }
+              return;
+            }
+
+            if (action === 'insert-before') {
+              const parent = targetNode.parentNode;
+              if (parent) {
+                if (children.length > 0) {
+                  children.forEach(child => {
+                    parent.insertBefore(child.cloneNode(true), targetNode);
+                  });
+                } else if (updateTag.textContent?.trim()) {
+                  const newP = currentDoc.createElement('p');
+                  newP.style.textAlign = 'justify';
+                  newP.innerHTML = updateTag.innerHTML;
+                  parent.insertBefore(newP, targetNode);
+                }
+                modified = true;
+              }
+              return;
+            }
+
+            // action === 'replace' (ou padrão)
+            if (action === 'replace') {
+              if (children.length > 0) {
+                const parent = targetNode.parentNode;
+                if (parent) {
+                  children.forEach(child => {
+                    parent.insertBefore(child.cloneNode(true), targetNode);
+                  });
+                  parent.removeChild(targetNode);
                   modified = true;
                 }
+              } else if (updateTag.textContent?.trim()) {
+                targetNode.innerHTML = updateTag.innerHTML;
+                modified = true;
               }
             }
           });
@@ -955,22 +983,41 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
 
         <div
           className="simple-editor-content"
+          onClick={() => {
+            if (editable && editor && !editor.isFocused) {
+              editor.commands.focus();
+            }
+          }}
           style={{
             position: "relative",
+            minHeight: "1160px",
+            display: "flex",
+            flexDirection: "column",
+            cursor: editable ? "text" : "default",
             ["--editor-font-size" as keyof React.CSSProperties]: `${fontSize}px`,
-            userSelect: editable ? "text" : "none",
-            WebkitUserSelect: editable ? "text" : "none",
-            MozUserSelect: editable ? "text" : "none",
-            msUserSelect: editable ? "text" : "none",
           }}
         >
-          <div style={{
-            overflow: "visible",
-          }}>
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              minHeight: "100%",
+              overflow: "visible",
+              cursor: editable ? "text" : "default",
+            }}
+          >
             <EditorContent
               editor={editor}
               role="presentation"
               className="simple-editor-content-inner"
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                minHeight: "100%",
+                cursor: editable ? "text" : "default",
+              }}
             />
           </div>
           {children}

@@ -13,6 +13,7 @@ import Link from "next/link";
 import { LoadingOverlay } from "@/components/editor/LoadingOverlay";
 import { FloatingAiBar } from "@/components/editor/FloatingAiBar";
 import { DispositivosMapeados } from "@/components/editor/DispositivosMapeados";
+import { EstruturaPeticao } from "@/components/editor/EstruturaPeticao";
 import { renderPeticaoJsonToHtml, getPeticaoBlocks, PeticaoDocumentJson } from "@/lib/peticao-template";
 
 export default function EditorPage() {
@@ -46,6 +47,7 @@ export default function EditorPage() {
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [editorHtml, setEditorHtml] = useState<string>("");
+  const isDocEmpty = !editorHtml || editorHtml.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim().length === 0;
 
   // Função centralizada e segura para persistir no Supabase
   const saveToDatabase = useCallback(async (html: string) => {
@@ -582,11 +584,18 @@ export default function EditorPage() {
         </div>
       )}
 
-      {/* ── Layout principal: editor + sidebar de dispositivos ── */}
+      {/* ── Layout principal: editor + sidebars (Estrutura à esquerda + Dispositivos à direita) ── */}
       <div className="w-full pb-20">
+        {/* Sidebar de Estrutura da Peça — fixo à esquerda no desktop */}
+        {!isGenerating && !isTypewriting && (
+          <div className="hidden lg:block fixed top-24 left-3.5 z-40 w-64 min-[1600px]:w-80 max-h-[calc(100vh-120px)]">
+            <EstruturaPeticao editorHtml={editorHtml} />
+          </div>
+        )}
+
         {/* Sidebar de Dispositivos — fixo à direita no desktop */}
         {!isGenerating && !isTypewriting && (
-          <div className="hidden xl:block fixed top-24 right-4 z-40 w-64 2xl:w-72">
+          <div className="hidden lg:block fixed top-24 right-3.5 z-40 w-64 min-[1600px]:w-80 max-h-[calc(100vh-120px)]">
             <DispositivosMapeados editorHtml={editorHtml} />
           </div>
         )}
@@ -631,35 +640,31 @@ export default function EditorPage() {
               </div>
             </div>
           }
-        >
-          {!isGenerating && !isTypewriting && (
-            <div className="flex w-full flex-col items-center justify-center gap-4 rounded-b-2xl border-t border-border bg-card p-6 sm:p-8 text-center">
-              <div>
-                <h3 className="text-base font-bold text-foreground">
-                  Petição Pronta para Uso
-                </h3>
-                <p className="mt-1 max-w-md text-xs text-muted-foreground leading-relaxed">
-                  Você pode editar o texto livremente no editor acima ou fazer o download do arquivo Word (.docx).
-                </p>
-              </div>
+        />
 
-              <button
-                onClick={handleDownloadDocx}
-                disabled={isDownloading}
-                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-primary px-7 py-3 text-sm font-bold text-primary-foreground shadow-md transition-all hover:opacity-90 active:scale-95 disabled:pointer-events-none disabled:opacity-50 cursor-pointer"
-              >
-                {isDownloading ? (
-                  <span className="animate-pulse">Exportando...</span>
-                ) : (
-                  <>
-                    <FileDown size={18} />
-                    <span>Baixar Documento (.docx)</span>
-                  </>
-                )}
-              </button>
-            </div>
-          )}
-        </SimpleEditor>
+        {/* ── Botão Baixar Documento (.docx) Fixo em Baixo ── */}
+        {!isGenerating && !isTypewriting && (
+          <div className="fixed bottom-5 right-4 sm:right-6 z-50 animate-in fade-in slide-in-from-bottom-3">
+            <button
+              onClick={handleDownloadDocx}
+              disabled={isDownloading || isDocEmpty}
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-primary-foreground shadow-2xl border border-primary/30 backdrop-blur-md transition-all hover:opacity-95 hover:scale-[1.03] active:scale-95 disabled:pointer-events-none disabled:opacity-40 cursor-pointer"
+              title={isDocEmpty ? "Escreva ou gere uma petição para baixar o documento" : "Baixar documento Word (.docx)"}
+            >
+              {isDownloading ? (
+                <span className="animate-pulse flex items-center gap-2">
+                  <Loader2 className="size-4 animate-spin" />
+                  <span>Exportando...</span>
+                </span>
+              ) : (
+                <>
+                  <FileDown size={16} />
+                  <span>Baixar Documento (.docx)</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
 
         <FloatingAiBar
           isGenerating={isGenerating || isTypewriting}
