@@ -491,6 +491,24 @@ export default function EditorPage() {
     setIsDownloading(true);
 
     try {
+      // Extrai o nome da ação do HTML para sanitizar no nome do arquivo
+      let actionName = "";
+      const h2Match = draft.match(/<h2[^>]*>((?:(?!<\/h2>)[\s\S])*?)<\/h2>/i);
+      if (h2Match && h2Match[1]) {
+        const cleanH2 = h2Match[1].replace(/<[^>]+>/g, "").trim();
+        if (cleanH2 && !cleanH2.startsWith("I.") && !cleanH2.startsWith("II.") && !cleanH2.startsWith("III.")) {
+          actionName = cleanH2;
+        }
+      }
+
+      const sanitizedFilename = (actionName || "peticao-inicial")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 100) + ".docx";
+
       // Marca no banco de dados como CONCLUÍDO (completed) ao baixar
       if (currentDocId) {
         fetch(`/api/documents/${currentDocId}`, {
@@ -507,7 +525,7 @@ export default function EditorPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: "Peticao_Inicial_SmartDoc",
+          title: actionName || "peticao-inicial",
           content: draft
         })
       });
@@ -518,7 +536,7 @@ export default function EditorPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "peticao_inicial.docx";
+      a.download = sanitizedFilename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { ProcessosClient } from "./processos/processos-client";
 import {
   FileText,
@@ -90,6 +90,7 @@ interface UserProfile {
   plan?: string;
   petitions_limit?: number;
   petitions_used?: number;
+  extra_credits?: number;
   credits_reset_at?: string;
 }
 
@@ -206,12 +207,26 @@ export default function DashboardPage() {
     }
   };
 
+  const reloadProfile = useCallback(async () => {
+    try {
+      const res = await fetch("/api/user/profile");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.profile) {
+          setProfile(data.profile);
+        }
+      }
+    } catch (e) {
+      console.warn("Erro ao recarregar perfil:", e);
+    }
+  }, []);
+
   // Escuta confirmação de pagamento em tempo real via Supabase Realtime (SEM POLLING e com cleanup correto)
   useEffect(() => {
     if (!isPixModalOpen || !pixData?.externalId || pixSuccess) return;
 
     const externalId = pixData.externalId;
-    const planName = selectedPlan?.name || "Profissional Pro";
+    const planName = selectedPlan?.name || "Plano Profissional";
 
     // Criar canal único por ID de transação para evitar colisões
     const paymentChannel = supabase
@@ -224,11 +239,11 @@ export default function DashboardPage() {
           table: "payments",
           filter: `external_id=eq.${externalId}`,
         },
-        (payload) => {
+        async (payload) => {
           console.log("[Webhook Realtime] Pagamento confirmado:", payload);
           if (payload.new && (payload.new.status === "PAID" || payload.new.status === "COMPLETE")) {
             setPixSuccess(true);
-            setProfile((prev) => prev ? { ...prev, plan: planName } : null);
+            await reloadProfile();
             triggerPaymentToast(planName);
           }
         }
@@ -238,9 +253,9 @@ export default function DashboardPage() {
     return () => {
       supabase.removeChannel(paymentChannel);
     };
-  }, [isPixModalOpen, pixData?.externalId, pixSuccess, selectedPlan?.name]);
+  }, [isPixModalOpen, pixData?.externalId, pixSuccess, selectedPlan?.name, reloadProfile]);
 
-  // Ouvinte global em tempo real para pagamentos e atualizações de plano do usuário (mesmo com modal fechado)
+  // Ouvinte global em tempo real para pagamentos e atualizações de perfil do usuário (mesmo com modal fechado)
   useEffect(() => {
     if (!profile?.id) return;
 
@@ -254,9 +269,10 @@ export default function DashboardPage() {
           table: "payments",
           filter: `user_id=eq.${profile.id}`,
         },
-        (payload) => {
+        async (payload) => {
           if (payload.new && (payload.new.status === "PAID" || payload.new.status === "COMPLETE")) {
-            const plan = profile.plan || "Profissional Pro";
+            await reloadProfile();
+            const plan = profile.plan || "Plano Profissional";
             triggerPaymentToast(plan);
           }
         }
@@ -264,7 +280,7 @@ export default function DashboardPage() {
       .subscribe();
 
     const userProfileChannel = supabase
-      .channel(`user_profile_plan_${profile.id}`)
+      .channel(`user_profile_all_${profile.id}`)
       .on(
         "postgres_changes",
         {
@@ -274,9 +290,22 @@ export default function DashboardPage() {
           filter: `id=eq.${profile.id}`,
         },
         (payload) => {
-          if (payload.new?.plan && payload.new.plan !== profile.plan) {
-            setProfile((prev) => prev ? { ...prev, plan: payload.new.plan } : null);
-            triggerPaymentToast(payload.new.plan);
+          console.log("[Realtime Profiles UPDATE]:", payload.new);
+          if (payload.new) {
+            setProfile((prev) => {
+              if (!prev) return payload.new as UserProfile;
+              return {
+                ...prev,
+                plan: payload.new.plan ?? prev.plan,
+                petitions_limit: payload.new.petitions_limit ?? prev.petitions_limit,
+                petitions_used: payload.new.petitions_used ?? prev.petitions_used,
+                extra_credits: payload.new.extra_credits ?? prev.extra_credits,
+                credits_reset_at: payload.new.credits_reset_at ?? prev.credits_reset_at,
+              };
+            });
+            if (payload.new.plan && payload.new.plan !== profile.plan) {
+              triggerPaymentToast(payload.new.plan);
+            }
           }
         }
       )
@@ -286,7 +315,7 @@ export default function DashboardPage() {
       supabase.removeChannel(userPaymentChannel);
       supabase.removeChannel(userProfileChannel);
     };
-  }, [profile?.id, profile?.plan]);
+  }, [profile?.id, profile?.plan, reloadProfile]);
 
   const handleCopyPix = () => {
     if (pixData?.pixCode) {
@@ -296,30 +325,89 @@ export default function DashboardPage() {
     }
   };
 
-  // Notifications State
-  const [notifications, setNotifications] = useState([
-    {
-      id: "1",
-      title: "Modelos com Raciocínio Profundo Ativos",
-      description: "Agora as petições são geradas com jurisprudências atualizadas e fundamentação exaustiva.",
-      time: "Há 10 min",
-      read: false,
-    },
-    {
-      id: "2",
-      title: "Exportação em Word (.docx) Calibrada",
-      description: "Seus arquivos exportam com fonte Cambria e Visual Law perfeitamente formatados.",
-      time: "Há 1 hora",
-      read: false,
-    },
-    {
-      id: "3",
-      title: "Bem-vindo ao SmartDoc Pro",
-      description: "Você está no período de avaliação Pro com acesso completo.",
-      time: "Hoje",
-      read: true,
+  // Notificações Processuais em Tempo Real
+  interface ProcessNotification {
+    id: string;
+    processo_id?: string;
+    numero_processo?: string;
+    tribunal?: string;
+    title: string;
+    description: string;
+    time: string;
+    read: boolean;
+    created_at?: string;
+  }
+
+  const [notifications, setNotifications] = useState<ProcessNotification[]>([]);
+  const [loadingNotifs, setLoadingNotifs] = useState(false);
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setLoadingNotifs(true);
+      const res = await fetch("/api/processos/notificacoes");
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.notifications)) {
+          setNotifications(data.notifications);
+        }
+      }
+    } catch (e) {
+      console.warn("Erro ao buscar notificações processuais:", e);
+    } finally {
+      setLoadingNotifs(false);
     }
-  ]);
+  }, []);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  // Escuta novas movimentações em tempo real
+  useEffect(() => {
+    const channel = supabase
+      .channel("process_movements_realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "movimentacoes_processuais",
+        },
+        () => {
+          fetchNotifications();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchNotifications]);
+
+  const markAllNotificationsAsRead = async () => {
+    setNotifications([]);
+    try {
+      await fetch("/api/processos/notificacoes", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mark_all: true }),
+      });
+    } catch (e) {
+      console.warn("Erro ao marcar todas como lidas:", e);
+    }
+  };
+
+  const handleNotificationClick = async (notif: ProcessNotification) => {
+    setNotifications(prev => prev.filter(n => n.id !== notif.id));
+    try {
+      fetch("/api/processos/notificacoes", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notification_id: notif.id }),
+      }).catch(console.warn);
+    } catch (e) {}
+    setActiveTab("processos");
+  };
 
   const unreadNotificationsCount = notifications.filter(n => !n.read).length;
 
@@ -608,9 +696,6 @@ export default function DashboardPage() {
     }
   };
 
-  const markAllNotificationsAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-  };
 
   const filteredDocuments = documents.filter((doc) => {
     const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -816,9 +901,9 @@ export default function DashboardPage() {
             <Coins className="size-3.5 shrink-0 text-amber-500" />
             {(sidebarOpen || isDrawer) && (
               <div className="flex flex-1 items-center justify-between">
-                <span>Créditos de Petição</span>
+                <span>Planos & Créditos</span>
                 <span className="font-mono text-[9px] text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.2 rounded-full">
-                  {Math.max(0, (profile?.petitions_limit ?? 0) - (profile?.petitions_used ?? 0))}
+                  {Math.max(0, (profile?.petitions_limit ?? 0) - (profile?.petitions_used ?? 0)) + (profile?.extra_credits ?? 0)}
                 </span>
               </div>
             )}
@@ -890,7 +975,7 @@ export default function DashboardPage() {
                 <span>Saldo de Créditos</span>
               </span>
               <span className="font-mono text-[10px] font-bold text-foreground">
-                {Math.max(0, (profile?.petitions_limit ?? 0) - (profile?.petitions_used ?? 0))}
+                {Math.max(0, (profile?.petitions_limit ?? 0) - (profile?.petitions_used ?? 0)) + (profile?.extra_credits ?? 0)}
               </span>
             </div>
             
@@ -1025,7 +1110,7 @@ export default function DashboardPage() {
             </Button>
 
             {/* Notificações Dropdown */}
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
               <DropdownMenuTrigger render={
                 <Button variant="ghost" size="icon-xs" className="relative text-muted-foreground hover:text-foreground size-8 rounded-md">
                   <Bell className="size-3.5" />
@@ -1034,38 +1119,63 @@ export default function DashboardPage() {
                   )}
                 </Button>
               } />
-              <DropdownMenuContent align="end" className="w-80 p-2 border-border/80 bg-card/95 shadow-2xl backdrop-blur-xl">
+              <DropdownMenuContent align="end" className="w-84 sm:w-96 p-2 border-border/80 bg-card/95 shadow-2xl backdrop-blur-xl">
                 <div className="flex items-center justify-between px-2 py-1.5">
-                  <DropdownMenuLabel className="font-bold text-xs p-0 text-foreground">
-                    Avisos & Atualizações
-                  </DropdownMenuLabel>
+                  <div className="flex items-center gap-1.5">
+                    <DropdownMenuLabel className="font-bold text-xs p-0 text-foreground">
+                      Movimentações Processuais
+                    </DropdownMenuLabel>
+                    {unreadNotificationsCount > 0 && (
+                      <span className="font-mono text-[9px] bg-primary text-primary-foreground px-1.5 py-0.2 rounded-full font-bold">
+                        {unreadNotificationsCount} novas
+                      </span>
+                    )}
+                  </div>
                   {unreadNotificationsCount > 0 && (
                     <button
                       onClick={markAllNotificationsAsRead}
                       className="text-[10px] text-primary hover:underline font-medium cursor-pointer"
                     >
-                      Marcar lidas
+                      Marcar todas como lidas
                     </button>
                   )}
                 </div>
                 <DropdownMenuSeparator />
-                <div className="space-y-1 py-1 max-h-72 overflow-y-auto">
-                  {notifications.map((notif) => (
-                    <div
-                      key={notif.id}
-                      className={`p-2.5 rounded-lg text-xs transition-colors ${
-                        notif.read ? "text-muted-foreground hover:bg-muted/40" : "bg-primary/5 text-foreground hover:bg-primary/10"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between font-semibold">
-                        <span>{notif.title}</span>
-                        <span className="text-[10px] text-muted-foreground font-mono font-normal">{notif.time}</span>
-                      </div>
-                      <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">
-                        {notif.description}
+                <div className="space-y-1 py-1 max-h-80 overflow-y-auto pr-1.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-border/80 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-primary/50 [&::-webkit-scrollbar-track]:bg-transparent">
+                  {notifications.length === 0 ? (
+                    <div className="py-6 text-center px-4">
+                      <Scale className="size-6 text-muted-foreground/40 mx-auto mb-2" />
+                      <p className="text-xs font-semibold text-foreground">Nenhuma movimentação pendente</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        Novas publicações e andamentos de processos monitorados aparecerão aqui em tempo real.
                       </p>
                     </div>
-                  ))}
+                  ) : (
+                    notifications.map((notif) => (
+                      <div
+                        key={notif.id}
+                        onClick={() => handleNotificationClick(notif)}
+                        className={`p-2.5 rounded-lg text-xs transition-colors cursor-pointer ${
+                          notif.read ? "text-muted-foreground hover:bg-muted/40" : "bg-primary/5 text-foreground hover:bg-primary/10 border-l-2 border-primary"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between font-semibold gap-2">
+                          <span className="truncate text-primary font-mono text-[11px]">{notif.numero_processo || notif.title}</span>
+                          <span className="text-[10px] text-muted-foreground font-mono font-normal shrink-0">{notif.time}</span>
+                        </div>
+                        <p className="mt-1 text-[11px] text-foreground leading-relaxed line-clamp-3">
+                          {notif.description}
+                        </p>
+                        {notif.tribunal && (
+                          <div className="mt-1.5 flex items-center gap-1.5">
+                            <span className="font-mono text-[9px] bg-muted px-1.5 py-0.2 rounded text-muted-foreground">
+                              {notif.tribunal}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -1082,7 +1192,7 @@ export default function DashboardPage() {
             </Button>
 
             {/* Profile Dropdown Menu */}
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
               <DropdownMenuTrigger render={
                 <button className="flex items-center gap-1 rounded-full border border-border/80 p-0.5 hover:border-primary/50 transition-colors cursor-pointer outline-none">
                   <Avatar className="size-6">
@@ -1319,18 +1429,18 @@ export default function DashboardPage() {
             </div>
           )}
           
-          {/* ════ TAB 2: CRÉDITOS & PACOTES DE PETIÇÃO ════ */}
+          {/* ════ TAB 2: PLANOS MENSAIS & RECARGA AVULSA ════ */}
           {activeTab === "plans" && (
             <div className="space-y-6">
               <div className="border-b border-border/60 pb-5">
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold tracking-tight text-foreground">Créditos de Petição</h1>
+                  <h1 className="text-xl font-bold tracking-tight text-foreground">Planos & Assinaturas Mensais</h1>
                   <span className="font-mono text-[10px] bg-primary/10 border border-primary/20 text-primary px-2 py-0.5 rounded-full font-bold">
-                    Sem Mensalidade Fixa
+                    Renovação Mensal
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Adquira créditos sob demanda. Seus créditos são cumulativos, não possuem prazo de expiração e o valor por petição diminui em pacotes maiores.
+                  Seus créditos mensais são renovados e resetados automaticamente a cada 30 dias. Se precisar de mais peças antes do ciclo, utilize a Recarga Avulsa.
                 </p>
               </div>
 
@@ -1341,14 +1451,22 @@ export default function DashboardPage() {
                     <Coins className="size-5" />
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="text-sm font-bold text-foreground">
-                        Saldo Disponível: <strong className="text-primary font-black text-base">{Math.max(0, (profile?.petitions_limit ?? 0) - (profile?.petitions_used ?? 0))} Petições</strong>
+                        Saldo Disponível: <strong className="text-primary font-black text-base">
+                          {Math.max(0, (profile?.petitions_limit ?? 0) - (profile?.petitions_used ?? 0)) + (profile?.extra_credits ?? 0)} Petições
+                        </strong>
                       </span>
-                      <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[10px] font-bold">Sem Expiração</Badge>
+                      <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-bold">
+                        {profile?.plan || "Plano Start Mensal"}
+                      </Badge>
                     </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
-                      Você já utilizou <strong className="text-foreground">{profile?.petitions_used ?? 0}</strong> de um total de <strong className="text-foreground">{profile?.petitions_limit ?? 0}</strong> créditos adquiridos.
+                    <div className="text-xs text-muted-foreground mt-1 flex flex-wrap items-center gap-2">
+                      <span>Plano Mensal: <strong className="text-foreground">{Math.max(0, (profile?.petitions_limit ?? 0) - (profile?.petitions_used ?? 0))}</strong> de {profile?.petitions_limit ?? 0} restantes</span>
+                      {(profile?.extra_credits ?? 0) > 0 && (
+                        <span>• Créditos Avulsos: <strong className="text-emerald-500 font-semibold">+{profile?.extra_credits}</strong></span>
+                      )}
+                      <span>• Próximo Reset: <strong className="text-foreground">{profile?.credits_reset_at ? new Date(profile.credits_reset_at).toLocaleDateString('pt-BR') : 'Em 30 dias'}</strong></span>
                     </div>
                   </div>
                 </div>
@@ -1356,56 +1474,57 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3 sm:border-l sm:border-border/60 sm:pl-4">
                   <div className="text-right">
                     <div className="font-mono text-xs font-bold text-foreground">
-                      {Math.max(0, (profile?.petitions_limit ?? 0) - (profile?.petitions_used ?? 0))}
+                      {Math.max(0, (profile?.petitions_limit ?? 0) - (profile?.petitions_used ?? 0)) + (profile?.extra_credits ?? 0)}
                     </div>
-                    <div className="text-[10px] text-muted-foreground">Créditos Restantes</div>
+                    <div className="text-[10px] text-muted-foreground">Total Disponível</div>
                   </div>
                 </div>
               </div>
 
-              {/* Grade de Pacotes de Créditos (4 Colunas) */}
+              {/* Grade de 3 Planos Mensais + 1 Pacote Avulso */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {/* 1. Pacote Start (10 Petições) */}
+                {/* 1. Plano Start Mensal */}
                 <div className="flex flex-col justify-between rounded-xl border border-border/70 bg-card/60 p-4.5 backdrop-blur-md">
                   <div>
                     <div className="flex items-center justify-between">
                       <span className="font-mono text-[10px] text-muted-foreground uppercase border border-border px-2 py-0.5 rounded-md">Start</span>
-                      <span className="font-mono text-[10px] text-muted-foreground">R$ 0,10/petição</span>
+                      <span className="font-mono text-[10px] font-semibold text-emerald-500">R$ 3,13/petição</span>
                     </div>
-                    <div className="mt-3 text-2xl font-extrabold text-foreground">
-                      R$ 1,00
+                    <div className="mt-3 flex items-baseline gap-1">
+                      <span className="text-2xl font-extrabold text-foreground">R$ 47</span>
+                      <span className="text-xs text-muted-foreground font-medium">/mês</span>
                     </div>
                     <div className="mt-1 text-xs font-bold text-primary">
-                      10 Petições
+                      15 Petições /mês
                     </div>
                     <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
-                      Ideal para demandas pontuais ou experimentar a tecnologia.
+                      Ideal para demandas essenciais e advogados autônomos.
                     </p>
                     
                     <ul className="mt-4 space-y-1.5 text-xs text-muted-foreground">
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> 10 Petições completas</li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Créditos sem validade</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> 15 Petições completas/mês</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Reset mensal a cada 30 dias</li>
                       <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Exportação Word (.docx)</li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Ditado e revisão por IA</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Acompanhamento Processual Esaj</li>
                     </ul>
                   </div>
 
                   <Button
                     variant="outline"
                     onClick={() => handleOpenPixModal({
-                      id: "pack_10",
-                      name: "Inicial (10 Petições)",
-                      price: 1.00,
-                      description: "Pacote Inicial SmartDoc - 10 Créditos de Petição (Teste)",
+                      id: "plan_start",
+                      name: "Start Mensal (15 Petições/mês)",
+                      price: 47.00,
+                      description: "Assinatura SmartDoc - Plano Start Mensal (15 Petições/mês)",
                     })}
                     className="mt-5 w-full text-xs h-9 border-border font-semibold hover:bg-muted/80 gap-1.5"
                   >
                     <Zap className="size-3.5 text-primary" />
-                    <span>Comprar 10 Créditos (Pix)</span>
+                    <span>Assinar Start (Pix)</span>
                   </Button>
                 </div>
 
-                {/* 2. Pacote Profissional (30 Petições - Destaque) */}
+                {/* 2. Plano Profissional Mensal (Destaque) */}
                 <div className="relative flex flex-col justify-between rounded-xl border-2 border-primary bg-card/80 p-4.5 shadow-lg shadow-primary/5 backdrop-blur-md">
                   <div className="absolute -top-2.5 right-3 rounded-full bg-primary px-2 py-0.5 font-mono text-[9px] font-bold text-primary-foreground uppercase">
                     Mais Escolhido
@@ -1413,120 +1532,124 @@ export default function DashboardPage() {
                   <div>
                     <div className="flex items-center justify-between">
                       <span className="font-mono text-[10px] text-primary uppercase bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-md font-semibold">Profissional</span>
-                      <span className="font-mono text-[10px] font-semibold text-emerald-500">R$ 3,23/petição</span>
+                      <span className="font-mono text-[10px] font-semibold text-emerald-500">R$ 2,42/petição</span>
                     </div>
-                    <div className="mt-3 text-2xl font-extrabold text-foreground">
-                      R$ 97
+                    <div className="mt-3 flex items-baseline gap-1">
+                      <span className="text-2xl font-extrabold text-foreground">R$ 97</span>
+                      <span className="text-xs text-muted-foreground font-medium">/mês</span>
                     </div>
                     <div className="mt-1 text-xs font-bold text-primary flex items-center justify-between">
-                      <span>30 Petições</span>
-                      <span className="font-mono text-[10px] bg-primary/10 px-1.5 py-0.2 rounded text-primary">Economize 31%</span>
+                      <span>40 Petições /mês</span>
+                      <span className="font-mono text-[10px] bg-primary/10 px-1.5 py-0.2 rounded text-primary">Economize 23%</span>
                     </div>
                     <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
-                      Para advogados com fluxo recorrente de peças e prazos.
+                      Para advogados com fluxo frequente de peças e prazos.
                     </p>
                     
                     <ul className="mt-4 space-y-1.5 text-xs text-foreground font-medium">
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> <strong>30 Petições completas</strong></li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Créditos sem validade</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> <strong>40 Petições completas/mês</strong></li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Reset mensal a cada 30 dias</li>
                       <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Exportação Word (.docx)</li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Ditado e revisão por IA</li>
-                    </ul>
-                  </div>
-
-                  <Button
-                    onClick={() => handleOpenPixModal({
-                      id: "pack_30",
-                      name: "Profissional (30 Petições)",
-                      price: 97.00,
-                      description: "Pacote Profissional SmartDoc - 30 Créditos de Petição",
-                    })}
-                    className="mt-5 w-full text-xs h-9 bg-primary text-primary-foreground font-semibold shadow-xs hover:opacity-90 gap-1.5"
-                  >
-                    <Crown className="size-3.5" />
-                    <span>Comprar 30 Créditos (Pix)</span>
-                  </Button>
-                </div>
-
-                {/* 3. Pacote Escritório (80 Petições) */}
-                <div className="flex flex-col justify-between rounded-xl border border-border/70 bg-card/60 p-4.5 backdrop-blur-md">
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-[10px] text-muted-foreground uppercase border border-border px-2 py-0.5 rounded-md">Escritório</span>
-                      <span className="font-mono text-[10px] font-semibold text-emerald-500">R$ 2,46/petição</span>
-                    </div>
-                    <div className="mt-3 text-2xl font-extrabold text-foreground">
-                      R$ 197
-                    </div>
-                    <div className="mt-1 text-xs font-bold text-primary flex items-center justify-between">
-                      <span>80 Petições</span>
-                      <span className="font-mono text-[10px] bg-primary/10 px-1.5 py-0.2 rounded text-primary">Economize 48%</span>
-                    </div>
-                    <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
-                      Excelente para bancas e escritórios em expansão.
-                    </p>
-                    
-                    <ul className="mt-4 space-y-1.5 text-xs text-muted-foreground">
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> 80 Petições completas</li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Créditos sem validade</li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Exportação Word (.docx)</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Acompanhamento Processual Esaj</li>
                       <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Suporte prioritário via WhatsApp</li>
                     </ul>
                   </div>
 
                   <Button
-                    variant="outline"
                     onClick={() => handleOpenPixModal({
-                      id: "pack_80",
-                      name: "Escritório (80 Petições)",
-                      price: 197.00,
-                      description: "Pacote Escritório SmartDoc - 80 Créditos de Petição",
+                      id: "plan_pro",
+                      name: "Profissional Mensal (40 Petições/mês)",
+                      price: 97.00,
+                      description: "Assinatura SmartDoc - Plano Profissional Mensal (40 Petições/mês)",
                     })}
-                    className="mt-5 w-full text-xs h-9 border-border font-semibold hover:bg-muted/80 gap-1.5"
+                    className="mt-5 w-full text-xs h-9 bg-primary text-primary-foreground font-semibold shadow-xs hover:opacity-90 gap-1.5"
                   >
-                    <Briefcase className="size-3.5 text-primary" />
-                    <span>Comprar 80 Créditos (Pix)</span>
+                    <Crown className="size-3.5" />
+                    <span>Assinar Profissional (Pix)</span>
                   </Button>
                 </div>
 
-                {/* 4. Pacote Elite (200 Petições) */}
+                {/* 3. Plano Escritório Mensal */}
                 <div className="flex flex-col justify-between rounded-xl border border-border/70 bg-card/60 p-4.5 backdrop-blur-md">
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-[10px] text-muted-foreground uppercase border border-border px-2 py-0.5 rounded-md">Elite & Volume</span>
-                      <span className="font-mono text-[10px] font-semibold text-emerald-500">R$ 1,73/petição</span>
+                      <span className="font-mono text-[10px] text-muted-foreground uppercase border border-border px-2 py-0.5 rounded-md">Escritório</span>
+                      <span className="font-mono text-[10px] font-semibold text-emerald-500">R$ 1,97/petição</span>
                     </div>
-                    <div className="mt-3 text-2xl font-extrabold text-foreground">
-                      R$ 347
+                    <div className="mt-3 flex items-baseline gap-1">
+                      <span className="text-2xl font-extrabold text-foreground">R$ 197</span>
+                      <span className="text-xs text-muted-foreground font-medium">/mês</span>
                     </div>
                     <div className="mt-1 text-xs font-bold text-primary flex items-center justify-between">
-                      <span>200 Petições</span>
-                      <span className="font-mono text-[10px] bg-primary/10 px-1.5 py-0.2 rounded text-primary">Economize 63%</span>
+                      <span>100 Petições /mês</span>
+                      <span className="font-mono text-[10px] bg-primary/10 px-1.5 py-0.2 rounded text-primary">Economize 37%</span>
                     </div>
                     <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
-                      Máxima economia para bancas de alto volume processual.
+                      Excelente para bancas e escritórios de alto volume.
                     </p>
                     
                     <ul className="mt-4 space-y-1.5 text-xs text-muted-foreground">
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> 200 Petições completas</li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Créditos sem validade</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> 100 Petições completas/mês</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Reset mensal a cada 30 dias</li>
                       <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Exportação Word (.docx)</li>
-                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Gerente de conta dedicado</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Acompanhamento Processual Esaj</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Gerente de conta dedicado VIP</li>
                     </ul>
                   </div>
 
                   <Button
                     variant="outline"
                     onClick={() => handleOpenPixModal({
-                      id: "pack_200",
-                      name: "Elite (200 Petições)",
-                      price: 347.00,
-                      description: "Pacote Elite SmartDoc - 200 Créditos de Petição",
+                      id: "plan_office",
+                      name: "Escritório Mensal (100 Petições/mês)",
+                      price: 197.00,
+                      description: "Assinatura SmartDoc - Plano Escritório Mensal (100 Petições/mês)",
                     })}
                     className="mt-5 w-full text-xs h-9 border-border font-semibold hover:bg-muted/80 gap-1.5"
                   >
-                    <Scale className="size-3.5 text-primary" />
-                    <span>Comprar 200 Créditos (Pix)</span>
+                    <Briefcase className="size-3.5 text-primary" />
+                    <span>Assinar Escritório (Pix)</span>
+                  </Button>
+                </div>
+
+                {/* 4. Pacote Avulso de Recarga (Sem Validade) */}
+                <div className="flex flex-col justify-between rounded-xl border border-dashed border-primary/50 bg-primary/5 p-4.5 backdrop-blur-md">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] text-primary uppercase bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-md font-semibold">Avulso</span>
+                      <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none text-[9px] font-bold">Sem Expiração</Badge>
+                    </div>
+                    <div className="mt-3 flex items-baseline gap-1">
+                      <span className="text-2xl font-extrabold text-foreground">R$ 47</span>
+                      <span className="text-xs text-muted-foreground font-medium">único</span>
+                    </div>
+                    <div className="mt-1 text-xs font-bold text-primary">
+                      +10 Petições Extras
+                    </div>
+                    <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                      Acabou o saldo do mês? Recarregue créditos extras imediatos.
+                    </p>
+                    
+                    <ul className="mt-4 space-y-1.5 text-xs text-muted-foreground">
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> 10 Petições completas</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Não expiram no fim do mês</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Ativação imediata no saldo</li>
+                      <li className="flex items-center gap-2"><Check className="size-3.5 text-primary shrink-0" /> Exportação Word (.docx)</li>
+                    </ul>
+                  </div>
+
+                  <Button
+                    variant="secondary"
+                    onClick={() => handleOpenPixModal({
+                      id: "pack_avulso",
+                      name: "Recarga Avulsa (10 Petições)",
+                      price: 47.00,
+                      description: "Recarga Avulsa SmartDoc - 10 Créditos Extras de Petição",
+                    })}
+                    className="mt-5 w-full text-xs h-9 border border-border font-semibold hover:bg-muted/80 gap-1.5"
+                  >
+                    <Plus className="size-3.5 text-primary" />
+                    <span>Recarregar 10 Petições</span>
                   </Button>
                 </div>
               </div>

@@ -25,8 +25,8 @@ export async function GET(request: Request) {
       query = query.eq("status", status);
     }
 
-    if (search) {
-      query = query.ilike("title", `%${search}%`);
+    if (search && search.trim()) {
+      query = query.or(`title.ilike.%${search}%,summary.ilike.%${search}%,action_type.ilike.%${search}%`);
     }
 
     const { data, error } = await query;
@@ -38,11 +38,12 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ documents: data || [] });
   } catch (err: any) {
-    return NextResponse.json({ error: err?.message || "Erro interno" }, { status: 500 });
+    console.error("Unexpected error:", err);
+    return NextResponse.json({ error: err.message || "Erro interno" }, { status: 500 });
   }
 }
 
-// POST /api/documents - Criar novo documento
+// POST /api/documents - Criar novo rascunho de petição e debitar créditos com suporte a reset mensal e avulsos
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
@@ -55,24 +56,40 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { title, action_type, facts, content_html, summary, status = "draft" } = body;
 
-    // 1. Verificar saldo de créditos de petição do usuário
+    // 1. Verificar perfil e créditos
     const { data: profile } = await supabase
       .from("profiles")
-      .select("plan, plan_status, petitions_limit, petitions_used")
+      .select("plan, plan_status, petitions_limit, petitions_used, extra_credits, credits_reset_at")
       .eq("id", user.id)
       .maybeSingle();
 
-    const limit = profile?.petitions_limit ?? 0;
-    const used = profile?.petitions_used ?? 0;
-    const available = Math.max(0, limit - used);
+    let limit = profile?.petitions_limit ?? 15;
+    let used = profile?.petitions_used ?? 0;
+    let extra = profile?.extra_credits ?? 0;
+    const resetAt = profile?.credits_reset_at ? new Date(profile.credits_reset_at) : null;
+
+    // Auto-reset se a data mensal venceu
+    if (resetAt && resetAt <= new Date()) {
+      used = 0;
+      await supabase
+        .from("profiles")
+        .update({
+          petitions_used: 0,
+          credits_reset_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        })
+        .eq("id", user.id);
+    }
+
+    const monthlyAvailable = Math.max(0, limit - used);
+    const totalAvailable = monthlyAvailable + extra;
 
     // Trava de esgotamento de créditos
-    if (available <= 0) {
+    if (totalAvailable <= 0) {
       return NextResponse.json(
         {
-          error: "Seus créditos de petição se esgotaram. Adquira um novo pacote de créditos para continuar gerando peças com IA.",
+          error: "Seus créditos de petição se esgotaram. Renove seu plano mensal ou adquira um pacote avulso para continuar gerando peças com IA.",
           code: "CREDITS_EXHAUSTED",
-          credits: { used, limit, available: 0 },
+          credits: { used, limit, extra, available: 0 },
         },
         { status: 403 }
       );
@@ -99,23 +116,34 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // 3. Incrementar contador de créditos utilizados
-    await supabase
-      .from("profiles")
-      .update({
-        petitions_used: used + 1,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", user.id);
+    // 3. Debitar crédito: primeiro consome do limite mensal; se esgotado, consome do saldo avulso
+    if (monthlyAvailable > 0) {
+      await supabase
+        .from("profiles")
+        .update({
+          petitions_used: used + 1,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", user.id);
+    } else {
+      await supabase
+        .from("profiles")
+        .update({
+          extra_credits: Math.max(0, extra - 1),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", user.id);
+    }
 
     return NextResponse.json(
       {
         document: data,
-        credits: { used: used + 1, limit },
+        credits: { used: used + 1, limit, extra: monthlyAvailable > 0 ? extra : Math.max(0, extra - 1) },
       },
       { status: 201 }
     );
   } catch (err: any) {
-    return NextResponse.json({ error: err?.message || "Erro interno" }, { status: 500 });
+    console.error("Unexpected error:", err);
+    return NextResponse.json({ error: err.message || "Erro interno" }, { status: 500 });
   }
 }

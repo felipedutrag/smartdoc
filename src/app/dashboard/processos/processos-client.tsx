@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, RefreshCcw, Search, Scale, ChevronDown, ChevronUp, Loader2, Clock } from "lucide-react";
+import { Plus, RefreshCcw, Search, Scale, ChevronDown, ChevronUp, Loader2, Clock, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,7 @@ export function ProcessosClient() {
   const [loading, setLoading] = useState(true);
   const [numero, setNumero] = useState("");
   const [isSyncing, setIsSyncing] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
@@ -82,12 +83,28 @@ export function ProcessosClient() {
     }
   };
 
+  const handleDeleteProcesso = async (processoId: string) => {
+    if (!confirm("Tem certeza que deseja remover este processo do acompanhamento?")) {
+      return;
+    }
+    setDeletingId(processoId);
+    try {
+      const { error } = await supabase.from("processos").delete().eq("id", processoId);
+      if (error) throw error;
+      setProcessos((prev) => prev.filter((p) => p.id !== processoId));
+    } catch (err: any) {
+      alert("Erro ao excluir processo: " + (err.message || "Tente novamente"));
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const toggleExpand = (id: string) => {
     setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto w-full">
+    <div className="space-y-6 w-full">
       <Card className="bg-card/60 backdrop-blur border-border/60">
         <CardHeader>
           <CardTitle>Adicionar Processo</CardTitle>
@@ -150,13 +167,16 @@ export function ProcessosClient() {
                       <p className="text-sm text-muted-foreground line-clamp-1"><span className="font-semibold text-foreground/80">Assunto:</span> {p.assunto}</p>
                     </div>
                     
-                    <div className="flex gap-2 w-full md:w-auto shrink-0">
+                    <div className="flex items-center gap-2 w-full md:w-auto shrink-0">
                       <Button variant="outline" size="sm" className="flex-1 md:flex-none border-border/60" onClick={() => toggleExpand(p.id)}>
                         {expanded[p.id] ? "Recolher Histórico" : "Ver Todas"}
                         {expanded[p.id] ? <ChevronUp className="size-4 ml-2"/> : <ChevronDown className="size-4 ml-2"/>}
                       </Button>
-                      <Button size="sm" variant="secondary" className="px-3 bg-muted border border-border/60" disabled={isSyncing === p.id} onClick={() => handleSync(p.numero_processo, p.id)}>
+                      <Button size="sm" variant="secondary" className="px-3 bg-muted border border-border/60" disabled={isSyncing === p.id} onClick={() => handleSync(p.numero_processo, p.id)} title="Sincronizar Andamentos">
                         <RefreshCcw className={`size-4 ${isSyncing === p.id ? "animate-spin text-primary" : "text-muted-foreground"}`} />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="px-2.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 border border-border/60" disabled={deletingId === p.id} onClick={() => handleDeleteProcesso(p.id)} title="Excluir do Acompanhamento">
+                        {deletingId === p.id ? <Loader2 className="size-4 animate-spin text-destructive" /> : <Trash2 className="size-4" />}
                       </Button>
                     </div>
                   </div>
