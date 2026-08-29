@@ -402,13 +402,13 @@ export default function Home() {
                   <span className="font-bold text-foreground">JOÃO DA SILVA</span>, brasileiro, solteiro, analista de sistemas, portador do RG nº 12.345.678-9 SSP/SP e inscrito no CPF sob o nº ***.123.456-**, residente e domiciliado na Rua das Flores, nº 100, São Paulo/SP, por intermédio de seu advogado constituído, vem, respeitosamente, perante Vossa Excelência, propor a presente:
                 </div>
 
-                <div className="h-2" />
+                <div className="h-3" />
 
-                <div className="text-center font-sans font-bold text-xs sm:text-sm text-primary py-1 tracking-tight">
+                <div className="text-center font-sans font-bold text-xs sm:text-sm text-primary tracking-tight">
                   AÇÃO DE OBRIGAÇÃO DE FAZER C/C REPARAÇÃO POR DANOS MORAIS E MATERIAIS COM TUTELA DE URGÊNCIA
                 </div>
 
-                <div className="h-2" />
+                <div className="h-3" />
 
                 <div className="text-justify text-[11px] sm:text-[11.5px] leading-relaxed">
                   em face de <span className="font-bold text-foreground">TECH PRIME SOLUÇÕES DIGITAIS S.A.</span>, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº 12.345.678/0001-90, com sede na Av. Paulista, nº 1500, Bela Vista, São Paulo/SP, CEP 01310-200, pelas razões de fato e de direito a seguir expostas:

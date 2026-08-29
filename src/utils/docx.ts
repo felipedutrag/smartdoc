@@ -132,10 +132,10 @@ export function parseHtmlToDocxElements(rawHtml: string, title?: string): Paragr
       }
     } else if (tag === "h2" || tag === "h1") {
       if (isCenter) {
-        // NOME DA AÇÃO: 16pt (size: 32), Negrito, Centralizado, 1 linha acima e 1 linha abaixo
+        // NOME DA AÇÃO: 16pt (size: 32), Negrito, Centralizado, margens zeradas pois o HTML tem <p><br></p> explícito
         paragraphs.push(
           new Paragraph({
-            spacing: { line: 360, before: 240, after: 240 },
+            spacing: { line: 360, before: 0, after: 0 },
             alignment: AlignmentType.CENTER,
             children: parseInlineToRuns(inner.toUpperCase(), 32, true),
           })
