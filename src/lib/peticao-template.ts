@@ -63,7 +63,7 @@ export function getPeticaoBlocks(data: PeticaoDocumentJson): string[] {
   // 2. Preâmbulo / Qualificação das Partes
   const autorNome = partes?.autor?.nome || "[NOME DO AUTOR]";
   const autorQualif = partes?.autor?.qualificacao || "[nacionalidade], [estado civil], [profissão], inscrito no CPF nº [Número], residente em [Endereço]";
-  
+
   // Garantir captura do tipo de ação mesmo se a IA aninhar fora de partes ou com outro nome
   const tipoAcao = (
     partes?.tipoAcao ||
@@ -85,9 +85,9 @@ export function getPeticaoBlocks(data: PeticaoDocumentJson): string[] {
   // Linha pulada antes do nome da ação (editável)
   blocks.push(`<p><br></p>`);
 
-  // Nome da Ação (Centralizado)
+  // Nome da Ação (Centralizado sem qualquer margem top ou bottom)
   blocks.push(
-    `<h2 style="text-align: center; text-transform: uppercase;">${tipoAcao}</h2>`
+    `<h2 style="text-align: center; text-transform: uppercase; margin: 0; margin-top: 0; margin-bottom: 0;">${tipoAcao}</h2>`
   );
 
   // Linha pulada após o nome da ação (editável)
