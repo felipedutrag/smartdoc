@@ -11,6 +11,11 @@ export const metadata: Metadata = {
   title: "SmartDoc | Gerador de Petições Judiciais",
   description: "Gere petições iniciais completas e fundamentadas usando inteligência artificial jurídica. Ganhe produtividade no seu escritório de advocacia.",
   keywords: "petição judicial, petição inicial, gerador de petição, ia para advogados, inteligência artificial jurídica, smartdoc, software jurídico",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
   openGraph: {
     title: "SmartDoc | Gerador de Petições Judiciais",
     description: "Gere petições iniciais completas e fundamentadas usando inteligência artificial jurídica.",
