@@ -40,6 +40,11 @@
     font-weight: normal;
     margin-top: 0;
     margin-bottom: 0.75rem;
+
+    &:empty,
+    &:has(br:only-child) {
+      margin-bottom: 0;
+    }
   }
 
   // Selection styles
