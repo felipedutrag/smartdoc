@@ -17,10 +17,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Fatos não fornecidos." }, { status: 400 });
     }
 
-    const modelName = "gemini-3.1-flash-lite";
-    console.log(`\n======================================================`);
-    console.log(`[GERADOR DE PETIÇÕES] 🚀 Modelo Gemini Ativo: ${modelName}`);
-    console.log(`======================================================\n`);
+    const FALLBACK_MODELS = [
+      "gemini-2.5-flash",
+      "gemini-3.5-flash",
+      "gemini-2.5-flash-lite",
+      "gemini-3.5-flash-lite",
+      "gemini-3.1-flash-lite",
+    ];
 
     const knowledgeBase = await getLegalKnowledgeBase(facts);
     
@@ -134,23 +137,46 @@ REGRAS RÍGIDAS DE CONTROLE, SEGURANÇA E FIDELIDADE JURÍDICA (ANTI-ALUCINAÇÃ
 `;
 
     const prompt = `Fatos narrados para a elaboração da petição:\n${facts}`;
-
     const genAI = new GoogleGenerativeAI(geminiKey);
-    const model = genAI.getGenerativeModel({
-      model: modelName,
-      systemInstruction: systemInstruction,
-      generationConfig: {
-        temperature: 0.3,
-        topP: 0.95,
-        maxOutputTokens: 16384,
-        responseMimeType: "application/json",
-      },
-    });
 
-    const result = await model.generateContentStream(prompt);
+    let activeResult: any = null;
+    let successfulModel = "";
+    let lastError: any = null;
 
-    if (result.response) {
-      result.response.catch(() => {});
+    for (const modelName of FALLBACK_MODELS) {
+      try {
+        console.log(`\n======================================================`);
+        console.log(`[GERADOR DE PETIÇÕES] 🚀 Tentando modelo: ${modelName}`);
+        console.log(`======================================================\n`);
+
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          systemInstruction: systemInstruction,
+          generationConfig: {
+            temperature: 0.3,
+            topP: 0.95,
+            maxOutputTokens: 16384,
+            responseMimeType: "application/json",
+          },
+        });
+
+        const result = await model.generateContentStream(prompt);
+        if (result.response) {
+          result.response.catch(() => {});
+        }
+
+        activeResult = result;
+        successfulModel = modelName;
+        console.log(`[GERADOR DE PETIÇÕES] ✅ Conectado com sucesso ao modelo: ${modelName}`);
+        break;
+      } catch (err: any) {
+        lastError = err;
+        console.warn(`[GERADOR DE PETIÇÕES] ⚠️ Falha no modelo ${modelName}:`, err?.message || err);
+      }
+    }
+
+    if (!activeResult) {
+      throw new Error(`Todos os modelos de fallback falharam. Último erro: ${lastError?.message || lastError}`);
     }
 
     const stream = new ReadableStream({
@@ -176,7 +202,7 @@ REGRAS RÍGIDAS DE CONTROLE, SEGURANÇA E FIDELIDADE JURÍDICA (ANTI-ALUCINAÇÃ
         };
 
         try {
-          for await (const chunk of result.stream) {
+          for await (const chunk of activeResult.stream) {
             if (closed) break;
             let content = "";
             try {
@@ -197,7 +223,7 @@ REGRAS RÍGIDAS DE CONTROLE, SEGURANÇA E FIDELIDADE JURÍDICA (ANTI-ALUCINAÇÃ
           safeClose();
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);
-          console.error(`Stream generation error (${modelName}):`, msg);
+          console.error(`Stream generation error (${successfulModel}):`, msg);
           safeError(e);
         }
       },
