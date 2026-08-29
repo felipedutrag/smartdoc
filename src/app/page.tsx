@@ -28,6 +28,7 @@ import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { SmartDocLogo } from "@/components/brand-logo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -149,7 +150,7 @@ export default function Home() {
           {/* Brand Logo */}
           <Link href="/" className="group flex items-center gap-2 shrink-0">
             <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 border border-primary/20 text-primary transition-transform group-hover:scale-105">
-              <Scale className="size-4" />
+              <SmartDocLogo className="size-4" />
             </div>
             <div className="flex items-center text-sm font-bold tracking-tight">
               <span>SMART</span>
@@ -770,7 +771,7 @@ export default function Home() {
       {/* ── FOOTER (Centralizado e Limpo) ── */}
       <footer className="relative z-10 flex w-full flex-col sm:flex-row items-center justify-between gap-3 border-t border-border/60 px-6 py-6 text-xs text-muted-foreground bg-muted/20">
         <div className="flex items-center gap-2">
-          <Scale className="size-3.5 text-primary" />
+          <SmartDocLogo className="size-3.5 text-primary" />
           <span className="font-semibold text-foreground">SmartDoc</span>
           <span>© {new Date().getFullYear()} — Tecnologia Jurídica com IA. Todos os direitos reservados.</span>
         </div>

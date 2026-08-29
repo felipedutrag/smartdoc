@@ -47,6 +47,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
+import { SmartDocLogo } from "@/components/brand-logo";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -732,7 +733,7 @@ export default function DashboardPage() {
         <div className="flex h-14 items-center justify-between border-b border-border/70 px-4">
           <Link href="/" className="flex items-center gap-2 overflow-hidden text-sm font-bold tracking-tight">
             <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary">
-              <Scale className="size-3.5" />
+              <SmartDocLogo className="size-3.5" />
             </div>
             {(sidebarOpen || isDrawer) && (
               <div className="flex items-center">
