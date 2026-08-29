@@ -12,7 +12,7 @@ import Link from "next/link";
 
 import { LoadingOverlay } from "@/components/editor/LoadingOverlay";
 import { FloatingAiBar } from "@/components/editor/FloatingAiBar";
-import { renderPeticaoJsonToHtml, getPeticaoBlocks, PeticaoDocumentJson } from "@/lib/peticao-template";
+import { renderPeticaoJsonToHtml, getPeticaoBlocks, safeParsePeticaoJson, PeticaoDocumentJson } from "@/lib/peticao-template";
 
 export default function EditorPage() {
   const isMobileRaw = useIsBreakpoint("max", 860);
@@ -393,16 +393,9 @@ export default function EditorPage() {
             console.warn(`Stream interrompido na tentativa ${retryCount + 1}: ${streamMsg}`);
           }
 
-          // Parse JSON e inicia digitação progressiva
+          // Parse JSON e inicia digitação progressiva blindado contra caracteres de controle
           try {
-            let cleanJsonStr = fullJsonText.trim();
-            if (cleanJsonStr.startsWith("```json")) {
-              cleanJsonStr = cleanJsonStr.replace(/^```json/, "").replace(/```$/, "").trim();
-            } else if (cleanJsonStr.startsWith("```")) {
-              cleanJsonStr = cleanJsonStr.replace(/^```/, "").replace(/```$/, "").trim();
-            }
-
-            const parsedJson: PeticaoDocumentJson = JSON.parse(cleanJsonStr);
+            const parsedJson: PeticaoDocumentJson = safeParsePeticaoJson(fullJsonText);
             const blocks = getPeticaoBlocks(parsedJson);
             const renderedHtml = renderPeticaoJsonToHtml(parsedJson);
 
