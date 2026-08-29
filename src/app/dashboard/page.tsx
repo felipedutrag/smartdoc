@@ -1141,7 +1141,7 @@ export default function DashboardPage() {
                   )}
                 </div>
                 <DropdownMenuSeparator />
-                <div className="space-y-1 py-1 max-h-80 overflow-y-auto pr-1.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-border/80 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-primary/50 [&::-webkit-scrollbar-track]:bg-transparent">
+                <div className="space-y-1 py-1 max-h-80 overflow-y-auto pr-1.5 custom-scrollbar-dark">
                   {notifications.length === 0 ? (
                     <div className="py-6 text-center px-4">
                       <Scale className="size-6 text-muted-foreground/40 mx-auto mb-2" />
