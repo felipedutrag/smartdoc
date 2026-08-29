@@ -307,15 +307,15 @@ export default function Home() {
       <section id="inicio" className="relative z-10 flex w-full flex-col items-center px-4 pt-24 sm:pt-36 pb-12 text-center">
         <div className="flex w-full max-w-4xl flex-col items-center mx-auto">
 
-          {/* Micro Linear Badge — animado */}
-          <div className="animate-slide-up opacity-0 [animation-fill-mode:forwards] mb-5 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1.5 text-xs font-medium text-primary shadow-xs backdrop-blur-sm">
+          {/* Micro Linear Badge */}
+          <div className="animate-slide-up mb-5 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1.5 text-xs font-medium text-primary shadow-xs backdrop-blur-sm">
             <span className="flex size-1.5 rounded-full bg-primary animate-pulse" />
             <span className="font-semibold">Editor de Texto para Advogados</span>
             <ChevronRight className="size-3" />
           </div>
 
-          {/* Main Title — animado com delay */}
-          <h1 className="animate-slide-up opacity-0 [animation-fill-mode:forwards] delay-200 mb-4 text-2xl sm:text-4xl md:text-[42px] font-extrabold tracking-tight text-foreground leading-[1.15] max-w-2xl sm:max-w-3xl mx-auto">
+          {/* Main Title */}
+          <h1 className="animate-slide-up delay-200 mb-4 text-2xl sm:text-4xl md:text-[42px] font-extrabold tracking-tight text-foreground leading-[1.15] max-w-2xl sm:max-w-3xl mx-auto">
             O Editor de Petições<br className="hidden sm:inline" />
             <span className="text-primary">
               {" "}para a Advocacia Moderna
@@ -323,12 +323,12 @@ export default function Home() {
           </h1>
 
           {/* Subtitle */}
-          <p className="animate-slide-up opacity-0 [animation-fill-mode:forwards] delay-300 mb-6 max-w-xl mx-auto text-xs sm:text-sm md:text-[15px] leading-relaxed text-muted-foreground font-normal">
+          <p className="animate-slide-up delay-300 mb-6 max-w-xl mx-auto text-xs sm:text-sm md:text-[15px] leading-relaxed text-muted-foreground font-normal">
             Estruture peças completas, refine teses jurídicas e formate petições prontas para o protocolo judicial com agilidade, precisão e rigor técnico.
           </p>
 
-          {/* CTA Buttons — animados */}
-          <div className="animate-slide-up opacity-0 [animation-fill-mode:forwards] delay-400 flex flex-wrap items-center justify-center gap-3">
+          {/* CTA Buttons */}
+          <div className="animate-slide-up delay-400 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/register"
               className={cn(buttonVariants({ size: "default" }), "h-11 px-7 text-sm font-bold bg-primary text-primary-foreground rounded-xl shadow-lg hover:opacity-90 transition-all gap-2")}
@@ -346,7 +346,7 @@ export default function Home() {
           </div>
 
           {/* Social Proof Micro Tags */}
-          <div className="animate-fade-in opacity-0 [animation-fill-mode:forwards] delay-700 mt-8 flex flex-wrap justify-center gap-5 text-[11px] text-muted-foreground">
+          <div className="animate-fade-in delay-700 mt-8 flex flex-wrap justify-center gap-5 text-[11px] text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="size-3.5 text-emerald-500" />
               <span>Estruturação jurídica automatizada</span>
