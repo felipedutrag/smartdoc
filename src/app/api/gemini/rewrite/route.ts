@@ -17,7 +17,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Chave GEMINI_API_KEY não configurada no servidor." }, { status: 500 });
     }
 
-    const modelName = "gemini-3.1-flash-lite";
+    const modelName = "gemini-2.5-flash";
     console.log(`\n======================================================`);
     console.log(`[EDITOR / REESCRITA] 🚀 Modelo Gemini Ativo: ${modelName}`);
     console.log(`======================================================\n`);

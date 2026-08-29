@@ -17,7 +17,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Fatos não fornecidos." }, { status: 400 });
     }
 
-    const modelName = "gemini-3.1-flash-lite";
+    const modelName = "gemini-2.5-flash";
     console.log(`\n======================================================`);
     console.log(`[GERADOR DE PETIÇÕES] 🚀 Modelo Gemini Ativo: ${modelName}`);
     console.log(`======================================================\n`);
