@@ -39,8 +39,9 @@ export function Footer() {
           position: "relative"
         }}
       >
-        <span style={{ fontWeight: 400, letterSpacing: "-0.05em" }}>SMART</span>
-        <span style={{ fontWeight: 900, color: "#d97706", letterSpacing: "-0.05em", marginLeft: 2 }}>DOC</span>
+        <span style={{ fontWeight: 700, letterSpacing: "-0.04em" }}>smart</span>
+        <span style={{ fontWeight: 900, color: "#d97706" }}>.</span>
+        <span style={{ fontWeight: 900, color: "#d97706", letterSpacing: "-0.05em", marginLeft: 0 }}>doc</span>
         <span
           style={{
             position: "absolute",

@@ -1,9 +1,9 @@
 import React from "react";
-import { Scale } from "lucide-react";
+import { Feather } from "lucide-react";
 
 export function SmartDocLogo({ className = "size-4", ...props }: { className?: string } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <Scale className={className} {...(props as any)} />
+    <Feather className={className} {...(props as any)} />
   );
 }
 
@@ -25,14 +25,15 @@ export function SmartDocBrand({ size = "md", badge, className = "", showIcon = t
     <div className={`inline-flex items-center gap-2 shrink-0 select-none ${className}`}>
       {showIcon && (
         <div className={`flex ${boxSize} shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/25 text-primary shadow-sm shadow-primary/10`}>
-          <Scale className={iconSize} />
+          <Feather className={iconSize} />
         </div>
       )}
-      <div className={`flex items-center ${textSize} font-extrabold tracking-tight text-foreground leading-none`}>
-        <span>SMART</span>
-        <span className="text-primary font-black ml-1">DOC</span>
+      <div className={`flex items-center ${textSize} font-sans tracking-[-0.04em] text-foreground leading-none`}>
+        <span className="font-extrabold tracking-[-0.03em]">smart</span>
+        <span className="text-primary font-bold">.</span>
+        <span className="text-primary font-black tracking-[-0.05em]">doc</span>
         {badge && (
-          <span className={`ml-2 rounded-full border border-primary/30 bg-primary/10 font-mono font-bold text-primary uppercase tracking-widest ${badgeSize}`}>
+          <span className={`ml-1.5 rounded-full border border-primary/30 bg-primary/10 font-mono font-bold text-primary uppercase tracking-widest ${badgeSize}`}>
             {badge}
           </span>
         )}

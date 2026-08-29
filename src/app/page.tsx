@@ -10,7 +10,6 @@ import {
   Cpu,
   CheckCircle2,
   ChevronDown,
-  Scale,
   Download,
   ChevronRight,
   Bot,
@@ -47,7 +46,7 @@ export default function Home() {
   const isMobile = isMobileRaw ?? false;
 
   useEffect(() => {
-    const fullText = "Configurada a manifesta falha na prestação dos serviços e o dever de indenizar nos termos do art. 14 do CDC, requer-se a total procedência dos pedidos com a condenação da ré ao pagamento de reparação por danos morais e materiais.";
+    const fullText = "O Autor é correntista e usuário dos serviços de intermediação da Ré. Ocorre que, em 15/01/2025, a Requerida realizou o bloqueio unilateral e injustificado do saldo financeiro de R$ 48.500,00, sem qualquer aviso prévio, inviabilizando suas operações e gerando graves prejuízos materiais e evidente abalo moral.";
     let timeout: NodeJS.Timeout;
     let charIndex = 0;
 
@@ -311,23 +310,21 @@ export default function Home() {
           {/* Micro Linear Badge — animado */}
           <div className="animate-slide-up opacity-0 [animation-fill-mode:forwards] mb-5 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1.5 text-xs font-medium text-primary shadow-xs backdrop-blur-sm">
             <span className="flex size-1.5 rounded-full bg-primary animate-pulse" />
-            <span className="font-semibold">SmartDoc 2.0</span>
-            <span className="text-primary/40">•</span>
-            <span className="text-foreground/60">IA de Voz Jurídica</span>
+            <span className="font-semibold">Editor de Texto para Advogados</span>
             <ChevronRight className="size-3" />
           </div>
 
           {/* Main Title — animado com delay */}
-          <h1 className="animate-slide-up opacity-0 [animation-fill-mode:forwards] delay-200 mb-5 text-4xl sm:text-6xl font-black tracking-tight text-foreground leading-[1.1] max-w-4xl mx-auto">
-            Sua Assistente Jurídica<br className="hidden sm:inline" />
+          <h1 className="animate-slide-up opacity-0 [animation-fill-mode:forwards] delay-200 mb-4 text-2xl sm:text-4xl md:text-[42px] font-extrabold tracking-tight text-foreground leading-[1.15] max-w-2xl sm:max-w-3xl mx-auto">
+            O Editor de Petições<br className="hidden sm:inline" />
             <span className="text-primary">
-              {" "}com IA de Voz
+              {" "}para a Advocacia Moderna
             </span>
           </h1>
 
           {/* Subtitle */}
-          <p className="animate-slide-up opacity-0 [animation-fill-mode:forwards] delay-300 mb-8 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed text-muted-foreground font-normal">
-            Converse naturalmente com a IA para redigir, alterar e aperfeiçoar petições inteiras — por voz ou texto. Pronta para protocolo judicial em minutos.
+          <p className="animate-slide-up opacity-0 [animation-fill-mode:forwards] delay-300 mb-6 max-w-xl mx-auto text-xs sm:text-sm md:text-[15px] leading-relaxed text-muted-foreground font-normal">
+            Estruture peças completas, refine teses jurídicas e formate petições prontas para o protocolo judicial com agilidade, precisão e rigor técnico.
           </p>
 
           {/* CTA Buttons — animados */}
@@ -352,11 +349,11 @@ export default function Home() {
           <div className="animate-fade-in opacity-0 [animation-fill-mode:forwards] delay-700 mt-8 flex flex-wrap justify-center gap-5 text-[11px] text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="size-3.5 text-emerald-500" />
-              <span>Assistente de voz com IA generativa</span>
+              <span>Estruturação jurídica automatizada</span>
             </div>
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="size-3.5 text-emerald-500" />
-              <span>Alteração por conversa natural</span>
+              <span>Padrão forense e visual law</span>
             </div>
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="size-3.5 text-emerald-500" />
@@ -392,60 +389,38 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Sub Editor Toolbar */}
-          <div className="flex items-center justify-between border-b border-border/60 px-3 sm:px-4 py-1.5 bg-muted/15 text-muted-foreground text-xs overflow-hidden gap-2">
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="flex items-center gap-1 border-r border-border/60 pr-2">
-                <span className="font-semibold text-foreground text-[10px] sm:text-[11px]">Padrão Forense</span>
-                <span className="text-[9px] sm:text-[10px] font-mono opacity-60">12pt</span>
-              </div>
-              <div className="flex items-center gap-1 text-muted-foreground/70">
-                <span className="px-1 py-0.5 rounded font-bold hover:bg-muted text-[10px]">B</span>
-                <span className="px-1 py-0.5 rounded italic hover:bg-muted text-[10px]">I</span>
-                <span className="px-1 py-0.5 rounded underline hover:bg-muted text-[10px]">U</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="inline-flex items-center gap-1.5 text-[9px] sm:text-[10px] font-mono text-primary font-medium">
-                <span className="size-1.5 rounded-full bg-primary animate-ping" />
-                <span>IA ao Vivo</span>
-              </span>
-            </div>
-          </div>
-
           {/* Window Mockup Content */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-border/60 bg-background/60 rounded-b-xl overflow-hidden">
             {/* Left Document Editor Area */}
-            <div className="lg:col-span-8 p-4 sm:p-8 font-serif text-xs leading-relaxed text-foreground/90 space-y-3.5 bg-card/40 break-words">
-              <div className="text-center font-bold font-sans text-[11px] tracking-wider text-muted-foreground border-b border-border/40 pb-2">
-                EXCELENTÍSSIMO SENHOR DOUTOR JUIZ DE DIREITO DA 12ª VARA CÍVEL DA COMARCA DE SÃO PAULO/SP
-              </div>
-
-              <div className="pt-1 text-justify">
-                <span className="font-bold text-foreground">JOÃO DA SILVA</span>, brasileiro, solteiro, portador do CPF sob o nº ***.123.456-**, por intermédio de seu advogado signatário, vem propor a presente:
-              </div>
-
-              <div className="text-center font-sans font-bold text-xs sm:text-sm text-primary py-1 tracking-tight">
-                AÇÃO DE OBRIGAÇÃO DE FAZER C/C REPARAÇÃO POR DANOS MORAIS E MATERIAIS
-              </div>
-
-              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 font-sans text-[11px] text-muted-foreground space-y-1">
-                <div className="font-semibold text-primary flex items-center gap-1.5">
-                  <Scale className="size-3.5" />
-                  <span>Fundamentação Jurídica Estruturada:</span>
+            <div className="lg:col-span-8 p-4 sm:p-7 [font-family:Cambria,Georgia,serif] text-xs leading-relaxed text-foreground/90 space-y-3 bg-card/40 break-words flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="text-justify font-bold font-sans text-[10.5px] sm:text-[11.5px] tracking-wide uppercase text-muted-foreground border-b border-border/40 pb-2 leading-snug">
+                  EXCELENTÍSSIMO SENHOR DOUTOR JUIZ DE DIREITO DA 12ª VARA CÍVEL DO FORO CENTRAL DA COMARCA DE SÃO PAULO/SP
                 </div>
-                <p className="text-[11px] leading-relaxed">
-                  Art. 186 e 927 do CC c/c Art. 6º, VI e Art. 14 do CDC. Jurisprudência pacificada do STJ (Súmula 162).
-                </p>
-              </div>
 
-              {/* Dynamic Typewriter Paragraph */}
-              <div className="pt-1">
-                <p className="text-justify font-serif text-[11px] leading-relaxed text-foreground/90 min-h-[46px]">
-                  {typedConclusion}
-                  <span className="inline-block w-1.5 h-3 bg-primary ml-0.5 animate-pulse align-middle" />
-                </p>
+                <div className="text-justify text-[11px] sm:text-[11.5px] leading-relaxed">
+                  <span className="font-bold text-foreground">JOÃO DA SILVA</span>, brasileiro, solteiro, analista de sistemas, portador do RG nº 12.345.678-9 SSP/SP e inscrito no CPF sob o nº ***.123.456-**, residente e domiciliado na Rua das Flores, nº 100, São Paulo/SP, por intermédio de seu advogado constituído, vem, respeitosamente, perante Vossa Excelência, propor a presente:
+                </div>
+
+                <div className="text-center font-sans font-bold text-xs sm:text-sm text-primary py-1 tracking-tight">
+                  AÇÃO DE OBRIGAÇÃO DE FAZER C/C REPARAÇÃO POR DANOS MORAIS E MATERIAIS COM TUTELA DE URGÊNCIA
+                </div>
+
+                <div className="text-justify text-[11px] sm:text-[11.5px] leading-relaxed">
+                  em face de <span className="font-bold text-foreground">TECH PRIME SOLUÇÕES DIGITAIS S.A.</span>, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº 12.345.678/0001-90, com sede na Av. Paulista, nº 1500, Bela Vista, São Paulo/SP, CEP 01310-200, pelas razões de fato e de direito a seguir expostas:
+                </div>
+
+                {/* Seção DOS FATOS com Typing Script */}
+                <div className="pt-2 border-t border-border/40 space-y-1">
+                  <div className="font-sans font-bold text-[11px] sm:text-xs text-foreground uppercase tracking-wide flex items-center gap-1.5">
+                    <span className="text-primary font-mono font-bold">I.</span> DOS FATOS
+                  </div>
+
+                  <p className="text-justify [font-family:Cambria,Georgia,serif] text-[11px] sm:text-[11.5px] leading-relaxed text-foreground/90 min-h-[58px]">
+                    {typedConclusion}
+                    <span className="inline-block w-1.5 h-3.5 bg-primary ml-0.5 animate-pulse align-middle" />
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -456,20 +431,20 @@ export default function Home() {
                   Painel de Inteligência
                 </div>
 
-                {/* Voice Assistant Active Card */}
+                {/* Copilot Assistant Active Card */}
                 <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-1.5 shadow-2xs">
                   <div className="flex items-center justify-between">
                     <div className="text-[11px] font-semibold text-primary flex items-center gap-1.5">
-                      <Mic className="size-3.5 text-primary animate-pulse" />
-                      <span>Assistente de Voz Ativo</span>
+                      <Bot className="size-3.5 text-primary" />
+                      <span>Copiloto de Redação</span>
                     </div>
                     <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
                       <span className="size-1.5 rounded-full bg-emerald-500 animate-ping" />
-                      Ao Vivo
+                      Ativo
                     </span>
                   </div>
                   <p className="text-[10px] text-muted-foreground leading-relaxed">
-                    Converse com a IA para reescrever argumentos, adicionar pedidos ou alterar teses — tudo por voz.
+                    Sugere jurisprudências, estrutura pedidos e refina argumentos técnicos em tempo real.
                   </p>
                 </div>
 
@@ -531,22 +506,22 @@ export default function Home() {
 
           {/* Bento Grid Container (Subtle Balanced Spacing) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-            {/* Bento Card 1: Voz & IA Forense */}
+            {/* Bento Card 1: IA Forense & Redação */}
             <Card className="md:col-span-2 border-border/80 bg-card px-4 py-4.5 shadow-sm flex flex-col justify-center gap-2">
               <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20">
-                <Mic className="size-3.5" />
+                <FileText className="size-3.5" />
               </div>
               <div className="space-y-1">
                 <h3 className="text-xs sm:text-sm font-bold text-foreground tracking-tight">
-                  Assistente de Voz e Redação com IA
+                  Redação Jurídica Estruturada com IA
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Dite a narrativa do caso ou converse com a IA para estruturar peças completas. Ela identifica artigos de lei aplicáveis, organiza os fatos e redige os pedidos em tempo real.
+                  Insira o relato dos fatos para estruturar peças processuais completas. O sistema identifica artigos de lei aplicáveis, mapeia jurisprudências e redige pedidos fundamentados.
                 </p>
                 <div className="pt-0.5">
                   <span className="inline-flex items-center gap-1.5 rounded border border-border/80 bg-muted/40 px-2 py-0.5 font-mono text-[9px] text-muted-foreground">
                     <span className="flex size-1.5 rounded-full bg-emerald-500" />
-                    <span>Inteligência Jurídica • Voz e Texto</span>
+                    <span>Inteligência Forense • Mapeamento Legal</span>
                   </span>
                 </div>
               </div>
@@ -580,10 +555,10 @@ export default function Home() {
               </div>
               <div className="space-y-1">
                 <h3 className="text-xs sm:text-sm font-bold text-foreground tracking-tight">
-                  Edição por Voz ou Texto
+                  Refinamento Inteligente de Teses
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Selecione qualquer trecho e peça à IA para reescrever, fortalecer a tese ou adicionar fundamentação. Por voz ou digitando.
+                  Selecione qualquer trecho da petição para reescrever, fortalecer argumentos, aprofundar jurisprudências ou ajustar pedidos instantaneamente.
                 </p>
                 <div className="pt-0.5">
                   <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
@@ -636,25 +611,25 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative rounded-xl border border-border/80 bg-card p-4 shadow-xs">
               <div className="font-mono text-[10px] font-extrabold text-primary mb-2">01 / NARRATIVA</div>
-              <h4 className="text-sm font-bold text-foreground">Relate ou dite o caso</h4>
+              <h4 className="text-sm font-bold text-foreground">Insira o relato do caso</h4>
               <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                Cole o histórico dos fatos, mensagens de WhatsApp ou dite a narrativa por voz. A IA processa e identifica teses e dispositivos aplicáveis.
+                Cole o histórico dos fatos ou documentos do cliente. O assistente processa a narrativa e identifica teses e artigos aplicáveis.
               </p>
             </div>
 
             <div className="relative rounded-xl border border-border/80 bg-card p-4 shadow-xs">
               <div className="font-mono text-[10px] font-extrabold text-primary mb-2">02 / GERAÇÃO</div>
-              <h4 className="text-sm font-bold text-foreground">A IA redige a peça completa</h4>
+              <h4 className="text-sm font-bold text-foreground">Estruturação forense completa</h4>
               <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                Com base nos fatos, a IA estrutura endereçamento, qualificação, fundamentação jurídica, pedidos e valor da causa.
+                Com base nos fatos, o editor estrutura endereçamento, qualificação das partes, fundamentação jurídica, pedidos e valor da causa.
               </p>
             </div>
 
             <div className="relative rounded-xl border border-border/80 bg-card p-4 shadow-xs">
               <div className="font-mono text-[10px] font-extrabold text-primary mb-2">03 / REFINAMENTO</div>
-              <h4 className="text-sm font-bold text-foreground">Refine por voz e protocole</h4>
+              <h4 className="text-sm font-bold text-foreground">Refine e protocole</h4>
               <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                Converse com a IA para ajustar qualquer trecho. Exporte o .docx formatado e protocole no tribunal.
+                Ajuste qualquer trecho com o copiloto inteligente. Exporte o .docx formatado nos padrões forenses e protocole no tribunal.
               </p>
             </div>
           </div>
@@ -679,8 +654,8 @@ export default function Home() {
           <div className="space-y-3 max-w-3xl mx-auto">
             {[
               {
-                q: "Como funciona a assistência de voz com a IA?",
-                a: "Você pode ditar fatos brutos e conversar diretamente com o assistente inteligente para pedir revisões, novos pedidos ou inclusão de teses doutrinárias e jurisprudenciais — a peça é atualizada instantaneamente na sua tela."
+                q: "Como o assistente inteligente auxilia na redação de petições?",
+                a: "Você insere os fatos e o sistema estrutura toda a petição com endereçamento, fundamentação legal e pedidos. Você pode solicitar revisões cirúrgicas, expansão de teses ou inclusão de precedentes em tempo real."
               },
               {
                 q: "Posso alterar a petição apenas conversando?",
@@ -737,16 +712,16 @@ export default function Home() {
       </section>
 
       {/* ── FINAL CTA (Distinct Background & Border) ── */}
-      <section className="relative z-10 flex w-full flex-col items-center px-4 py-20 text-center bg-muted/30 border-y border-border/70">
+      <section className="relative z-10 flex w-full flex-col items-center px-4 py-16 sm:py-20 text-center bg-muted/30 border-y border-border/70">
         <div className="flex w-full max-w-4xl flex-col items-center mx-auto">
           <div className="mb-2 text-xs font-mono font-bold uppercase tracking-widest text-primary">
             Produtividade Forense
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground sm:whitespace-nowrap">
-            Comece a advogar com IA agora
+            Eleve a produtividade de seu escritório
           </h2>
           <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-            Crie sua conta e descubra como a IA de voz transforma a rotina do seu escritório.
+            Descubra como economizar horas de trabalho manual com IA especializada.
           </p>
 
           <div className="mt-6 flex items-center gap-3">
@@ -754,26 +729,38 @@ export default function Home() {
               href="/register"
               className={cn(buttonVariants({ size: "default" }), "h-11 px-7 text-xs sm:text-sm font-bold bg-primary text-primary-foreground rounded-xl shadow-md hover:opacity-90 transition-all")}
             >
-              Criar Conta
+              Criar Conta Gratuita
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── FOOTER (Centralizado e Limpo) ── */}
-      <footer className="relative z-10 flex w-full flex-col sm:flex-row items-center justify-between gap-3 border-t border-border/60 px-6 py-6 text-xs text-muted-foreground bg-muted/20">
-        <div className="flex items-center gap-2">
-          <SmartDocBrand size="sm" showIcon={true} />
-          <span>© {new Date().getFullYear()} — Tecnologia Jurídica com IA. Todos os direitos reservados.</span>
-        </div>
-        <div className="flex items-center gap-4 text-xs font-medium">
-          <Link href="/termos-de-uso" className="hover:text-foreground hover:underline transition-colors">
-            Termos de Uso
-          </Link>
-          <span>&bull;</span>
-          <Link href="/politica-de-privacidade" className="hover:text-foreground hover:underline transition-colors">
-            Política de Privacidade
-          </Link>
+      {/* ── FOOTER (Modern & Responsivo) ── */}
+      <footer className="relative z-10 w-full border-t border-border/70 bg-card/30 backdrop-blur-md">
+        <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-8 sm:py-6 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 text-xs text-muted-foreground">
+          {/* Brand & Tagline */}
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-left">
+            <SmartDocBrand size="sm" showIcon={true} />
+            <span className="hidden sm:inline text-border/80 select-none">|</span>
+            <span className="text-[11px] sm:text-xs text-muted-foreground/80">
+              Tecnologia para a advocacia moderna
+            </span>
+          </div>
+
+          {/* Links e Copyright integrados */}
+          <div className="flex flex-wrap items-center justify-center gap-x-3.5 gap-y-1.5 text-[11px] sm:text-xs font-medium">
+            <Link href="/termos-de-uso" className="hover:text-foreground transition-colors">
+              Termos de Uso
+            </Link>
+            <span className="text-muted-foreground/30 select-none">&bull;</span>
+            <Link href="/politica-de-privacidade" className="hover:text-foreground transition-colors">
+              Política de Privacidade
+            </Link>
+            <span className="text-muted-foreground/30 select-none">&bull;</span>
+            <span className="text-muted-foreground/60 font-mono text-[10.5px]">
+              © {new Date().getFullYear()}
+            </span>
+          </div>
         </div>
       </footer>
     </main>
