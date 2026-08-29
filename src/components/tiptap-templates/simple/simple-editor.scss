@@ -114,7 +114,8 @@ body,
 
   p {
     margin-top: 0;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0;
+    min-height: 1.65em; /* Garante que linhas vazias tenham exatamente a mesma altura de linhas com texto */
 
     &:first-child {
       margin-bottom: 3.5rem;
@@ -127,6 +128,22 @@ body,
   p[style*="margin-bottom: 4rem"],
   p[style*="margin-bottom: 4.5rem"] {
     margin-bottom: 3.5rem !important;
+  }
+
+  /* ── Indentação de Bloco e Recuo de Primeira Linha (Padrão Forense) ── */
+  [data-indent-level="1"] { margin-left: 1.5rem !important; }
+  [data-indent-level="2"] { margin-left: 3.0rem !important; }
+  [data-indent-level="3"] { margin-left: 4.5rem !important; }
+  [data-indent-level="4"] { margin-left: 6.0rem !important; }
+  [data-indent-level="5"] { margin-left: 7.5rem !important; }
+  [data-indent-level="6"] { margin-left: 9.0rem !important; }
+  [data-indent-level="7"] { margin-left: 10.5rem !important; }
+  [data-indent-level="8"] { margin-left: 12.0rem !important; }
+
+  [data-first-line-indent="1.25cm"],
+  [data-first-line-indent="true"],
+  [data-first-line-indent] {
+    text-indent: 1.25cm !important;
   }
 
   h1, h2, h3, h4 {

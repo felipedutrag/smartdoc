@@ -83,7 +83,7 @@ export function getPeticaoBlocks(data: PeticaoDocumentJson): string[] {
   );
 
   // Linha pulada antes do nome da ação (editável)
-  blocks.push(`<p><br></p>`);
+  blocks.push(`<p></p>`);
 
   // Nome da Ação (Centralizado sem qualquer margem top ou bottom)
   blocks.push(
@@ -91,7 +91,7 @@ export function getPeticaoBlocks(data: PeticaoDocumentJson): string[] {
   );
 
   // Linha pulada após o nome da ação (editável)
-  blocks.push(`<p><br></p>`);
+  blocks.push(`<p></p>`);
 
   // Réu
   blocks.push(
@@ -99,17 +99,17 @@ export function getPeticaoBlocks(data: PeticaoDocumentJson): string[] {
   );
 
   // Linha pulada antes dos fatos (editável)
-  blocks.push(`<p><br></p>`);
+  blocks.push(`<p></p>`);
 
   // 3. Dos Fatos
   blocks.push(`<h2 style="text-align: left;">I. DOS FATOS</h2>`);
-  blocks.push(`<p><br></p>`);
+  blocks.push(`<p></p>`);
 
   if (Array.isArray(fatos) && fatos.length > 0) {
     for (let i = 0; i < fatos.length; i++) {
       const fato = fatos[i];
       if (fato?.trim()) {
-        if (i > 0) blocks.push(`<p><br></p>`);
+        if (i > 0) blocks.push(`<p></p>`);
         blocks.push(`<p style="text-align: justify;">${fato.trim()}</p>`);
       }
     }
@@ -118,7 +118,7 @@ export function getPeticaoBlocks(data: PeticaoDocumentJson): string[] {
   }
 
   // Linha pulada antes do Direito
-  blocks.push(`<p><br></p>`);
+  blocks.push(`<p></p>`);
 
   // 4. Do Direito
   blocks.push(`<h2 style="text-align: left;">II. DO DIREITO</h2>`);
@@ -126,19 +126,19 @@ export function getPeticaoBlocks(data: PeticaoDocumentJson): string[] {
   if (Array.isArray(direito) && direito.length > 0) {
     for (const item of direito) {
       if (item.subtitulo?.trim()) {
-        blocks.push(`<p><br></p>`);
+        blocks.push(`<p></p>`);
         blocks.push(`<p style="text-align: justify; font-weight: bold;">${item.subtitulo.trim()}</p>`);
       }
       if (Array.isArray(item.paragrafos)) {
         for (const p of item.paragrafos) {
           if (p?.trim()) {
-            blocks.push(`<p><br></p>`);
+            blocks.push(`<p></p>`);
             blocks.push(`<p style="text-align: justify;">${p.trim()}</p>`);
           }
         }
       }
       if (item.citacaoDestaque?.trim()) {
-        blocks.push(`<p><br></p>`);
+        blocks.push(`<p></p>`);
         blocks.push(
           `<blockquote style="text-align: justify;">${item.citacaoDestaque.trim()}</blockquote>`
         );
@@ -147,19 +147,19 @@ export function getPeticaoBlocks(data: PeticaoDocumentJson): string[] {
   }
 
   // Linha pulada antes dos Pedidos
-  blocks.push(`<p><br></p>`);
+  blocks.push(`<p></p>`);
 
   // 5. Dos Pedidos
   blocks.push(`<h2 style="text-align: left;">III. DOS PEDIDOS</h2>`);
-  blocks.push(`<p><br></p>`);
+  blocks.push(`<p></p>`);
   blocks.push(`<p style="text-align: justify;">Ante o exposto, requer a Vossa Excelência:</p>`);
-  blocks.push(`<p><br></p>`);
+  blocks.push(`<p></p>`);
 
   if (Array.isArray(pedidos) && pedidos.length > 0) {
     for (let i = 0; i < pedidos.length; i++) {
       const ped = pedidos[i];
       const alinea = ped.alinea ? `${ped.alinea})` : "•";
-      if (i > 0) blocks.push(`<p><br></p>`);
+      if (i > 0) blocks.push(`<p></p>`);
       blocks.push(
         `<p style="text-align: justify;"><strong>${alinea}</strong> ${ped.texto?.trim() || ""}</p>`
       );
@@ -167,7 +167,7 @@ export function getPeticaoBlocks(data: PeticaoDocumentJson): string[] {
   }
 
   // Protesto por provas e Valor da Causa
-  blocks.push(`<p><br></p>`);
+  blocks.push(`<p></p>`);
   if (fechamento?.provas?.trim()) {
     blocks.push(`<p style="text-align: justify;">${fechamento.provas.trim()}</p>`);
   } else {
@@ -180,7 +180,7 @@ export function getPeticaoBlocks(data: PeticaoDocumentJson): string[] {
   valorCausa = valorCausa.replace(/^d[aá]-se\s+[aà]\s+causa\s+o\s+valor\s+de\s+/i, "").replace(/^d[aá]-se\s+o\s+valor\s+de\s+/i, "").trim();
   if (!valorCausa.endsWith(".")) valorCausa += ".";
 
-  blocks.push(`<p><br></p>`);
+  blocks.push(`<p></p>`);
   blocks.push(
     `<p style="text-align: justify; font-weight: bold;">Dá-se à causa o valor de ${valorCausa}</p>`
   );
@@ -190,15 +190,15 @@ export function getPeticaoBlocks(data: PeticaoDocumentJson): string[] {
   const advNome = fechamento?.advogado?.nome?.trim() || "[Nome do Advogado]";
   const advOab = fechamento?.advogado?.oab?.trim() || "OAB/[UF] [Número]";
 
-  blocks.push(`<p><br></p>`);
+  blocks.push(`<p></p>`);
   blocks.push(
     `<p style="text-align: center;">Nestes termos,<br/>Pede deferimento.</p>`
   );
-  blocks.push(`<p><br></p>`);
+  blocks.push(`<p></p>`);
   blocks.push(
     `<p style="text-align: center;">${localData}.</p>`
   );
-  blocks.push(`<p><br></p>`);
+  blocks.push(`<p></p>`);
   blocks.push(
     `<p style="text-align: center;">_________________________________________</p>`
   );

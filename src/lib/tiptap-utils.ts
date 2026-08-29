@@ -637,3 +637,25 @@ export function getSelectedBlockNodes(editor: Editor): PMNode[] {
 
   return blocks
 }
+
+/**
+ * Sanitiza e normaliza o HTML da petição jurídica para evitar duplicação de <br>
+ * e acúmulo de parágrafos vazios corrompidos no ciclo save -> Supabase -> reload -> setContent.
+ */
+export function sanitizePeticaoHtml(html: string): string {
+  if (!html) return ""
+
+  let cleaned = html
+    // 1. Converte markdown bold e italic acidentais
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/__(.*?)__/g, "<strong>$1</strong>")
+    // 2. Remove duplicações de <br> dentro de parágrafos vazios
+    .replace(/<p([^>]*)>\s*(?:<br\s*\/?>\s*)+<\/p>/gi, "<p$1></p>")
+    // 3. Remove múltiplos <br> em sequência no meio do parágrafo mantendo quebra suave simples
+    .replace(/(?:<br\s*\/?>\s*){2,}/gi, "<br>")
+    // 4. Normaliza &nbsp; isolados em parágrafos vazios
+    .replace(/<p([^>]*)>\s*&nbsp;\s*<\/p>/gi, "<p$1></p>")
+
+  return cleaned
+}
+

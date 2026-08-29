@@ -14,7 +14,10 @@ import { LoadingOverlay } from "@/components/editor/LoadingOverlay";
 import { FloatingAiBar } from "@/components/editor/FloatingAiBar";
 import { DispositivosMapeados } from "@/components/editor/DispositivosMapeados";
 import { EstruturaPeticao } from "@/components/editor/EstruturaPeticao";
+import { SimuladorContestacaoModal } from "@/components/editor/SimuladorContestacaoModal";
+import { HistoricoVersoesModal, DocumentVersion } from "@/components/editor/HistoricoVersoesModal";
 import { renderPeticaoJsonToHtml, getPeticaoBlocks, PeticaoDocumentJson } from "@/lib/peticao-template";
+import { Swords, History } from "lucide-react";
 
 export default function EditorPage() {
   const isMobileRaw = useIsBreakpoint("max", 860);
@@ -48,6 +51,62 @@ export default function EditorPage() {
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [editorHtml, setEditorHtml] = useState<string>("");
   const isDocEmpty = !editorHtml || editorHtml.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim().length === 0;
+
+  const [isSimuladorOpen, setIsSimuladorOpen] = useState(false);
+  const [isHistoricoOpen, setIsHistoricoOpen] = useState(false);
+
+  // Checkpoint de versões na timeline forense
+  const addVersionCheckpoint = useCallback((label: string, source: "ai" | "human" | "initial", html: string) => {
+    try {
+      const stored = localStorage.getItem("smartdoc_version_history");
+      let list: DocumentVersion[] = stored ? JSON.parse(stored) : [];
+      const newVer: DocumentVersion = {
+        id: `ver-${Date.now()}`,
+        timestamp: Date.now(),
+        label,
+        source,
+        html,
+        wordCount: html.replace(/<[^>]+>/g, " ").trim().split(/\s+/).length,
+      };
+      list.push(newVer);
+      if (list.length > 30) list = list.slice(list.length - 30);
+      localStorage.setItem("smartdoc_version_history", JSON.stringify(list));
+    } catch (e) {
+      console.error("Falha ao salvar checkpoint de versão:", e);
+    }
+  }, []);
+
+  // Inserção de tópico de blindagem sugerido pela Simulação de Contestação
+  const handleInsertBlindagem = useCallback((titulo: string, paragrafos: string[]) => {
+    const current = localStorage.getItem("extrajus_draft") || editorHtml;
+    if (!current) return;
+
+    const novoTopicoHtml = `
+      <h2>${titulo.toUpperCase()}</h2>
+      ${paragrafos.map(p => `<p data-first-line-indent="1.25cm">${p}</p>`).join("")}
+    `;
+
+    let updated = current;
+    // Tenta inserir antes dos PEDIDOS
+    const pedidosMatch = updated.search(/<h[12][^>]*>[\s\S]*?(?:DOS\s+PEDIDOS|DO\s+PEDIDO)/i);
+    if (pedidosMatch !== -1) {
+      updated = updated.slice(0, pedidosMatch) + novoTopicoHtml + "\n" + updated.slice(pedidosMatch);
+    } else {
+      updated += "\n" + novoTopicoHtml;
+    }
+
+    localStorage.setItem("extrajus_draft", updated);
+    window.dispatchEvent(new Event("storage_extrajus_draft"));
+    handleContentChange(updated, "ai");
+    addVersionCheckpoint(`Blindagem: ${titulo}`, "ai", updated);
+  }, [editorHtml, addVersionCheckpoint]);
+
+  const handleRestoreVersion = useCallback((html: string) => {
+    localStorage.setItem("extrajus_draft", html);
+    window.dispatchEvent(new Event("storage_extrajus_draft"));
+    handleContentChange(html, "human");
+    addVersionCheckpoint("Versão Restaurada", "human", html);
+  }, [addVersionCheckpoint]);
 
   // Função centralizada e segura para persistir no Supabase
   const saveToDatabase = useCallback(async (html: string) => {
@@ -640,6 +699,45 @@ export default function EditorPage() {
               </div>
             </div>
           }
+          rightContent={
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsSimuladorOpen(true)}
+                disabled={isDocEmpty}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40 disabled:pointer-events-none"
+                title="Simular Contestação da Ré & Blindagem Processual"
+              >
+                <Swords className="size-3.5" />
+                <span className="hidden md:inline">Simular Contestação</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsHistoricoOpen(true)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground text-xs font-semibold transition-all cursor-pointer shadow-sm active:scale-95"
+                title="Histórico de Versões & Timeline Forense"
+              >
+                <History className="size-3.5" />
+                <span className="hidden md:inline">Versões</span>
+              </button>
+            </div>
+          }
+        />
+
+        {/* ── Modais de Diferenciação Estratégica ── */}
+        <SimuladorContestacaoModal
+          isOpen={isSimuladorOpen}
+          onClose={() => setIsSimuladorOpen(false)}
+          editorHtml={editorHtml}
+          onInsertBlindagem={handleInsertBlindagem}
+        />
+
+        <HistoricoVersoesModal
+          isOpen={isHistoricoOpen}
+          onClose={() => setIsHistoricoOpen(false)}
+          currentHtml={editorHtml}
+          onRestoreVersion={handleRestoreVersion}
         />
 
         {/* ── Botão Baixar Documento (.docx) Fixo em Baixo ── */}

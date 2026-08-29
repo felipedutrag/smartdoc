@@ -32,6 +32,7 @@ import { Selection } from "@tiptap/extensions"
 import { NodeIdExtension } from "@/components/tiptap-extension/node-id-extension"
 import { TabIndentExtension } from "@/components/tiptap-extension/tab-indent-extension"
 import { AiAutocompleteExtension } from "@/components/tiptap-extension/ai-autocomplete-extension"
+import { Indent, Outdent } from "lucide-react"
 
 
 // --- UI Primitives ---
@@ -91,7 +92,7 @@ import { SmartDocBrand } from "@/components/brand-logo"
 import Link from "next/link"
 
 // --- Lib ---
-import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils"
+import { handleImageUpload, MAX_FILE_SIZE, sanitizePeticaoHtml } from "@/lib/tiptap-utils"
 
 // --- Styles ---
 import "@/components/tiptap-templates/simple/simple-editor.scss"
@@ -257,6 +258,35 @@ const MainToolbarContent = ({
               <TextAlignButton align="right" />
               <TextAlignButton align="justify" />
             </ToolbarGroup>
+
+            <ToolbarSeparator />
+
+            <ToolbarGroup style={disabled ? { pointerEvents: "none", opacity: 0.55 } : undefined}>
+              <button
+                type="button"
+                onClick={() => editor?.commands.outdent()}
+                title="Diminuir Recuo (Shift+Tab)"
+                className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+              >
+                <Outdent className="size-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => editor?.commands.indent()}
+                title="Aumentar Recuo (Tab)"
+                className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+              >
+                <Indent className="size-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => editor?.commands.toggleFirstLineIndent()}
+                title="Alternar Recuo de 1ª Linha (1,25cm ABNT)"
+                className="inline-flex h-7 px-1.5 items-center justify-center rounded-md text-[10px] font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer font-mono"
+              >
+                1.25cm
+              </button>
+            </ToolbarGroup>
           </div>
         )}
 
@@ -374,9 +404,7 @@ export interface SimpleEditorRef {
 
 const cleanMarkdownBold = (html: string): string => {
   if (!html) return "";
-  let cleaned = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-  cleaned = cleaned.replace(/__(.*?)__/g, "<strong>$1</strong>");
-  return cleaned;
+  return sanitizePeticaoHtml(html);
 };
 
 export const SimpleEditor = forwardRef<SimpleEditorRef, {
@@ -434,8 +462,6 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
     }
   }, [isMobile])
 
-
-
   const increaseFontSize = () => {
     setFontSize(prev => Math.min(prev + 1, 32))
   }
@@ -447,6 +473,9 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
   const editor = useEditor({
     immediatelyRender: false,
     editable: editable,
+    parseOptions: {
+      preserveWhitespace: false,
+    },
     extensions: [
       StarterKit.configure({
         horizontalRule: false,
@@ -486,6 +515,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
         "aria-label": "Main content area, start typing to enter text.",
         class: "simple-editor",
       },
+      transformPastedHTML: (pastedHtml) => sanitizePeticaoHtml(pastedHtml),
       handlePaste: () => false,
       handleDrop: () => !editable,
       handleDOMEvents: {
@@ -497,7 +527,8 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
     onUpdate: ({ editor }) => {
       // Save to localstorage as user types
       if (editable) {
-        const html = editor.getHTML();
+        const rawHtml = editor.getHTML();
+        const html = sanitizePeticaoHtml(rawHtml);
         localStorage.setItem("extrajus_draft", html);
         onContentChange?.(html, "human");
       }
@@ -535,7 +566,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
     if (initialContent) {
       const cleaned = cleanMarkdownBold(initialContent);
       if (editor.getHTML() !== cleaned) {
-        editor.commands.setContent(cleaned, { emitUpdate: false });
+        editor.commands.setContent(cleaned, { emitUpdate: false, parseOptions: { preserveWhitespace: false } });
         clearEditorHistory(editor);
       }
     }
@@ -562,7 +593,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
       const draft = localStorage.getItem("extrajus_draft") || "";
       const cleaned = cleanMarkdownBold(draft);
       if (editor.getHTML() !== cleaned) {
-        editor.commands.setContent(cleaned, { emitUpdate: false });
+        editor.commands.setContent(cleaned, { emitUpdate: false, parseOptions: { preserveWhitespace: false } });
         if (typeof (editor.commands as any).clearHistory === "function") {
           (editor.commands as any).clearHistory();
         }
@@ -745,17 +776,18 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
           });
 
           if (modified) {
-            const finalHtml = currentDoc.body.innerHTML;
-            editor.commands.setContent(finalHtml);
+            const finalHtml = sanitizePeticaoHtml(currentDoc.body.innerHTML);
+            editor.commands.setContent(finalHtml, { parseOptions: { preserveWhitespace: false } });
             localStorage.setItem("extrajus_draft", finalHtml);
             onContentChange?.(finalHtml, "ai");
           }
         } else {
           // Fallback se a IA retornar o documento completo ou trecho direto
           if (cleaned.length > 50 && !cleaned.includes('<update')) {
-            editor.commands.setContent(cleaned);
-            localStorage.setItem("extrajus_draft", cleaned);
-            onContentChange?.(cleaned, "ai");
+            const finalHtml = sanitizePeticaoHtml(cleaned);
+            editor.commands.setContent(finalHtml, { parseOptions: { preserveWhitespace: false } });
+            localStorage.setItem("extrajus_draft", finalHtml);
+            onContentChange?.(finalHtml, "ai");
           }
         }
       }
@@ -770,8 +802,8 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
   const clearHighlights = () => {
     if (!editor) return;
     const html = editor.getHTML();
-    const cleanHtml = html.replace(/<mark[^>]*>([\s\S]*?)<\/mark>/gi, "$1");
-    editor.commands.setContent(cleanHtml);
+    const cleanHtml = sanitizePeticaoHtml(html.replace(/<mark[^>]*>([\s\S]*?)<\/mark>/gi, "$1"));
+    editor.commands.setContent(cleanHtml, { parseOptions: { preserveWhitespace: false } });
     localStorage.setItem("extrajus_draft", cleanHtml);
     onContentChange?.(cleanHtml, "human");
     setPreAiEditContent(null);
@@ -779,8 +811,9 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, {
 
   const undoAiEdit = () => {
     if (!editor || !preAiEditContent) return;
-    editor.commands.setContent(preAiEditContent);
-    localStorage.setItem("extrajus_draft", preAiEditContent);
+    const cleanHtml = sanitizePeticaoHtml(preAiEditContent);
+    editor.commands.setContent(cleanHtml, { parseOptions: { preserveWhitespace: false } });
+    localStorage.setItem("extrajus_draft", cleanHtml);
     setPreAiEditContent(null);
   };
 

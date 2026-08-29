@@ -102,6 +102,38 @@ export function parseHtmlToDocxElements(rawHtml: string, title?: string): Paragr
     if (tag === "p") {
       const isEnderecamento = /EXCELENT[IÍ]SSIMO/i.test(inner);
 
+      // Extração de indentLevel e firstLineIndent
+      let leftIndentTwip = 0;
+      let firstLineTwip = 0;
+
+      // 1. Indentação de bloco
+      const indentLevelMatch = attrs.match(/data-indent-level="(\d+)"/i);
+      const marginLeftMatch = attrs.match(/margin-left:\s*([\d\.]+)rem/i);
+      if (indentLevelMatch) {
+        const lvl = parseInt(indentLevelMatch[1], 10);
+        if (lvl > 0) leftIndentTwip = lvl * 360; // 360 twips (~0.25 in / 0.63 cm por nível)
+      } else if (marginLeftMatch) {
+        const rems = parseFloat(marginLeftMatch[1]);
+        if (rems > 0) leftIndentTwip = Math.round((rems / 1.5) * 360);
+      }
+
+      // 2. Recuo de primeira linha (padrão 1.25cm = ~708 twips)
+      const firstLineMatch = attrs.match(/data-first-line-indent="([^"]+)"/i) || attrs.match(/text-indent:\s*([^;"]+)/i);
+      if (firstLineMatch) {
+        const rawIndent = firstLineMatch[1].toLowerCase();
+        if (rawIndent.includes("2.5cm")) {
+          firstLineTwip = 1417; // 2.5cm
+        } else if (rawIndent.includes("cm") || rawIndent === "true" || rawIndent.includes("1.25")) {
+          firstLineTwip = 708; // 1.25cm padrão ABNT forense
+        } else if (rawIndent.includes("rem")) {
+          firstLineTwip = Math.round(parseFloat(rawIndent) * 240);
+        }
+      }
+
+      const indentConfig: { left?: number; firstLine?: number } = {};
+      if (leftIndentTwip > 0) indentConfig.left = leftIndentTwip;
+      if (firstLineTwip > 0) indentConfig.firstLine = firstLineTwip;
+
       if (isEnderecamento) {
         // Endereçamento: 14pt, negrito, justificado
         paragraphs.push(
@@ -120,11 +152,20 @@ export function parseHtmlToDocxElements(rawHtml: string, title?: string): Paragr
             })
           );
         }
+      } else if (!inner.trim()) {
+        // Linha em branco intencional
+        paragraphs.push(
+          new Paragraph({
+            spacing: { line: 360, after: 240 },
+            children: [new TextRun({ text: "", font: "Cambria", size: 28 })],
+          })
+        );
       } else {
-        // Parágrafo padrão: 14pt (size: 28), Justificado, Cambria, 1 linha de espaçamento
+        // Parágrafo padrão com indentação e recuo de primeira linha
         paragraphs.push(
           new Paragraph({
             alignment,
+            indent: Object.keys(indentConfig).length > 0 ? indentConfig : undefined,
             spacing: { line: 360, after: 240 }, // 1 linha de espaçamento (12pt / 240 twips)
             children: parseInlineToRuns(inner, 28),
           })

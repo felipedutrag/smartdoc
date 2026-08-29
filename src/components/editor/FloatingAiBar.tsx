@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Mic, Send } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Mic, Send, Sparkles, Command } from "lucide-react";
 
 interface FloatingAiBarProps {
   isGenerating: boolean;
@@ -27,6 +27,23 @@ export function FloatingAiBar({
   hasActiveEdit = false,
 }: FloatingAiBarProps) {
   const [isFocused, setIsFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+        inputRef.current?.select();
+      }
+      if (e.key === "Escape" && isFocused) {
+        inputRef.current?.blur();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isFocused]);
 
   if (isGenerating) return null;
 
@@ -85,6 +102,7 @@ export function FloatingAiBar({
         border: "none"
       }}>
         <input
+          ref={inputRef}
           type="text"
           value={textInput}
           disabled={isRewriting}
@@ -98,7 +116,7 @@ export function FloatingAiBar({
               onSend(textInput);
             }
           }}
-          placeholder={isRewriting ? "A IA está editando o documento..." : "Peça uma alteração para a IA..."}
+          placeholder={isRewriting ? "A IA está editando o documento..." : "Peça uma alteração para a IA (ou pressione Ctrl+K)..."}
           style={{
             flex: 1,
             background: "transparent",
@@ -111,6 +129,15 @@ export function FloatingAiBar({
             fontFamily: "inherit"
           }}
         />
+        {!isFocused && !textInput && (
+          <kbd
+            onClick={() => inputRef.current?.focus()}
+            className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono font-semibold text-muted-foreground bg-muted/60 border border-border/80 rounded cursor-pointer hover:bg-muted transition-colors select-none mr-1"
+            title="Atalho de teclado"
+          >
+            <span>Ctrl</span><span>K</span>
+          </kbd>
+        )}
         <button
           onClick={() => {
             toggleDictation();
