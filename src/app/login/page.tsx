@@ -280,13 +280,9 @@ export default function AuthPage() {
         <div className="flex flex-col justify-center p-6 sm:p-10 md:col-span-7">
           {/* Logo Header */}
           <div className="mb-6">
-            <a href="/" className="inline-flex items-center text-xl font-bold tracking-tight">
-              <span className="tracking-tight">SMART</span>
-              <span className="ml-0.5 text-primary">DOC</span>
-              <Badge variant="outline" className="ml-2 border-primary/30 bg-primary/10 text-[10px] font-extrabold text-primary">
-                PRO
-              </Badge>
-            </a>
+            <Link href="/" className="inline-block transition-opacity hover:opacity-85">
+              <SmartDocBrand size="lg" badge="PRO" />
+            </Link>
 
             <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground">
               {mode === "login" && "Acesse seu escritório digital"}

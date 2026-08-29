@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { Scale, Sparkles } from "lucide-react";
 
+import { SmartDocBrand } from "@/components/brand-logo";
+
 interface LoadingOverlayProps {
   isGenerating: boolean;
 }
@@ -37,18 +39,7 @@ export function LoadingOverlay({ isGenerating }: LoadingOverlayProps) {
     <div className="fixed inset-0 z-[2000] flex flex-col items-center justify-center bg-background/90 backdrop-blur-2xl gap-6 p-6 sm:p-10 text-foreground transition-all duration-300 animate-in fade-in">
       <div className="relative flex flex-col items-center justify-center gap-5">
         {/* Brand Logo matching Home Header */}
-        <div className="flex items-center gap-3">
-          <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 border border-primary/25 text-primary shadow-lg shadow-primary/10 animate-pulse">
-            <Scale className="size-5.5" />
-          </div>
-          <div className="flex items-center text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            <span>SMART</span>
-            <span className="text-primary font-black ml-1">DOC</span>
-            <span className="ml-2.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 font-mono text-[10px] font-bold text-primary uppercase tracking-widest">
-              PRO
-            </span>
-          </div>
-        </div>
+        <SmartDocBrand size="xl" badge="PRO" className="animate-pulse" />
 
         {/* Progress Bar with theme colors */}
         <div className="w-64 sm:w-80 h-1.5 bg-muted/60 rounded-full overflow-hidden relative shadow-inner border border-border/40">
