@@ -6,27 +6,30 @@
   fill="none"
 >
   <defs>
+    <!-- Gradiente de fundo sutil e nobre -->
     <linearGradient id="sd-bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#18181b" />
-      <stop offset="100%" stop-color="#09090b" />
+      <stop offset="0%" stop-color="#1c1917" />
+      <stop offset="100%" stop-color="#0c0a09" />
     </linearGradient>
+    <!-- Gradiente nobre na cor primária do tema SmartDoc (Ocre/Âmbar Titanium) -->
     <linearGradient id="sd-feather-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#38bdf8" />
-      <stop offset="50%" stop-color="#60a5fa" />
-      <stop offset="100%" stop-color="#818cf8" />
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="35%" stop-color="#f59e0b" />
+      <stop offset="75%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#b45309" />
     </linearGradient>
   </defs>
 
-  <!-- Fundo com cantos arredondados -->
+  <!-- Fundo com cantos arredondados e borda sutil -->
   <rect width="48" height="48" rx="12" fill="url(#sd-bg-grad)" />
-  <rect width="46" height="46" x="1" y="1" rx="11" stroke="#3f3f46" stroke-width="1.5" stroke-opacity="0.5" />
+  <rect width="46" height="46" x="1" y="1" rx="11" stroke="#44403c" stroke-width="1.2" stroke-opacity="0.6" />
 
-  <!-- Ícone Feather com cores vivas e alta visibilidade -->
+  <!-- Ícone Feather na cor do tema -->
   <g transform="translate(10, 10)">
     <path
       d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5zM16 8 2 22M17.5 15H9"
       stroke="url(#sd-feather-grad)"
-      stroke-width="2.5"
+      stroke-width="2.6"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
