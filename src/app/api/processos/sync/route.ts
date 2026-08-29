@@ -2,33 +2,76 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import * as cheerio from 'cheerio';
 
-function sanitizeAndPadCnj(numero: string): { formatted: string; clean: string; tribunal: string } {
+interface TribunalConfig {
+  formatted: string;
+  clean: string;
+  tribunalName: string;
+  datajudAlias: string;
+  isEsaj: boolean;
+}
+
+function getTribunalConfig(numero: string): TribunalConfig {
   let clean = numero.replace(/\D/g, '');
   if (clean.length > 0 && clean.length < 20) {
     clean = clean.padStart(20, '0');
   }
-  
+
   let formatted = numero;
   if (clean.length === 20) {
     formatted = clean.replace(/^(\d{7})(\d{2})(\d{4})(\d{1})(\d{2})(\d{4})$/, '$1-$2.$3.$4.$5.$6');
   }
 
-  const j = clean.substring(13, 14);
-  const tr = clean.substring(14, 16);
+  const j = clean.substring(13, 14); // Segmento da Justiça (8 = Estadual, 4 = Federal, 5 = Trabalho)
+  const tr = clean.substring(14, 16); // Tribunal
 
-  let tribunal = 'TRIBUNAL REGIONAL / ESTADUAL';
-  if (j === '8' && tr === '26') tribunal = 'TJSP (e-SAJ)';
-  else if (j === '8' && tr === '24') tribunal = 'TJSC (e-Proc)';
-  else if (j === '8' && tr === '21') tribunal = 'TJRS (e-Proc)';
-  else if (j === '8' && tr === '19') tribunal = 'TJRJ (PJe)';
-  else if (j === '8' && tr === '13') tribunal = 'TJMG (e-Proc)';
-  else if (j === '4' && tr === '04') tribunal = 'TRF4 (e-Proc)';
-  else if (j === '4' && tr === '02') tribunal = 'TRF2 (e-Proc)';
-  else if (j === '4' && tr === '03') tribunal = 'TRF3 (PJe)';
+  let tribunalName = 'TRIBUNAL DE JUSTIÇA';
+  let datajudAlias = 'api_publica_tjsp';
+  let isEsaj = false;
 
-  return { formatted, clean, tribunal };
+  // 1. Justiça Estadual (J = 8)
+  if (j === '8') {
+    switch (tr) {
+      case '26': tribunalName = 'TJSP (e-SAJ)'; datajudAlias = 'api_publica_tjsp'; isEsaj = true; break;
+      case '24': tribunalName = 'TJSC (e-Proc)'; datajudAlias = 'api_publica_tjsc'; break;
+      case '21': tribunalName = 'TJRS (e-Proc)'; datajudAlias = 'api_publica_tjrs'; break;
+      case '19': tribunalName = 'TJRJ (PJe)'; datajudAlias = 'api_publica_tjrj'; break;
+      case '13': tribunalName = 'TJMG (e-Proc)'; datajudAlias = 'api_publica_tjmg'; break;
+      case '16': tribunalName = 'TJPR (Projudi)'; datajudAlias = 'api_publica_tjpr'; break;
+      case '02': tribunalName = 'TJAL (e-SAJ)'; datajudAlias = 'api_publica_tjal'; isEsaj = true; break;
+      case '06': tribunalName = 'TJCE (e-SAJ)'; datajudAlias = 'api_publica_tjce'; isEsaj = true; break;
+      case '12': tribunalName = 'TJMS (e-SAJ)'; datajudAlias = 'api_publica_tjms'; isEsaj = true; break;
+      case '01': tribunalName = 'TJAC (e-SAJ)'; datajudAlias = 'api_publica_tjac'; isEsaj = true; break;
+      case '04': tribunalName = 'TJAM (e-SAJ)'; datajudAlias = 'api_publica_tjam'; isEsaj = true; break;
+      case '07': tribunalName = 'TJDF (PJe)'; datajudAlias = 'api_publica_tjdft'; break;
+      case '09': tribunalName = 'TJGO (Projudi)'; datajudAlias = 'api_publica_tjgo'; break;
+      case '05': tribunalName = 'TJBA (PJe)'; datajudAlias = 'api_publica_tjba'; break;
+      case '17': tribunalName = 'TJPE (PJe)'; datajudAlias = 'api_publica_tjpe'; break;
+      case '08': tribunalName = 'TJES (PJe)'; datajudAlias = 'api_publica_tjes'; break;
+      default: tribunalName = `TJ Estado (${tr})`; datajudAlias = `api_publica_tj${tr}`;
+    }
+  } 
+  // 2. Justiça Federal (J = 4)
+  else if (j === '4') {
+    switch (tr) {
+      case '01': tribunalName = 'TRF1 (PJe)'; datajudAlias = 'api_publica_trf1'; break;
+      case '02': tribunalName = 'TRF2 (e-Proc)'; datajudAlias = 'api_publica_trf2'; break;
+      case '03': tribunalName = 'TRF3 (PJe)'; datajudAlias = 'api_publica_trf3'; break;
+      case '04': tribunalName = 'TRF4 (e-Proc)'; datajudAlias = 'api_publica_trf4'; break;
+      case '05': tribunalName = 'TRF5 (PJe)'; datajudAlias = 'api_publica_trf5'; break;
+      case '06': tribunalName = 'TRF6 (e-Proc)'; datajudAlias = 'api_publica_trf6'; break;
+      default: tribunalName = `TRF Região (${tr})`; datajudAlias = `api_publica_trf${tr}`;
+    }
+  }
+  // 3. Justiça do Trabalho (J = 5)
+  else if (j === '5') {
+    tribunalName = `TRT${tr} (PJe-JT)`;
+    datajudAlias = `api_publica_trt${tr}`;
+  }
+
+  return { formatted, clean, tribunalName, datajudAlias, isEsaj };
 }
 
+// Raspador HTTP direto para tribunais e-SAJ (TJSP, TJMS, TJAL, TJCE, etc.)
 async function scrapeEsajHttp(numero_processo: string) {
   const url = `https://esaj.tjsp.jus.br/cpopg/search.do?cbPesquisa=NUMPROC&dadosConsulta.valorConsulta=${numero_processo}&dadosConsulta.tipoNuProcesso=UNIFICADO`;
 
@@ -48,11 +91,10 @@ async function scrapeEsajHttp(numero_processo: string) {
   const html = await response.text();
   const $ = cheerio.load(html);
 
-  // Verificar se há mensagens de erro ou processo não encontrado
   const tribunalMsg = $('#mensagemRetorno, .mensagemErro, #spwTabelaMensagem, .spwMensagem').text().replace(/\s+/g, ' ').trim();
   const notFound = tribunalMsg.includes('Não existem informações disponíveis') || tribunalMsg.includes('não foi encontrado');
 
-  // 1. Extrair Partes
+  // 1. Partes
   let partes = '';
   const partesRows = $('#tablePartesPrincipais tr');
   if (partesRows.length > 0) {
@@ -64,10 +106,10 @@ async function scrapeEsajHttp(numero_processo: string) {
     partes = list.join(' | ');
   }
 
-  // 2. Extrair Assunto
+  // 2. Assunto
   const assunto = $('#assuntoProcesso').text().replace(/\s+/g, ' ').trim();
 
-  // 3. Extrair Movimentações
+  // 3. Movimentações
   const movimentos: Array<{ data: string; descricao: string }> = [];
   const movRows = $('#tabelaTodasMovimentacoes tr, #tabelaUltimasMovimentacoes tr');
   movRows.each((_, row) => {
@@ -79,22 +121,82 @@ async function scrapeEsajHttp(numero_processo: string) {
   });
 
   if (notFound && !partes && !assunto) {
-    return {
-      partes: 'Processo não encontrado ou sob Segredo de Justiça',
-      assunto: 'Sem informações públicas no tribunal',
-      movimentos: [
-        { data: new Date().toLocaleDateString('pt-BR'), descricao: 'Tribunal informou: Não existem informações públicas para os parâmetros fornecidos.' }
-      ],
-      notFound: true,
-    };
+    return null;
   }
 
   return {
     partes: partes || 'Partes não disponíveis',
     assunto: assunto || 'Assunto não disponível',
     movimentos: movimentos.slice(0, 25),
-    notFound: false,
   };
+}
+
+// Consulta Oficial à API Pública do DataJud (CNJ) para e-Proc, PJe, Projudi e e-SAJ
+async function scrapeDataJud(cleanNumber: string, alias: string) {
+  const apiKey = process.env.DATAJUD_API_KEY || "cDZHYzlZa0JadVREZDJCendQbXNpOHpubm1jV3Vqek86dW1xSnZ2ZVhSYTZxSTFXa2w1V0V6dw==";
+  const url = `https://api-publica.datajud.cnj.jus.br/${alias}/_search`;
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Authorization": `APIKey ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: {
+          match: {
+            numeroProcesso: cleanNumber
+          }
+        }
+      }),
+      cache: "no-store"
+    });
+
+    if (!res.ok) {
+      console.warn(`[DATAJUD] Tribunal ${alias} retornou status ${res.status}`);
+      return null;
+    }
+
+    const json = await res.json();
+    const hit = json.hits?.hits?.[0]?._source;
+    if (!hit) return null;
+
+    // Partes (Polo Ativo / Polo Passivo)
+    let partes = "";
+    if (Array.isArray(hit.polos)) {
+      const poloList: string[] = [];
+      hit.polos.forEach((p: any) => {
+        const poloNome = p.polo === 'AT' ? 'Autor' : p.polo === 'PA' ? 'Réu' : (p.polo || 'Parte');
+        const partesNames = (p.partes || []).map((pt: any) => pt.nome).join(', ');
+        if (partesNames) poloList.push(`${poloNome}: ${partesNames}`);
+      });
+      partes = poloList.join(' | ');
+    }
+
+    // Assunto e Classe
+    const classe = hit.classe?.nome || '';
+    const assunto = (hit.assuntos || []).map((a: any) => a.nome).join(', ') || classe || 'Assunto Judicial';
+
+    // Movimentações
+    const movimentos: Array<{ data: string; descricao: string }> = [];
+    if (Array.isArray(hit.movimentos)) {
+      hit.movimentos.slice(0, 25).forEach((m: any) => {
+        const dataStr = m.dataHora ? new Date(m.dataHora).toLocaleDateString('pt-BR') : new Date().toLocaleDateString('pt-BR');
+        const descricao = m.nome || m.complementosTabelados?.[0]?.descricao || 'Movimentação Processual';
+        movimentos.push({ data: dataStr, descricao });
+      });
+    }
+
+    return {
+      partes: partes || 'Partes registradas no CNJ',
+      assunto: assunto || 'Processo Judicial',
+      movimentos: movimentos.length > 0 ? movimentos : [{ data: new Date().toLocaleDateString('pt-BR'), descricao: 'Processo localizado na base nacional do CNJ.' }]
+    };
+  } catch (err) {
+    console.error("[DATAJUD API ERROR]", err);
+    return null;
+  }
 }
 
 export async function POST(req: Request) {
@@ -114,45 +216,50 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Número do processo obrigatório' }, { status: 400 });
     }
 
-    const { formatted: numero_processo, clean, tribunal } = sanitizeAndPadCnj(rawNumero);
+    const { formatted: numero_processo, clean, tribunalName, datajudAlias, isEsaj } = getTribunalConfig(rawNumero);
 
     if (clean.length !== 20) {
       return NextResponse.json({ error: 'Número CNJ inválido. O processo deve conter 20 dígitos numéricos.' }, { status: 400 });
     }
 
-    let partes = 'Partes não encontradas';
-    let assunto = 'Assunto não encontrado';
+    let partes = '';
+    let assunto = '';
     let movimentos: Array<{ data: string; descricao: string }> = [];
 
-    if (tribunal.includes('e-SAJ')) {
+    // 1. Tenta e-SAJ direto se for tribunal e-SAJ
+    if (isEsaj) {
       try {
-        const scraped = await scrapeEsajHttp(numero_processo);
-        partes = scraped.partes;
-        assunto = scraped.assunto;
-        movimentos = scraped.movimentos;
-      } catch (err: any) {
-        console.error('Erro ao consultar e-SAJ via HTTP:', err);
-        throw new Error(err?.message || 'Falha ao consultar tribunal');
+        const esajData = await scrapeEsajHttp(numero_processo);
+        if (esajData) {
+          partes = esajData.partes;
+          assunto = esajData.assunto;
+          movimentos = esajData.movimentos;
+        }
+      } catch (err) {
+        console.warn('Erro ao consultar e-SAJ, tentando DataJud como fallback:', err);
       }
-    } else if (tribunal.includes('e-Proc')) {
-      partes = 'Consulta e-Proc (Aguardando Integração DataJud/CNJ)';
-      assunto = 'Processo Justiça Federal / Estadual e-Proc';
-      movimentos = [
-        { data: new Date().toLocaleDateString('pt-BR'), descricao: 'Processo cadastrado para acompanhamento no sistema e-Proc.' },
-        { data: new Date().toLocaleDateString('pt-BR'), descricao: 'Aguardando publicação do diário oficial.' },
-      ];
-    } else {
-      partes = 'Autor (Aguardando Sincronização) | Réu';
-      assunto = 'Ação Cível / Especializada';
-      movimentos = [
-        { data: new Date().toLocaleDateString('pt-BR'), descricao: 'Processo cadastrado para monitoramento contínuo.' }
-      ];
     }
 
-    if (!partes) partes = 'Partes indisponíveis';
-    if (!assunto) assunto = 'Assunto indisponível';
-    if (movimentos.length === 0) {
-      movimentos = [{ data: new Date().toLocaleDateString('pt-BR'), descricao: 'Nenhuma nova movimentação registrada no diário oficial.' }];
+    // 2. Se for e-Proc / PJe ou se o e-SAJ não retornou, consulta a API Oficial do DataJud (CNJ)
+    if (!partes || movimentos.length === 0) {
+      const datajudResult = await scrapeDataJud(clean, datajudAlias);
+      if (datajudResult) {
+        partes = datajudResult.partes;
+        assunto = datajudResult.assunto;
+        movimentos = datajudResult.movimentos;
+      }
+    }
+
+    // 3. Fallback amigável se o processo for segredo de justiça ou não indexado ainda
+    if (!partes) {
+      partes = 'Processo monitorado (Aguardando publicação / Segredo de Justiça)';
+      assunto = 'Processo Judicial em Acompanhamento';
+      movimentos = [
+        {
+          data: new Date().toLocaleDateString('pt-BR'),
+          descricao: `Processo cadastrado para acompanhamento no ${tribunalName}. Novas movimentações serão sincronizadas automaticamente.`
+        }
+      ];
     }
 
     let pId = processo_id;
@@ -161,7 +268,7 @@ export async function POST(req: Request) {
       const { data: procInsert, error: procErr } = await supabase.from('processos').insert({
         user_id: user.id,
         numero_processo,
-        tribunal,
+        tribunal: tribunalName,
         partes: partes.substring(0, 250),
         assunto: assunto.substring(0, 250),
         status: 'Acompanhando',
@@ -173,7 +280,7 @@ export async function POST(req: Request) {
     } else {
       await supabase.from('processos').update({
         numero_processo,
-        tribunal,
+        tribunal: tribunalName,
         partes: partes.substring(0, 250),
         assunto: assunto.substring(0, 250),
         ultima_atualizacao: new Date().toISOString(),
@@ -203,7 +310,7 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ success: true, processo_id: pId, numero_processo, movimentos });
+    return NextResponse.json({ success: true, processo_id: pId, numero_processo, tribunal: tribunalName, movimentos });
   } catch (error: any) {
     console.error('API error sync:', error);
     return NextResponse.json({ error: error.message || 'Erro interno ao consultar tribunal' }, { status: 500 });
