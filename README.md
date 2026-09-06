@@ -35,14 +35,16 @@ flowchart TD
         Reranker -->|Top Jurisprudence Teses & Acórdãos| DraftPrompt[Legal Prompt Synthesizer]
     end
 
-    subgraph LLM Multi-Model Fallback Matrix
+    subgraph LLM Fallback Matrix
         DraftPrompt --> GeminiFlash[Google Gemini 2.5 Flash]
-        GeminiFlash -.->|Automatic Failover| GroqEngine[Groq Llama-3.3-70b]
-        GroqEngine -.->|Secondary Fallback| OpenAIPro[OpenAI GPT-4o]
+        GeminiFlash -.->|Failover| GroqEngine[Groq Llama-3.3-70b]
+        GroqEngine -.->|Secondary Failover| OpenAIPro[OpenAI GPT-4o]
     end
 
-    subgraph Document Studio & Production Pipeline
-        LLM Multi-Model Fallback Matrix -->|Structured JSON / HTML Content| TipTap[TipTap v3 Rich Text Studio]
+    subgraph Document Studio Pipeline
+        GeminiFlash -->|Structured Content| TipTap[TipTap v3 Rich Text Studio]
+        GroqEngine -.->|Fallback Content| TipTap
+        OpenAIPro -.->|Fallback Content| TipTap
         TipTap -->|Inline AI Rephrasing & Diff Highlighting| EditorUI[Interactive WYSIWYG Workspace]
         EditorUI -->|DOCX Generator Engine| DocxExport[Formatted .docx Output]
         EditorUI -->|Puppeteer & Sparticuz Chromium| PDFExport[Statutory PDF Output]
