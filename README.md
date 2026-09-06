@@ -1,4 +1,4 @@
-﻿# ⚖️ SmartDoc / Extrajus — AI Legal Tech Suite, STF RAG Vector Engine & Tiptap Document Editor
+# ⚖️ SmartDoc / Extrajus — AI Legal Tech Suite, STF RAG Vector Engine & Tiptap Document Editor
 
 <p align=center>
   <img src=https://img.shields.io/badge/Next.js_16-000000?style=for-the-badge&logo=nextdotjs&logoColor=white alt=Next.js 16 />
@@ -23,7 +23,7 @@ From conversational fact gathering via **Aura** (a Gemini Live voice legal triag
 
 ## 🏗️ System Architecture
 
-`mermaid
+```mermaid
 flowchart TD
     Lawyer([Lawyer / Litigant]) <-->|Spoken Fact Intake / Web Audio| AuraVoice[Aura Voice Assistant: Gemini Live WebSocket]
     AuraVoice -->|Structured Legal Brief JSON| LegalCore[Legal Drafting Core Engine]
@@ -48,7 +48,7 @@ flowchart TD
         EditorUI -->|Puppeteer & Sparticuz Chromium| PDFExport[Statutory PDF Output]
         EditorUI -->|Telegram Bot & Resend Notifications| MultiChannel[Dispatch & Delivery Alert System]
     end
-`
+```
 
 ---
 
@@ -80,7 +80,7 @@ flowchart TD
 
 ## 📂 Project Structure
 
-`
+```
 smartdoc/
 ├── public/                     # Static brand assets and templates
 ├── src/
@@ -106,7 +106,7 @@ smartdoc/
 │       └── docx.ts             # Judicial .docx compiler
 ├── package.json
 └── tsconfig.json
-`
+```
 
 ---
 
@@ -120,16 +120,16 @@ smartdoc/
 
 ### 1. Clone the Repository
 
-`ash
+```bash
 git clone https://github.com/felipedutrag/smartdoc.git
 cd smartdoc
-`
+```
 
 ### 2. Configure Environment Variables
 
 Create .env.local:
 
-`env
+```env
 # AI Models
 GEMINI_API_KEY=your_gemini_key
 GROQ_API_KEY=your_groq_key
@@ -144,14 +144,14 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_key
 RESEND_API_KEY=your_resend_key
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token
 TELEGRAM_CHAT_ID=your_telegram_chat_id
-`
+```
 
 ### 3. Install & Launch
 
-`ash
+```bash
 npm install
 npm run dev
-`
+```
 
 ---
 
