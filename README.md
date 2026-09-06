@@ -30,7 +30,7 @@ flowchart TD
     
     subgraph STF Jurisprudence RAG Engine
         LegalCore -->|Query Case Facts| HybridSearch[Hybrid Semantic & Keyword Matcher]
-        HybridSearch -->|Vector Similarity| SupabaseVec[(Supabase pgvector: STF Precedents & Súmulas)]
+        HybridSearch -->|Vector Similarity| SupabaseVec[("Supabase pgvector: STF Precedents & Súmulas")]
         HybridSearch -->|Semantic Reranker: Gemini 2.5 Flash| Reranker[Legal Precedent Reranker]
         Reranker -->|Top Jurisprudence Teses & Acórdãos| DraftPrompt[Legal Prompt Synthesizer]
     end
